@@ -1,0 +1,3729 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude — Hướng dẫn toàn diện</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════ */
+        :root {
+            --bg: #08090d;
+            --bg2: #0e1018;
+            --surface: #131520;
+            --surface2: #1a1d2e;
+            --surface3: #21253a;
+            --border: #252840;
+            --border2: #2f3350;
+            --accent: #7c6af8;
+            --accent-lt: #a99dfa;
+            --amber: #f5a623;
+            --green: #3ecf8e;
+            --red: #f06b6b;
+            --text: #dde1f5;
+            --muted: #6b7094;
+            --muted2: #8b90b8;
+            --nav-w: 272px;
+            --radius: 10px;
+            --font-body: 'Instrument Sans', sans-serif;
+            --font-head: 'Syne', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        /* ── RESET ── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 15px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.75;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 99px;
+        }
+
+        /* ═══════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════ */
+        #sidebar {
+            width: var(--nav-w);
+            min-height: 100vh;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            transition: transform .3s ease;
+        }
+
+        .sb-header {
+            padding: 24px 20px 18px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(124, 106, 248, .06) 0%, transparent 100%);
+        }
+
+        .sb-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .sb-orb {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--accent) 0%, #a55af4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            box-shadow: 0 4px 18px rgba(124, 106, 248, .35);
+        }
+
+        .sb-title {
+            font-family: var(--font-head);
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -.02em;
+        }
+
+        .sb-ver {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+            background: var(--surface2);
+            padding: 3px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+        }
+
+        .sb-ver .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        /* progress bar */
+        .sb-progress {
+            padding: 14px 20px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sb-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .sb-progress-bar {
+            height: 3px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .sb-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #a55af4);
+            border-radius: 99px;
+            width: 0%;
+            transition: width .4s ease;
+        }
+
+        .sb-section {
+            padding: 18px 14px 6px;
+        }
+
+        .sb-section-label {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: 0 6px;
+            margin-bottom: 5px;
+        }
+
+        .sb-link {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--muted2);
+            font-size: 13px;
+            transition: all .18s;
+            cursor: pointer;
+            margin-bottom: 1px;
+            position: relative;
+        }
+
+        .sb-link:hover {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .sb-link.active {
+            background: rgba(124, 106, 248, .12);
+            color: var(--accent-lt);
+        }
+
+        .sb-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 2px;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+        .sb-icon {
+            font-size: 14px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sb-badge {
+            margin-left: auto;
+            font-size: 10px;
+            background: rgba(124, 106, 248, .18);
+            color: var(--accent-lt);
+            padding: 1px 7px;
+            border-radius: 99px;
+            font-family: var(--font-mono);
+        }
+
+        .sb-footer {
+            margin-top: auto;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+        }
+
+        /* ═══════════════════════════════════════════════
+   MAIN
+═══════════════════════════════════════════════ */
+        main {
+            margin-left: var(--nav-w);
+            flex: 1;
+            padding: 0;
+            max-width: 900px;
+        }
+
+        /* Section */
+        .section {
+            padding: 60px 64px;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 20px;
+            animation: fadeUp .5s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Section header */
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--accent-lt);
+            font-weight: 600;
+            font-family: var(--font-mono);
+            margin-bottom: 14px;
+        }
+
+        .section-tag::before {
+            content: '';
+            width: 22px;
+            height: 1px;
+            background: currentColor;
+        }
+
+        h1 {
+            font-family: var(--font-head);
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -.03em;
+            margin-bottom: 20px;
+        }
+
+        h1 .grad {
+            background: linear-gradient(135deg, #fff 0%, var(--accent-lt) 60%, #a55af4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-family: var(--font-head);
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -.02em;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text);
+        }
+
+        h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 28px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p {
+            color: #9fa3c4;
+            margin-bottom: 14px;
+        }
+
+        /* ═══════════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════════ */
+
+        /* --- CALLOUTS --- */
+        .callout {
+            border-left: 3px solid var(--accent);
+            padding: 14px 18px;
+            background: rgba(124, 106, 248, .07);
+            border-radius: 0 8px 8px 0;
+            margin: 18px 0;
+            font-size: 13.5px;
+            color: #bfc3e0;
+        }
+
+        .callout-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--accent-lt);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .callout.warn {
+            border-color: var(--amber);
+            background: rgba(245, 166, 35, .07);
+        }
+
+        .callout.warn .callout-label {
+            color: var(--amber);
+        }
+
+        .callout.good {
+            border-color: var(--green);
+            background: rgba(62, 207, 142, .07);
+        }
+
+        .callout.good .callout-label {
+            color: var(--green);
+        }
+
+        .callout.err {
+            border-color: var(--red);
+            background: rgba(240, 107, 107, .07);
+        }
+
+        .callout.err .callout-label {
+            color: var(--red);
+        }
+
+        /* --- CARDS --- */
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .cards.col3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: border-color .2s, transform .2s, box-shadow .2s;
+            cursor: default;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(124, 106, 248, .12);
+        }
+
+        .card-ico {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--muted2);
+            line-height: 1.55;
+        }
+
+        /* --- TABLE --- */
+        .tbl-wrap {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        th {
+            text-align: left;
+            padding: 11px 16px;
+            background: var(--surface2);
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: #bbbdd6;
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, .02);
+        }
+
+        td strong {
+            color: var(--text);
+        }
+
+        .tag-new {
+            background: rgba(62, 207, 142, .15);
+            color: var(--green);
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+        }
+
+        .tag-api {
+            background: rgba(124, 106, 248, .15);
+            color: var(--accent-lt);
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+        }
+
+        .tag-pro {
+            background: rgba(245, 166, 35, .15);
+            color: var(--amber);
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+        }
+
+        /* --- STEPS --- */
+        .steps {
+            margin: 20px 0;
+        }
+
+        .step {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 24px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #a55af4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+            color: #fff;
+            font-family: var(--font-mono);
+            box-shadow: 0 4px 14px rgba(124, 106, 248, .3);
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            font-size: 13.5px;
+            color: var(--muted2);
+        }
+
+        /* --- FEAT LIST --- */
+        .feat-list {
+            list-style: none;
+            margin: 10px 0;
+        }
+
+        .feat-list li {
+            padding: 9px 0 9px 22px;
+            position: relative;
+            font-size: 14px;
+            color: #9fa3c4;
+            border-bottom: 1px solid rgba(37, 40, 64, .6);
+        }
+
+        .feat-list li:last-child {
+            border: none;
+        }
+
+        .feat-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .feat-list li strong {
+            color: var(--text);
+        }
+
+        /* ═══════════════════════════════════════════════
+   CODE BLOCK
+═══════════════════════════════════════════════ */
+        .code-wrap {
+            background: #07080d;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 16px 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .code-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .code-dot:nth-child(1) {
+            background: #ff5f57;
+        }
+
+        .code-dot:nth-child(2) {
+            background: #febc2e;
+        }
+
+        .code-dot:nth-child(3) {
+            background: #28c840;
+        }
+
+        .code-lang {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: .05em;
+        }
+
+        .copy-btn {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--muted);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all .18s;
+        }
+
+        .copy-btn:hover {
+            color: var(--text);
+            border-color: var(--accent);
+        }
+
+        .copy-btn.copied {
+            color: var(--green);
+            border-color: var(--green);
+        }
+
+        pre {
+            padding: 20px 22px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.75;
+            overflow-x: auto;
+            color: #9fa3c4;
+        }
+
+        .kw {
+            color: var(--accent-lt);
+        }
+
+        .str {
+            color: var(--green);
+        }
+
+        .cmt {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .num {
+            color: var(--amber);
+        }
+
+        .fn {
+            color: #7dd3fc;
+        }
+
+        .cls {
+            color: #f0abfc;
+        }
+
+        .prop {
+            color: #93c5fd;
+        }
+
+        /* ═══════════════════════════════════════════════
+   INTERACTIVE DEMO
+═══════════════════════════════════════════════ */
+        .demo-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .demo-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted2);
+            letter-spacing: .05em;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .demo-tag {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 99px;
+            background: rgba(124, 106, 248, .15);
+            color: var(--accent-lt);
+            border: 1px solid rgba(124, 106, 248, .2);
+        }
+
+        .demo-prompts {
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .demo-prompt-label {
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 4px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+
+        .prompt-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .prompt-chip {
+            font-size: 12.5px;
+            padding: 6px 13px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--muted2);
+            cursor: pointer;
+            transition: all .18s;
+            font-family: var(--font-body);
+        }
+
+        .prompt-chip:hover {
+            border-color: var(--accent);
+            color: var(--text);
+            background: rgba(124, 106, 248, .08);
+        }
+
+        .prompt-chip.selected {
+            border-color: var(--accent);
+            color: var(--accent-lt);
+            background: rgba(124, 106, 248, .12);
+        }
+
+        .demo-input-row {
+            padding: 0 18px 14px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .demo-input {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-family: var(--font-body);
+            font-size: 13.5px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .18s;
+            resize: none;
+        }
+
+        .demo-input:focus {
+            border-color: var(--accent);
+        }
+
+        .demo-input::placeholder {
+            color: var(--muted);
+        }
+
+        .run-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 18px;
+            background: linear-gradient(135deg, var(--accent), #a55af4);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .18s, transform .18s;
+            white-space: nowrap;
+            font-family: var(--font-body);
+        }
+
+        .run-btn:hover {
+            opacity: .9;
+            transform: scale(1.02);
+        }
+
+        .run-btn:active {
+            transform: scale(.98);
+        }
+
+        .run-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .demo-response {
+            border-top: 1px solid var(--border);
+            padding: 18px 20px;
+            min-height: 80px;
+            display: none;
+        }
+
+        .demo-response.visible {
+            display: block;
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .claude-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #a55af4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .response-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-lt);
+        }
+
+        .response-body {
+            font-size: 13.5px;
+            color: #bbbdd6;
+            line-height: 1.75;
+        }
+
+        .response-body code {
+            font-family: var(--font-mono);
+            background: var(--surface3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--accent-lt);
+        }
+
+        .response-body .r-code {
+            background: #07080d;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            color: #9fa3c4;
+            margin: 10px 0;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.65;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 15px;
+            background: var(--accent-lt);
+            vertical-align: middle;
+            animation: blink .7s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0
+            }
+        }
+
+        /* ═══════════════════════════════════════════════
+   SLASH COMMANDS
+═══════════════════════════════════════════════ */
+        .cmd-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .cmd-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            transition: border-color .2s;
+        }
+
+        .cmd-card:hover {
+            border-color: var(--border2);
+        }
+
+        .cmd-name {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--accent-lt);
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cmd-badge {
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 99px;
+            font-family: var(--font-mono);
+        }
+
+        .cmd-badge.new {
+            background: rgba(62, 207, 142, .15);
+            color: var(--green);
+        }
+
+        .cmd-badge.pro {
+            background: rgba(245, 166, 35, .15);
+            color: var(--amber);
+        }
+
+        .cmd-desc {
+            font-size: 13px;
+            color: var(--muted2);
+            margin-bottom: 8px;
+        }
+
+        .cmd-example {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .cmd-example span {
+            color: var(--green);
+        }
+
+        /* ═══════════════════════════════════════════════
+   LIVE SLASH DEMO
+═══════════════════════════════════════════════ */
+        .slash-demo {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin: 16px 0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        .slash-demo-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .slash-input-area {
+            padding: 14px 16px;
+            position: relative;
+        }
+
+        #slash-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: var(--font-mono);
+            font-size: 13.5px;
+            color: var(--text);
+            padding: 0;
+        }
+
+        #slash-input::placeholder {
+            color: var(--muted);
+        }
+
+        .slash-dropdown {
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .slash-dropdown.open {
+            display: block;
+        }
+
+        .slash-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background .12s;
+            border-bottom: 1px solid rgba(37, 40, 64, .5);
+        }
+
+        .slash-item:last-child {
+            border-bottom: none;
+        }
+
+        .slash-item:hover,
+        .slash-item.selected {
+            background: rgba(124, 106, 248, .1);
+        }
+
+        .slash-item-cmd {
+            color: var(--accent-lt);
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        .slash-item-desc {
+            color: var(--muted2);
+            font-size: 12px;
+        }
+
+        /* ═══════════════════════════════════════════════
+   CHAT HISTORY
+═══════════════════════════════════════════════ */
+        .chat-history {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .chat-bubble {
+            display: flex;
+            gap: 12px;
+        }
+
+        .cb-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .cb-avatar.user {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+        }
+
+        .cb-avatar.ai {
+            background: linear-gradient(135deg, var(--accent), #a55af4);
+        }
+
+        .cb-body {
+            flex: 1;
+        }
+
+        .cb-who {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 5px;
+            letter-spacing: .05em;
+        }
+
+        .cb-who.ai {
+            color: var(--accent-lt);
+        }
+
+        .cb-msg {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0 10px 10px 10px;
+            padding: 12px 16px;
+            font-size: 13.5px;
+            color: #bbbdd6;
+            line-height: 1.7;
+        }
+
+        .chat-bubble.user .cb-msg {
+            background: var(--surface2);
+            border-radius: 10px 0 10px 10px;
+        }
+
+        .cb-msg code {
+            font-family: var(--font-mono);
+            background: var(--surface3);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--accent-lt);
+        }
+
+        .cb-msg pre {
+            background: #07080d;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: var(--green);
+            margin: 8px 0;
+            overflow-x: auto;
+        }
+
+        /* ═══════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+═══════════════════════════════════════════════ */
+        .shortcut-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--muted2);
+            transition: border-color .18s;
+        }
+
+        .shortcut-item:hover {
+            border-color: var(--border2);
+        }
+
+        .keys {
+            display: flex;
+            gap: 4px;
+        }
+
+        kbd {
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-bottom-width: 2px;
+            border-radius: 5px;
+            padding: 2px 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text);
+        }
+
+        /* ═══════════════════════════════════════════════
+   PROMPT FORMULA
+═══════════════════════════════════════════════ */
+        .formula {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 18px 0;
+        }
+
+        .formula-part {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+
+        .formula-part .label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 3px;
+            font-family: var(--font-mono);
+        }
+
+        .formula-part .val {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .formula-part:nth-child(1) {
+            border-color: var(--accent);
+        }
+
+        .formula-part:nth-child(3) {
+            border-color: #60a5fa;
+        }
+
+        .formula-part:nth-child(5) {
+            border-color: var(--green);
+        }
+
+        .formula-part:nth-child(7) {
+            border-color: var(--amber);
+        }
+
+        .formula-plus {
+            color: var(--muted);
+            font-size: 18px;
+            font-weight: 300;
+        }
+
+        /* ═══════════════════════════════════════════════
+   HAMBURGER
+═══════════════════════════════════════════════ */
+        #hamburger {
+            display: none;
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 300;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        /* ═══════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════ */
+        .hero-section {
+            padding: 72px 64px 60px;
+            border-bottom: 1px solid var(--border);
+            background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 106, 248, .12), transparent);
+        }
+
+        .hero-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+
+        .hero-chip {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 99px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted2);
+        }
+
+        .hero-stat-row {
+            display: flex;
+            gap: 24px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .hero-stat-num {
+            font-family: var(--font-head);
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--text), var(--accent-lt));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-stat-label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* ═══════════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════════ */
+        @media (max-width: 900px) {
+            #hamburger {
+                display: flex;
+            }
+
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+                box-shadow: 12px 0 40px rgba(0, 0, 0, .5);
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            .section,
+            .hero-section {
+                padding: 50px 24px;
+            }
+
+            .cards,
+            .cmd-grid,
+            .shortcut-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+        }
+
+        /* ── OVERLAY ── */
+        #overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 150;
+        }
+
+        #overlay.visible {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="hamburger" onclick="toggleNav()">☰</button>
+    <div id="overlay" onclick="toggleNav()"></div>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <nav id="sidebar">
+        <div class="sb-header">
+            <div class="sb-brand">
+                <div class="sb-orb">✦</div>
+                <span class="sb-title">Claude Guide</span>
+            </div>
+            <div class="sb-ver">
+                <span class="dot"></span>
+                Sonnet 4.6 · 2026
+            </div>
+        </div>
+
+        <div class="sb-progress">
+            <div class="sb-progress-label">
+                <span>Tiến trình đọc</span>
+                <span id="pct">0%</span>
+            </div>
+            <div class="sb-progress-bar">
+                <div class="sb-progress-fill" id="pfill"></div>
+            </div>
+        </div>
+
+        <nav class="sb-section" aria-label="Page navigation">
+            <div class="sb-section-label">🔄 Chuyển trang</div>
+            <a class="sb-link" href="Claude-architecture-guide.html"><span class="sb-icon">📐</span>Arch Guide</a>
+            <a class="sb-link active" href="claude-guide.html"><span class="sb-icon">📖</span>Claude Guide</a>
+            <a class="sb-link" href="antigravity-guide.html"><span class="sb-icon">🚀</span>AntiGravity</a>
+        </nav>
+
+        <div class="sb-section">
+            <div class="sb-section-label">🏁 Bắt đầu</div>
+            <a class="sb-link active" href="#intro" onclick="setActive(this)">
+                <span class="sb-icon">🏠</span> Giới thiệu Claude
+            </a>
+            <a class="sb-link" href="#models" onclick="setActive(this)">
+                <span class="sb-icon">🧬</span> Các model
+            </a>
+            <a class="sb-link" href="#start" onclick="setActive(this)">
+                <span class="sb-icon">🚀</span> Bắt đầu nhanh
+            </a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">💬 Chat cơ bản</div>
+            <a class="sb-link" href="#chat-basics" onclick="setActive(this)">
+                <span class="sb-icon">💬</span> Chat hiệu quả
+                <span class="sb-badge">demo</span>
+            </a>
+            <a class="sb-link" href="#prompts" onclick="setActive(this)">
+                <span class="sb-icon">✍️</span> Kỹ thuật prompt
+                <span class="sb-badge">demo</span>
+            </a>
+            <a class="sb-link" href="#slash" onclick="setActive(this)">
+                <span class="sb-icon">⚡</span> Slash commands
+                <span class="sb-badge">new</span>
+            </a>
+            <a class="sb-link" href="#shortcuts" onclick="setActive(this)">
+                <span class="sb-icon">⌨️</span> Phím tắt
+            </a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">📎 File & Media</div>
+            <a class="sb-link" href="#files" onclick="setActive(this)">
+                <span class="sb-icon">📄</span> Upload tài liệu
+                <span class="sb-badge">demo</span>
+            </a>
+            <a class="sb-link" href="#vision" onclick="setActive(this)">
+                <span class="sb-icon">🖼️</span> Phân tích ảnh
+                <span class="sb-badge">demo</span>
+            </a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">🔧 Tính năng nâng cao</div>
+            <a class="sb-link" href="#projects" onclick="setActive(this)">
+                <span class="sb-icon">📁</span> Projects
+            </a>
+            <a class="sb-link" href="#artifacts" onclick="setActive(this)">
+                <span class="sb-icon">🎨</span> Artifacts
+                <span class="sb-badge">demo</span>
+            </a>
+            <a class="sb-link" href="#memory" onclick="setActive(this)">
+                <span class="sb-icon">🧠</span> Memory
+            </a>
+            <a class="sb-link" href="#web-search" onclick="setActive(this)">
+                <span class="sb-icon">🔍</span> Web Search
+                <span class="sb-badge">demo</span>
+            </a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">⚙️ Developer</div>
+            <a class="sb-link" href="#api" onclick="setActive(this)">
+                <span class="sb-icon">🔌</span> Claude API
+                <span class="sb-badge">demo</span>
+            </a>
+            <a class="sb-link" href="#mcp" onclick="setActive(this)">
+                <span class="sb-icon">🔗</span> MCP Servers
+            </a>
+            <a class="sb-link" href="#claude-code" onclick="setActive(this)">
+                <span class="sb-icon">💻</span> Claude Code CLI
+            </a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">📚 Tham khảo</div>
+            <a class="sb-link" href="#usecases" onclick="setActive(this)">
+                <span class="sb-icon">💡</span> Use cases thực tế
+            </a>
+            <a class="sb-link" href="#limits" onclick="setActive(this)">
+                <span class="sb-icon">⚠️</span> Giới hạn
+            </a>
+            <a class="sb-link" href="#tips" onclick="setActive(this)">
+                <span class="sb-icon">⭐</span> Pro tips
+            </a>
+        </div>
+
+        <div class="sb-footer">
+            Anthropic © 2026 · docs.claude.ai
+        </div>
+    </nav>
+
+    <!-- ═══ MAIN ═══ -->
+    <main id="main-content">
+
+        <!-- ──────────────────────────── INTRO ──────────────────────────── -->
+        <div class="hero-section" id="intro">
+            <div class="section-tag">Tổng quan</div>
+            <h1><span class="grad">Hướng dẫn toàn diện<br>sử dụng Claude</span></h1>
+            <p>Claude là trợ lý AI do <strong>Anthropic</strong> xây dựng với trọng tâm là an toàn, hữu ích và trung
+                thực. Tài liệu này cung cấp đầy đủ hướng dẫn, ví dụ thực tế, demo tương tác và mọi lệnh bạn cần biết.
+            </p>
+
+            <div class="hero-chips">
+                <span class="hero-chip">claude.ai</span>
+                <span class="hero-chip">API</span>
+                <span class="hero-chip">Claude Code</span>
+                <span class="hero-chip">MCP</span>
+                <span class="hero-chip">Projects</span>
+                <span class="hero-chip">Artifacts</span>
+                <span class="hero-chip">Tiếng Việt ✓</span>
+            </div>
+
+            <div class="hero-stat-row">
+                <div class="hero-stat">
+                    <span class="hero-stat-num">200K</span>
+                    <span class="hero-stat-label">Token context window</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">3+</span>
+                    <span class="hero-stat-label">Model tiers</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">50+</span>
+                    <span class="hero-stat-label">Ngôn ngữ hỗ trợ</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">∞</span>
+                    <span class="hero-stat-label">Use cases</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── MODELS ──────────────────────────── -->
+        <div class="section" id="models">
+            <div class="section-tag">Model</div>
+            <h2>🧬 Các phiên bản Claude</h2>
+            <p>Mỗi model Claude được tối ưu cho các nhu cầu khác nhau về tốc độ, độ phức tạp và chi phí.</p>
+
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Model ID (API)</th>
+                            <th>Tốc độ</th>
+                            <th>Năng lực</th>
+                            <th>Context</th>
+                            <th>Tốt nhất cho</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Claude Opus 4</strong> <span class="tag-new">flagship</span></td>
+                            <td><code
+                                    style="font-family:var(--font-mono);font-size:12px;color:var(--accent-lt)">claude-opus-4-6</code>
+                            </td>
+                            <td>⚡⚡</td>
+                            <td>★★★★★</td>
+                            <td>200K</td>
+                            <td>Phân tích sâu, nghiên cứu, tác vụ phức tạp</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Claude Sonnet 4.6</strong> <span class="tag-new">default</span></td>
+                            <td><code
+                                    style="font-family:var(--font-mono);font-size:12px;color:var(--accent-lt)">claude-sonnet-4-6</code>
+                            </td>
+                            <td>⚡⚡⚡⚡</td>
+                            <td>★★★★☆</td>
+                            <td>200K</td>
+                            <td>Hầu hết tác vụ hàng ngày, cân bằng tối ưu</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Claude Haiku 4.5</strong> <span class="tag-api">fast</span></td>
+                            <td><code
+                                    style="font-family:var(--font-mono);font-size:12px;color:var(--accent-lt)">claude-haiku-4-5-20251001</code>
+                            </td>
+                            <td>⚡⚡⚡⚡⚡</td>
+                            <td>★★★☆☆</td>
+                            <td>200K</td>
+                            <td>Tác vụ đơn giản, high-volume, production API</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout">
+                <div class="callout-label">💡 Gợi ý chọn model</div>
+                Trên claude.ai, <strong>Sonnet 4.6</strong> là mặc định và đủ tốt cho 90% tác vụ. Chỉ chuyển sang Opus
+                khi cần suy luận sâu hoặc phân tích rất phức tạp. Với API: dùng Haiku cho volume lớn để tiết kiệm chi
+                phí.
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── QUICKSTART ──────────────────────────── -->
+        <div class="section" id="start">
+            <div class="section-tag">Bắt đầu</div>
+            <h2>🚀 Bắt đầu nhanh trong 3 bước</h2>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <div class="step-title">Tạo tài khoản tại claude.ai</div>
+                        <div class="step-desc">Đăng ký bằng email hoặc Google. Gói <strong>Free</strong> đủ để trải
+                            nghiệm. Gói <strong>Pro ($20/tháng)</strong> tăng giới hạn tin nhắn, thêm Projects,
+                            Artifacts và ưu tiên truy cập model mới nhất. Gói <strong>Team/Enterprise</strong> dành cho
+                            tổ chức với shared Projects và admin controls.</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <div class="step-title">Gửi tin nhắn đầu tiên</div>
+                        <div class="step-desc">Nhấp vào ô soạn thảo ở trang chủ, gõ bất kỳ câu hỏi nào bằng ngôn ngữ tự
+                            nhiên — tiếng Việt hoặc tiếng Anh đều được. Không cần lệnh đặc biệt, không cần syntax riêng.
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div>
+                        <div class="step-title">Iterate và tinh chỉnh</div>
+                        <div class="step-desc">Đọc phản hồi. Nếu chưa đúng ý: yêu cầu chỉnh sửa, hỏi follow-up, hoặc nói
+                            rõ hơn điều bạn cần. Claude nhớ toàn bộ context trong conversation — bạn không cần giải
+                            thích lại từ đầu.</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>📦 Giao diện claude.ai</h3>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">🗨️</div>
+                    <div class="card-title">Conversations</div>
+                    <div class="card-desc">Mỗi chat là một conversation riêng. Claude nhớ toàn bộ lịch sử trong
+                        conversation đó. Tạo conversation mới khi muốn bắt đầu chủ đề hoàn toàn khác.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">📁</div>
+                    <div class="card-title">Projects</div>
+                    <div class="card-desc">Nhóm nhiều conversations liên quan. Chia sẻ file, instructions cho cả
+                        project. Lý tưởng cho codebase, dự án dài hạn.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🎨</div>
+                    <div class="card-title">Artifacts Panel</div>
+                    <div class="card-desc">Panel bên phải hiện ra khi Claude tạo code dài, HTML, React app, SVG. Preview
+                        trực tiếp và tải về.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">⚙️</div>
+                    <div class="card-title">Settings</div>
+                    <div class="card-desc">Bật/tắt Memory, Web Search, Code Execution, Artifacts. Thêm User Preferences
+                        về phong cách phản hồi.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── CHAT BASICS ──────────────────────────── -->
+        <div class="section" id="chat-basics">
+            <div class="section-tag">Cơ bản</div>
+            <h2>💬 Chat hiệu quả với Claude</h2>
+            <p>Claude hiểu ngôn ngữ tự nhiên rất tốt. Dưới đây là demo một conversation thực tế từ đơn giản đến phức
+                tạp.</p>
+
+            <!-- DEMO 1: Chat multi-turn -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — Conversation thực tế (multi-turn)</div>
+                    <span class="demo-tag">interactive</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div class="demo-prompt-label">Chọn scenario:</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip selected" onclick="selectScenario(this,'chat1')">🧑‍💻 Lập trình Java
+                        </div>
+                        <div class="prompt-chip" onclick="selectScenario(this,'chat2')">📊 Phân tích dữ liệu</div>
+                        <div class="prompt-chip" onclick="selectScenario(this,'chat3')">✍️ Viết nội dung</div>
+                        <div class="prompt-chip" onclick="selectScenario(this,'chat4')">🐛 Debug lỗi</div>
+                    </div>
+                </div>
+                <div style="padding:14px 18px 18px">
+                    <button class="run-btn" onclick="showChat()" style="width:100%;justify-content:center;padding:10px">
+                        ▶ Xem demo conversation
+                    </button>
+                </div>
+                <div id="chat-demo-output" style="display:none;border-top:1px solid var(--border);padding:18px 20px">
+                </div>
+            </div>
+
+            <h3>🔑 Nguyên tắc cốt lõi</h3>
+            <ul class="feat-list">
+                <li><strong>Nói thẳng, không cần lịch sự thái quá</strong> — "Viết hàm tính tổng mảng" tốt hơn "Bạn có
+                    thể vui lòng giúp tôi viết hàm tính tổng mảng không ạ?"</li>
+                <li><strong>Paste nguyên liệu thô</strong> — Code, error log, stack trace, text cần xử lý. Đừng mô tả
+                    bằng lời — show thẳng.</li>
+                <li><strong>Hỏi follow-up trong cùng conversation</strong> — Claude nhớ toàn bộ context. "Giải thích
+                    thêm dòng 5" hoặc "Chỉnh sửa để handle null" đều hiểu ngay.</li>
+                <li><strong>Phản hồi trực tiếp</strong> — "Câu trả lời này không đúng vì..." rõ hơn "Không đúng rồi bạn
+                    ơi".</li>
+                <li><strong>Yêu cầu format cụ thể</strong> — "Chỉ code, không giải thích", "Trả lời bằng JSON", "Ngắn
+                    gọn dưới 5 dòng".</li>
+            </ul>
+        </div>
+
+        <!-- ──────────────────────────── PROMPTS ──────────────────────────── -->
+        <div class="section" id="prompts">
+            <div class="section-tag">Kỹ thuật</div>
+            <h2>✍️ Kỹ thuật viết Prompt</h2>
+            <p>Chất lượng output của Claude tỉ lệ trực tiếp với chất lượng prompt đầu vào. Đây là framework và demo thực
+                tế.</p>
+
+            <h3>📐 Công thức Prompt chuẩn</h3>
+            <div class="formula">
+                <div class="formula-part">
+                    <div class="label">Vai trò</div>
+                    <div class="val">Bạn là senior Java dev</div>
+                </div>
+                <div class="formula-plus">+</div>
+                <div class="formula-part">
+                    <div class="label">Ngữ cảnh</div>
+                    <div class="val">Spring Boot 3, PostgreSQL</div>
+                </div>
+                <div class="formula-plus">+</div>
+                <div class="formula-part">
+                    <div class="label">Yêu cầu cụ thể</div>
+                    <div class="val">Review code, tìm N+1 query</div>
+                </div>
+                <div class="formula-plus">+</div>
+                <div class="formula-part">
+                    <div class="label">Format output</div>
+                    <div class="val">Code đã fix + giải thích</div>
+                </div>
+            </div>
+
+            <!-- DEMO 2: Prompt comparison -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — So sánh Prompt tệ vs Prompt tốt</div>
+                    <span class="demo-tag">interactive</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div class="demo-prompt-label">Chọn loại tác vụ:</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip selected" onclick="selectPromptType(this,'code')">💻 Code</div>
+                        <div class="prompt-chip" onclick="selectPromptType(this,'write')">✍️ Viết lách</div>
+                        <div class="prompt-chip" onclick="selectPromptType(this,'debug')">🐛 Debug</div>
+                        <div class="prompt-chip" onclick="selectPromptType(this,'analyze')">📊 Phân tích</div>
+                    </div>
+                </div>
+                <div id="prompt-compare-output" style="padding:14px 18px 18px">
+                </div>
+            </div>
+
+            <h3>🎯 Các kỹ thuật prompt nâng cao</h3>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">🎭</div>
+                    <div class="card-title">Role Prompting</div>
+                    <div class="card-desc">Gán vai trò để có phản hồi chuyên môn: <em>"Bạn là senior architect với 15
+                            năm kinh nghiệm microservices..."</em></div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🪜</div>
+                    <div class="card-title">Chain of Thought</div>
+                    <div class="card-desc">Thêm <em>"Hãy suy nghĩ từng bước"</em> cho bài toán phức tạp. Claude sẽ lý
+                        giải từng bước trước khi đưa ra đáp án.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">📋</div>
+                    <div class="card-title">Few-shot Examples</div>
+                    <div class="card-desc">Cho Claude xem 2-3 ví dụ input→output mẫu trước khi đưa yêu cầu thực sự. Hiệu
+                        quả cao với tác vụ có format cố định.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🔒</div>
+                    <div class="card-title">Constraints</div>
+                    <div class="card-desc">Đặt ràng buộc rõ: <em>"Không dùng thư viện ngoài", "Chỉ Java 17", "Tối đa 50
+                            từ", "Không thêm comment"</em>.</div>
+                </div>
+            </div>
+
+            <!-- DEMO 3: Live prompt tester -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — Tự viết và xem response mẫu</div>
+                    <span class="demo-tag">sandbox</span>
+                </div>
+                <div class="demo-prompts">
+                    <div class="demo-prompt-label">Nhập prompt của bạn (hoặc chọn mẫu):</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip"
+                            onclick="fillPrompt(this,'Giải thích Spring @Transactional hoạt động thế nào, cho ví dụ code cụ thể')">
+                            @Transactional</div>
+                        <div class="prompt-chip"
+                            onclick="fillPrompt(this,'Viết hàm Java kiểm tra chuỗi palindrome, kèm unit test JUnit 5')">
+                            Palindrome + Test</div>
+                        <div class="prompt-chip"
+                            onclick="fillPrompt(this,'So sánh HashMap vs ConcurrentHashMap trong Java, khi nào dùng cái nào?')">
+                            Map comparison</div>
+                        <div class="prompt-chip"
+                            onclick="fillPrompt(this,'Bạn là DBA, review query SQL này và tối ưu hiệu suất: SELECT * FROM orders WHERE status = ?')">
+                            SQL Review</div>
+                    </div>
+                </div>
+                <div class="demo-input-row">
+                    <textarea class="demo-input" id="prompt-input" rows="3"
+                        placeholder="Gõ prompt bất kỳ..."></textarea>
+                </div>
+                <div style="padding:0 18px 16px;display:flex;gap:10px">
+                    <button class="run-btn" onclick="runPromptDemo()" id="run-prompt-btn">
+                        ▶ Xem response mẫu
+                    </button>
+                </div>
+                <div id="prompt-response" class="demo-response">
+                    <div class="response-header">
+                        <div class="claude-avatar">✦</div>
+                        <div class="response-name">Claude Sonnet 4.6</div>
+                    </div>
+                    <div class="response-body" id="prompt-response-body"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── SLASH COMMANDS ──────────────────────────── -->
+        <div class="section" id="slash">
+            <div class="section-tag">Lệnh nhanh</div>
+            <h2>⚡ Slash Commands</h2>
+            <p>Gõ <code
+                    style="font-family:var(--font-mono);background:var(--surface2);padding:2px 7px;border-radius:4px;color:var(--accent-lt)">/</code>
+                ở đầu tin nhắn để kích hoạt các lệnh tắt trong Claude. Dropdown sẽ xuất hiện ngay.</p>
+
+            <!-- Live slash demo -->
+            <div class="slash-demo">
+                <div class="slash-demo-bar">
+                    <span>💬</span>
+                    <span>Thử gõ "/" để xem danh sách lệnh</span>
+                </div>
+                <div class="slash-input-area">
+                    <input id="slash-input" type="text" placeholder='Gõ "/" để thấy slash commands...'
+                        oninput="handleSlash(this.value)" autocomplete="off">
+                </div>
+                <div class="slash-dropdown" id="slash-dropdown"></div>
+            </div>
+
+            <h3>📋 Danh sách Slash Commands đầy đủ</h3>
+            <div class="cmd-grid">
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/new <span class="cmd-badge new">chat</span></div>
+                    <div class="cmd-desc">Bắt đầu conversation mới, xóa toàn bộ context cũ</div>
+                    <div class="cmd-example">→ <span>/new</span></div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/clear</div>
+                    <div class="cmd-desc">Xóa lịch sử conversation hiện tại nhưng giữ nguyên cửa sổ chat</div>
+                    <div class="cmd-example">→ <span>/clear</span></div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/summarize</div>
+                    <div class="cmd-desc">Tóm tắt nội dung conversation hiện tại thành bullet points</div>
+                    <div class="cmd-example">→ <span>/summarize</span></div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/translate [lang]</div>
+                    <div class="cmd-desc">Dịch tin nhắn tiếp theo sang ngôn ngữ chỉ định</div>
+                    <div class="cmd-example">→ <span>/translate English</span></div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/explain</div>
+                    <div class="cmd-desc">Giải thích đoạn code hoặc nội dung bạn paste vào theo sau</div>
+                    <div class="cmd-example">→ <span>/explain</span> [paste code]</div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/fix</div>
+                    <div class="cmd-desc">Phân tích và sửa lỗi trong code paste vào theo sau</div>
+                    <div class="cmd-example">→ <span>/fix</span> [paste code lỗi]</div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/improve</div>
+                    <div class="cmd-desc">Cải thiện đoạn text/code về chất lượng, rõ ràng, hiệu suất</div>
+                    <div class="cmd-example">→ <span>/improve</span> [paste text]</div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/format [type]</div>
+                    <div class="cmd-desc">Định dạng lại output theo kiểu chỉ định</div>
+                    <div class="cmd-example">→ <span>/format json</span> hoặc <span>/format markdown</span></div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/test</div>
+                    <div class="cmd-desc">Viết unit test cho code được paste vào theo sau</div>
+                    <div class="cmd-example">→ <span>/test</span> [paste function]</div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/review</div>
+                    <div class="cmd-desc">Code review đầy đủ: bugs, security, performance, style</div>
+                    <div class="cmd-example">→ <span>/review</span> [paste code]</div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/search [query] <span class="cmd-badge new">web</span></div>
+                    <div class="cmd-desc">Tìm kiếm web và trả lời kèm nguồn tham khảo (cần bật Web Search)</div>
+                    <div class="cmd-example">→ <span>/search Spring Boot 3.4 changelog</span></div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/shorter</div>
+                    <div class="cmd-desc">Yêu cầu Claude rút gọn response vừa trả lời</div>
+                    <div class="cmd-example">→ <span>/shorter</span> (sau khi nhận response)</div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/longer</div>
+                    <div class="cmd-desc">Yêu cầu Claude mở rộng, chi tiết hơn response vừa trả lời</div>
+                    <div class="cmd-example">→ <span>/longer</span></div>
+                </div>
+
+                <div class="cmd-card">
+                    <div class="cmd-name">/retry</div>
+                    <div class="cmd-desc">Tạo lại response khác cho cùng prompt (regenerate)</div>
+                    <div class="cmd-example">→ <span>/retry</span></div>
+                </div>
+
+            </div>
+
+            <!-- DEMO 4: Slash command demo -->
+            <div class="demo-box" style="margin-top:20px">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — Slash command trong thực tế</div>
+                    <span class="demo-tag">interactive</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div class="demo-prompt-label">Chọn lệnh để xem ví dụ:</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip selected" onclick="selectSlashDemo(this,'fix')">🔧 /fix</div>
+                        <div class="prompt-chip" onclick="selectSlashDemo(this,'review')">👁️ /review</div>
+                        <div class="prompt-chip" onclick="selectSlashDemo(this,'test')">🧪 /test</div>
+                        <div class="prompt-chip" onclick="selectSlashDemo(this,'explain')">📖 /explain</div>
+                    </div>
+                </div>
+                <div id="slash-demo-output" style="padding:14px 18px 18px"></div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── SHORTCUTS ──────────────────────────── -->
+        <div class="section" id="shortcuts">
+            <div class="section-tag">Keyboard</div>
+            <h2>⌨️ Phím tắt Claude</h2>
+            <p>Tăng tốc workflow với các phím tắt trong giao diện claude.ai (desktop & web app).</p>
+
+            <div class="shortcut-grid">
+                <div class="shortcut-item">
+                    <span>Gửi tin nhắn</span>
+                    <div class="keys"><kbd>Enter</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Xuống dòng (không gửi)</span>
+                    <div class="keys"><kbd>Shift</kbd><kbd>Enter</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Conversation mới</span>
+                    <div class="keys"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>N</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Tìm kiếm conversations</span>
+                    <div class="keys"><kbd>Ctrl</kbd><kbd>K</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Focus vào ô nhập liệu</span>
+                    <div class="keys"><kbd>Esc</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Copy code block</span>
+                    <div class="keys"><kbd>Click</kbd> icon copy</div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Stop generating</span>
+                    <div class="keys"><kbd>Shift</kbd><kbd>Esc</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Regenerate response</span>
+                    <div class="keys">Click 🔄 icon</div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Edit tin nhắn gửi rồi</span>
+                    <div class="keys">Click ✏️ icon</div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Toggle sidebar</span>
+                    <div class="keys"><kbd>Ctrl</kbd><kbd>B</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Mở Settings</span>
+                    <div class="keys"><kbd>Ctrl</kbd><kbd>,</kbd></div>
+                </div>
+                <div class="shortcut-item">
+                    <span>Kích hoạt slash commands</span>
+                    <div class="keys"><kbd>/</kbd> ở đầu dòng</div>
+                </div>
+            </div>
+
+            <div class="callout warn">
+                <div class="callout-label">⚠️ macOS</div>
+                Thay <kbd>Ctrl</kbd> bằng <kbd>⌘ Cmd</kbd> trên macOS cho tất cả các phím tắt trên.
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── FILES ──────────────────────────── -->
+        <div class="section" id="files">
+            <div class="section-tag">Upload</div>
+            <h2>📄 Upload và xử lý tài liệu</h2>
+            <p>Claude xử lý nhiều loại file trực tiếp trong chat. Kéo thả hoặc click icon đính kèm (📎) ở ô nhập liệu.
+            </p>
+
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Loại file</th>
+                            <th>Extension</th>
+                            <th>Giới hạn</th>
+                            <th>Claude làm được</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>PDF</strong></td>
+                            <td>.pdf</td>
+                            <td>32MB / file</td>
+                            <td>Tóm tắt, trích xuất, so sánh, Q&A theo nội dung</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hình ảnh</strong></td>
+                            <td>.jpg .png .gif .webp</td>
+                            <td>5MB / ảnh</td>
+                            <td>Mô tả, OCR text, phân tích chart, debug UI</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Code files</strong></td>
+                            <td>.java .py .js .ts ...</td>
+                            <td>—</td>
+                            <td>Review, refactor, debug, viết test, giải thích</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Spreadsheet</strong></td>
+                            <td>.csv .xlsx</td>
+                            <td>—</td>
+                            <td>Phân tích data, tạo code xử lý, tóm tắt insight</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Text/Markdown</strong></td>
+                            <td>.txt .md</td>
+                            <td>—</td>
+                            <td>Chỉnh sửa, tóm tắt, cải thiện, dịch</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Word/Docs</strong></td>
+                            <td>.docx</td>
+                            <td>—</td>
+                            <td>Đọc nội dung, tóm tắt, trả lời câu hỏi</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- DEMO 5: File analysis demo -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — Claude phân tích file</div>
+                    <span class="demo-tag">example</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div class="demo-prompt-label">Chọn loại file để xem ví dụ:</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip selected" onclick="selectFileDemo(this,'pdf')">📄 PDF báo cáo</div>
+                        <div class="prompt-chip" onclick="selectFileDemo(this,'csv')">📊 CSV data</div>
+                        <div class="prompt-chip" onclick="selectFileDemo(this,'code')">☕ Java file</div>
+                        <div class="prompt-chip" onclick="selectFileDemo(this,'img')">🖼️ Screenshot UI</div>
+                    </div>
+                </div>
+                <div id="file-demo-output" style="padding:14px 18px 18px"></div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── VISION ──────────────────────────── -->
+        <div class="section" id="vision">
+            <div class="section-tag">Vision</div>
+            <h2>🖼️ Phân tích hình ảnh</h2>
+            <p>Claude có khả năng Vision mạnh — hiểu và phân tích nội dung hình ảnh chi tiết.</p>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">📊</div>
+                    <div class="card-title">Biểu đồ & Chart</div>
+                    <div class="card-desc">Upload chart PNG từ báo cáo, Claude đọc số liệu, xu hướng và tóm tắt insight.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🖥️</div>
+                    <div class="card-title">UI Screenshot</div>
+                    <div class="card-desc">Chụp màn hình bug, lỗi layout, Claude phân tích và gợi ý fix ngay lập tức.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🔤</div>
+                    <div class="card-title">OCR & Text trong ảnh</div>
+                    <div class="card-desc">Trích xuất text từ ảnh, scan tài liệu, đọc bảng viết tay hoặc in bị mờ.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🏗️</div>
+                    <div class="card-title">Sơ đồ kiến trúc</div>
+                    <div class="card-desc">Upload diagram, whiteboard photo, ERD sketch — Claude đọc hiểu và giải thích.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vision demo -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — Vision responses mẫu</div>
+                    <span class="demo-tag">example</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div class="demo-prompt-label">Chọn loại ảnh:</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip selected" onclick="selectVisionDemo(this,'chart')">📊 Biểu đồ line chart
+                        </div>
+                        <div class="prompt-chip" onclick="selectVisionDemo(this,'error')">❌ Error screenshot</div>
+                        <div class="prompt-chip" onclick="selectVisionDemo(this,'arch')">🏗️ Architecture diagram</div>
+                    </div>
+                </div>
+                <div id="vision-demo-output" style="padding:14px 18px 18px"></div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── PROJECTS ──────────────────────────── -->
+        <div class="section" id="projects">
+            <div class="section-tag">Tổ chức</div>
+            <h2>📁 Projects — Làm việc theo dự án</h2>
+            <p>Projects là tính năng mạnh nhất cho developer và team. Nhóm conversations, chia sẻ context và file cho cả
+                project.</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <div class="step-title">Tạo Project và đặt tên mô tả</div>
+                        <div class="step-desc">Sidebar trái → <strong>New Project</strong>. Ví dụ: "MB Ageas —
+                            Declaration Service", "Marketing Q1 2026", "Side Project — URL Shortener".</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <div class="step-title">Viết Project Instructions (System Prompt)</div>
+                        <div class="step-desc">Đây là hướng dẫn áp dụng cho MỌI conversation trong project. Ví dụ
+                            tốt:<br><br>
+                            <div class="code-wrap" style="margin:8px 0 0">
+                                <pre style="padding:12px 16px;font-size:12px">Bạn là senior Java developer. Stack: Spring Boot 3.4, Java 21, PostgreSQL 16.
+Project: MB Ageas Life insurance platform, microservices trên AWS EKS.
+Luôn trả lời bằng tiếng Việt. Code phải có exception handling đầy đủ.
+Ưu tiên performance và thread-safety. Không dùng deprecated APIs.</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div>
+                        <div class="step-title">Upload tài liệu project</div>
+                        <div class="step-desc">Thêm: ERD, API spec (Swagger/OpenAPI), README, coding guidelines,
+                            architecture diagram. Tất cả conversations trong project đều access được file này.</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div>
+                        <div class="step-title">Tạo conversations trong project</div>
+                        <div class="step-desc">Mỗi conversation là một task riêng. Tên gợi nhớ: "Fix N+1 query
+                            OrderService", "Design payment webhook handler", "Review auth middleware".</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout good">
+                <div class="callout-label">✅ Best practice thực tế</div>
+                Đừng dồn mọi thứ vào 1 conversation dài. Tạo conversation mới cho mỗi feature/bug — conversation ngắn →
+                context rõ → Claude trả lời chính xác hơn. Dùng Project để giữ shared context (stack, conventions),
+                không phải để có 1 conversation khổng lồ.
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── ARTIFACTS ──────────────────────────── -->
+        <div class="section" id="artifacts">
+            <div class="section-tag">Artifacts</div>
+            <h2>🎨 Artifacts — Nội dung tương tác</h2>
+            <p>Khi Claude tạo nội dung dài hoặc phức tạp, Artifacts panel xuất hiện bên phải để preview và edit riêng.
+            </p>
+
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Loại Artifact</th>
+                            <th>Khi nào xuất hiện</th>
+                            <th>Có thể làm gì</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Code</strong></td>
+                            <td>File code dài, multi-function</td>
+                            <td>Syntax highlight, copy, download, edit trực tiếp</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HTML</strong></td>
+                            <td>"Tạo trang HTML", "Viết dashboard"</td>
+                            <td>Preview trực tiếp, tải về .html, mở trong tab mới</td>
+                        </tr>
+                        <tr>
+                            <td><strong>React</strong></td>
+                            <td>"Viết React component", "Tạo UI với hooks"</td>
+                            <td>Live render ngay trong Claude, interactive</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SVG</strong></td>
+                            <td>"Vẽ sơ đồ", "Tạo diagram"</td>
+                            <td>Render vector, tải về .svg, scale không vỡ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Markdown</strong></td>
+                            <td>Tài liệu, README, report</td>
+                            <td>Preview formatted, tải về .md</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Artifact demo -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — Artifacts thực tế</div>
+                    <span class="demo-tag">example</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div class="demo-prompt-label">Chọn loại artifact:</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip selected" onclick="selectArtifactDemo(this,'html')">🌐 HTML app</div>
+                        <div class="prompt-chip" onclick="selectArtifactDemo(this,'react')">⚛️ React component</div>
+                        <div class="prompt-chip" onclick="selectArtifactDemo(this,'svg')">🎨 SVG diagram</div>
+                    </div>
+                </div>
+                <div id="artifact-demo-output" style="padding:14px 18px 18px"></div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── MEMORY ──────────────────────────── -->
+        <div class="section" id="memory">
+            <div class="section-tag">Personalization</div>
+            <h2>🧠 Memory — Ghi nhớ về bạn</h2>
+            <p>Claude tự động tổng hợp thông tin từ các conversations để cá nhân hóa phản hồi theo thời gian.</p>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">🔍</div>
+                    <div class="card-title">Memory hoạt động thế nào</div>
+                    <div class="card-desc">Sau mỗi conversation, Claude trích xuất thông tin quan trọng (nghề nghiệp,
+                        preferences, tech stack) và lưu vào "memory database". Conversation sau sẽ dùng context này.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">📝</div>
+                    <div class="card-title">Xem & chỉnh sửa Memory</div>
+                    <div class="card-desc">Settings → Memory. Bạn thấy toàn bộ điều Claude nhớ, có thể edit hoặc xóa
+                        từng mục một cách thủ công.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🎯</div>
+                    <div class="card-title">Yêu cầu Claude nhớ</div>
+                    <div class="card-desc">Nói thẳng: "Hãy nhớ tôi dùng Java 21 và Spring Boot 3.4" hay "Đừng nhớ thông
+                        tin về dự án X nữa".</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🔒</div>
+                    <div class="card-title">Riêng tư</div>
+                    <div class="card-desc">Memory tắt hoàn toàn trong Incognito Conversations. Tắt Memory hẳn trong
+                        Settings nếu không muốn dùng.</div>
+                </div>
+            </div>
+
+            <div class="callout warn">
+                <div class="callout-label">⚠️ Lưu ý quan trọng</div>
+                Memory update có độ trễ — conversation vừa xong chưa chắc đã được lưu ngay. Khi xóa conversation, thông
+                tin từ conversation đó sẽ được xóa khỏi Memory sau một thời gian (batch process hàng đêm).
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── WEB SEARCH ──────────────────────────── -->
+        <div class="section" id="web-search">
+            <div class="section-tag">Search</div>
+            <h2>🔍 Web Search — Thông tin thời gian thực</h2>
+            <p>Claude tích hợp tìm kiếm web để trả lời câu hỏi về thông tin mới hơn knowledge cutoff (8/2025).</p>
+
+            <h3>🟢 Khi nào Claude tự động search</h3>
+            <ul class="feat-list">
+                <li>Hỏi về sự kiện, tin tức <strong>hiện tại</strong>: "Kotlin 2.0 có gì mới?", "Spring Boot 3.5 release
+                    notes"</li>
+                <li>Hỏi về <strong>ai đang giữ chức vụ</strong>: "CTO hiện tại của Anthropic là ai?"</li>
+                <li>Hỏi về <strong>giá cả, tỷ giá</strong>, chỉ số thị trường</li>
+                <li>Hỏi về <strong>trạng thái hiện tại</strong> của thứ gì đó: "Dự án X có còn maintain không?"</li>
+            </ul>
+
+            <!-- Web search demo -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — Web Search response</div>
+                    <span class="demo-tag">example</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div class="demo-prompt-label">Chọn loại query:</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip selected" onclick="selectSearchDemo(this,'tech')">🔧 Tech news</div>
+                        <div class="prompt-chip" onclick="selectSearchDemo(this,'docs')">📖 Tìm docs</div>
+                        <div class="prompt-chip" onclick="selectSearchDemo(this,'compare')">⚖️ So sánh tool</div>
+                    </div>
+                </div>
+                <div id="search-demo-output" style="padding:14px 18px 18px"></div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── API ──────────────────────────── -->
+        <div class="section" id="api">
+            <div class="section-tag">Developer</div>
+            <h2>🔌 Claude API</h2>
+            <p>Tích hợp Claude vào ứng dụng của bạn qua REST API. Cần API key từ <strong>console.anthropic.com</strong>.
+            </p>
+
+            <h3>📞 Gọi API cơ bản</h3>
+
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div>
+                        <div class="code-dots">
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                        </div>
+                    </div>
+                    <span class="code-lang">JavaScript / fetch</span>
+                    <button class="copy-btn" onclick="copyCode(this,'code-basic')">Copy</button>
+                </div>
+                <pre id="code-basic"><span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">"https://api.anthropic.com/v1/messages"</span>, {
+  method: <span class="str">"POST"</span>,
+  headers: {
+    <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span>,
+    <span class="str">"x-api-key"</span>: process.env.<span class="prop">ANTHROPIC_API_KEY</span>,
+    <span class="str">"anthropic-version"</span>: <span class="str">"2023-06-01"</span>
+  },
+  body: <span class="fn">JSON.stringify</span>({
+    model: <span class="str">"claude-sonnet-4-20250514"</span>,
+    max_tokens: <span class="num">1024</span>,
+    system: <span class="str">"Bạn là Java architect. Trả lời bằng tiếng Việt."</span>,
+    messages: [
+      { role: <span class="str">"user"</span>, content: <span class="str">"Giải thích CQRS pattern"</span> }
+    ]
+  })
+});
+
+<span class="kw">const</span> data = <span class="kw">await</span> response.<span class="fn">json</span>();
+console.<span class="fn">log</span>(data.content[<span class="num">0</span>].text);</pre>
+            </div>
+
+            <h3>☕ Java / Spring Boot Integration</h3>
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div>
+                        <div class="code-dots">
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                        </div>
+                    </div>
+                    <span class="code-lang">Java — Spring Boot</span>
+                    <button class="copy-btn" onclick="copyCode(this,'code-java')">Copy</button>
+                </div>
+                <pre id="code-java"><span class="cmt">// pom.xml: com.anthropic:sdk-java:1.x</span>
+<span class="kw">@Service</span>
+<span class="kw">public class</span> <span class="cls">ClaudeService</span> {
+
+    <span class="kw">private final</span> <span class="cls">AnthropicClient</span> client;
+
+    <span class="kw">public</span> <span class="cls">ClaudeService</span>(<span class="kw">@Value</span>(<span class="str">"${anthropic.api.key}"</span>) <span class="cls">String</span> apiKey) {
+        <span class="kw">this</span>.client = <span class="cls">AnthropicClient</span>.<span class="fn">builder</span>()
+            .<span class="fn">apiKey</span>(apiKey)
+            .<span class="fn">build</span>();
+    }
+
+    <span class="kw">public</span> <span class="cls">String</span> <span class="fn">ask</span>(<span class="cls">String</span> question) {
+        <span class="kw">var</span> message = <span class="cls">MessageCreateParams</span>.<span class="fn">builder</span>()
+            .<span class="fn">model</span>(<span class="cls">Model</span>.CLAUDE_SONNET_4_6)
+            .<span class="fn">maxTokens</span>(<span class="num">1024</span>)
+            .<span class="fn">addUserMessage</span>(question)
+            .<span class="fn">build</span>();
+
+        <span class="kw">return</span> client.messages().<span class="fn">create</span>(message)
+            .<span class="fn">content</span>().get(<span class="num">0</span>)
+            .<span class="fn">text</span>().<span class="fn">get</span>().<span class="fn">text</span>();
+    }
+}</pre>
+            </div>
+
+            <h3>🔄 Streaming Response</h3>
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div>
+                        <div class="code-dots">
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                        </div>
+                    </div>
+                    <span class="code-lang">Python — streaming</span>
+                    <button class="copy-btn" onclick="copyCode(this,'code-stream')">Copy</button>
+                </div>
+                <pre id="code-stream"><span class="kw">import</span> anthropic
+
+client = anthropic.<span class="cls">Anthropic</span>()
+
+<span class="cmt"># Stream response từng token</span>
+<span class="kw">with</span> client.messages.<span class="fn">stream</span>(
+    model=<span class="str">"claude-sonnet-4-20250514"</span>,
+    max_tokens=<span class="num">1024</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"Viết hàm quicksort Python"</span>}]
+) <span class="kw">as</span> stream:
+    <span class="kw">for</span> text <span class="kw">in</span> stream.<span class="fn">text_stream</span>():
+        print(text, end=<span class="str">""</span>, flush=<span class="kw">True</span>)
+
+<span class="cmt"># Lấy toàn bộ message khi stream xong</span>
+message = stream.<span class="fn">get_final_message</span>()
+print(<span class="str">f"\nTotal tokens: {message.usage.input_tokens + message.usage.output_tokens}"</span>)</pre>
+            </div>
+
+            <!-- API demo interactive -->
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — API parameters giải thích</div>
+                    <span class="demo-tag">reference</span>
+                </div>
+                <div style="padding:16px 18px 18px">
+                    <div class="tbl-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Mô tả</th>
+                                    <th>Ví dụ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code style="font-family:var(--font-mono);color:var(--accent-lt)">model</code>
+                                    </td>
+                                    <td>string</td>
+                                    <td>ID model Claude sẽ dùng</td>
+                                    <td><code
+                                            style="font-family:var(--font-mono);color:var(--green);font-size:12px">"claude-sonnet-4-20250514"</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code
+                                            style="font-family:var(--font-mono);color:var(--accent-lt)">max_tokens</code>
+                                    </td>
+                                    <td>integer</td>
+                                    <td>Số token tối đa trong response</td>
+                                    <td><code style="font-family:var(--font-mono);color:var(--amber)">1024</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code style="font-family:var(--font-mono);color:var(--accent-lt)">system</code>
+                                    </td>
+                                    <td>string</td>
+                                    <td>System prompt — hướng dẫn vai trò, ngữ cảnh</td>
+                                    <td><code
+                                            style="font-family:var(--font-mono);color:var(--green);font-size:12px">"Bạn là Java expert..."</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code
+                                            style="font-family:var(--font-mono);color:var(--accent-lt)">messages</code>
+                                    </td>
+                                    <td>array</td>
+                                    <td>Lịch sử hội thoại (user/assistant turns)</td>
+                                    <td><code
+                                            style="font-family:var(--font-mono);color:var(--green);font-size:12px">[{role:"user", content:"..."}]</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code
+                                            style="font-family:var(--font-mono);color:var(--accent-lt)">temperature</code>
+                                    </td>
+                                    <td>0.0–1.0</td>
+                                    <td>0 = xác định, 1 = sáng tạo hơn</td>
+                                    <td><code style="font-family:var(--font-mono);color:var(--amber)">0.7</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code style="font-family:var(--font-mono);color:var(--accent-lt)">stream</code>
+                                    </td>
+                                    <td>boolean</td>
+                                    <td>Trả về response từng chunk (SSE)</td>
+                                    <td><code style="font-family:var(--font-mono);color:var(--amber)">true</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code
+                                            style="font-family:var(--font-mono);color:var(--accent-lt)">stop_sequences</code>
+                                    </td>
+                                    <td>array</td>
+                                    <td>Claude dừng khi gặp chuỗi này</td>
+                                    <td><code
+                                            style="font-family:var(--font-mono);color:var(--green);font-size:12px">["</code><code
+                                            style="font-family:var(--font-mono);color:var(--green);font-size:12px">END"]</code>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── MCP ──────────────────────────── -->
+        <div class="section" id="mcp">
+            <div class="section-tag">Developer</div>
+            <h2>🔗 MCP Servers — Kết nối công cụ ngoài</h2>
+            <p>Model Context Protocol (MCP) cho phép Claude kết nối với databases, APIs, file systems và services bên
+                ngoài.</p>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">📅</div>
+                    <div class="card-title">Google Calendar</div>
+                    <div class="card-desc">Tạo, đọc, cập nhật sự kiện. "Đặt meeting với team vào thứ Hai 9h"</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">📧</div>
+                    <div class="card-title">Gmail</div>
+                    <div class="card-desc">Đọc, tìm kiếm, soạn và gửi email. "Tóm tắt email chưa đọc hôm nay"</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">💾</div>
+                    <div class="card-title">Database (PostgreSQL, MySQL)</div>
+                    <div class="card-desc">Query trực tiếp DB. "Đếm order tháng này theo status" — Claude tự viết và
+                        chạy SQL.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🔧</div>
+                    <div class="card-title">Jira / Asana</div>
+                    <div class="card-desc">Tạo ticket, update sprint, đọc backlog. "Tạo bug ticket cho lỗi vừa tìm được"
+                    </div>
+                </div>
+            </div>
+
+            <h3>⚙️ Cấu hình MCP trong API call</h3>
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div>
+                        <div class="code-dots">
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                        </div>
+                    </div>
+                    <span class="code-lang">JavaScript — MCP</span>
+                    <button class="copy-btn" onclick="copyCode(this,'code-mcp')">Copy</button>
+                </div>
+                <pre id="code-mcp"><span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">"https://api.anthropic.com/v1/messages"</span>, {
+  body: <span class="fn">JSON.stringify</span>({
+    model: <span class="str">"claude-sonnet-4-20250514"</span>,
+    max_tokens: <span class="num">1000</span>,
+    messages: [{
+      role: <span class="str">"user"</span>,
+      content: <span class="str">"Tạo task trong Asana: Review PR declaration-service"</span>
+    }],
+    <span class="cmt">// Khai báo MCP servers Claude có thể dùng</span>
+    mcp_servers: [{
+      type: <span class="str">"url"</span>,
+      url: <span class="str">"https://mcp.asana.com/sse"</span>,
+      name: <span class="str">"asana-mcp"</span>
+    }]
+  })
+});</pre>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── CLAUDE CODE ──────────────────────────── -->
+        <div class="section" id="claude-code">
+            <div class="section-tag">Developer</div>
+            <h2>💻 Claude Code CLI</h2>
+            <p>Claude Code là command-line tool cho agentic coding — Claude tự viết file, chạy terminal commands và
+                debug trong môi trường của bạn.</p>
+
+            <h3>📦 Cài đặt</h3>
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div>
+                        <div class="code-dots">
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                        </div>
+                    </div>
+                    <span class="code-lang">Terminal</span>
+                    <button class="copy-btn" onclick="copyCode(this,'code-install')">Copy</button>
+                </div>
+                <pre id="code-install"><span class="cmt"># Cài Claude Code (yêu cầu Node.js 18+)</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="cmt"># Đăng nhập với API key</span>
+claude login
+
+<span class="cmt"># Hoặc set API key qua env</span>
+<span class="kw">export</span> ANTHROPIC_API_KEY=<span class="str">"sk-ant-..."</span></pre>
+            </div>
+
+            <h3>⚡ Các lệnh Claude Code thường dùng</h3>
+            <div class="cmd-grid">
+                <div class="cmd-card">
+                    <div class="cmd-name"><span style="color:var(--green)">$</span> claude</div>
+                    <div class="cmd-desc">Mở interactive REPL session trong terminal</div>
+                    <div class="cmd-example">→ <span>claude</span></div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-name"><span style="color:var(--green)">$</span> claude "..."</div>
+                    <div class="cmd-desc">Chạy một lệnh Claude và thoát (non-interactive)</div>
+                    <div class="cmd-example">→ <span>claude "Giải thích file này"</span></div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-name"><span style="color:var(--green)">$</span> claude -p "..."</div>
+                    <div class="cmd-desc">Print mode — chỉ in output, không giữ session</div>
+                    <div class="cmd-example">→ <span>claude -p "Tóm tắt README.md"</span></div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-name"><span style="color:var(--green)">$</span> claude --model</div>
+                    <div class="cmd-desc">Chỉ định model cụ thể cho session</div>
+                    <div class="cmd-example">→ <span>claude --model claude-opus-4-6</span></div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-name"><span style="color:var(--green)">$</span> claude --resume</div>
+                    <div class="cmd-desc">Tiếp tục conversation cuối cùng đã dừng</div>
+                    <div class="cmd-example">→ <span>claude --resume</span></div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-name"><span style="color:var(--green)">$</span> claude
+                        --dangerously-skip-permissions</div>
+                    <div class="cmd-desc">Bỏ qua confirmation prompt (dùng cẩn thận!)</div>
+                    <div class="cmd-example">→ Dùng trong CI/CD pipeline</div>
+                </div>
+            </div>
+
+            <h3>🛠️ Lệnh trong REPL session</h3>
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div>
+                        <div class="code-dots">
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                            <div class="code-dot"></div>
+                        </div>
+                    </div>
+                    <span class="code-lang">Claude Code REPL</span>
+                </div>
+                <pre><span class="cmt"># Trong REPL, các lệnh đặc biệt:</span>
+/help          <span class="cmt"># Hiển thị tất cả lệnh</span>
+/clear         <span class="cmt"># Xóa conversation context</span>
+/compact       <span class="cmt"># Tóm tắt conversation để tiết kiệm token</span>
+/cost          <span class="cmt"># Xem lượng token và chi phí đã dùng</span>
+/model         <span class="cmt"># Đổi model trong session</span>
+/exit          <span class="cmt"># Thoát REPL</span>
+
+<span class="cmt"># Ví dụ workflow thực tế:</span>
+<span class="str">> Đọc file OrderService.java và tìm tất cả nơi có N+1 query</span>
+<span class="str">> Fix tất cả N+1 query vừa tìm được, dùng JOIN FETCH</span>
+<span class="str">> Viết unit test cho các method vừa sửa</span>
+<span class="str">> Chạy mvn test và fix nếu có fail</span></pre>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── USE CASES ──────────────────────────── -->
+        <div class="section" id="usecases">
+            <div class="section-tag">Ứng dụng</div>
+            <h2>💡 Use Cases thực tế theo ngành</h2>
+
+            <h3>👨‍💻 Backend Developer (Java/Spring Boot)</h3>
+            <div class="chat-history">
+                <div class="chat-bubble user">
+                    <div class="cb-avatar user">👤</div>
+                    <div class="cb-body">
+                        <div class="cb-who">Bạn</div>
+                        <div class="cb-msg">Tôi có lỗi này khi chạy JPA
+                            query:<br><code>org.hibernate.exception.SQLGrammarException: could not extract ResultSet</code><br><br>Query:<br><code>@Query("SELECT o FROM Order o WHERE o.status IN :statuses") List&lt;Order&gt; findByStatuses(@Param("statuses") List&lt;OrderStatus&gt; statuses);</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-bubble">
+                    <div class="cb-avatar ai">✦</div>
+                    <div class="cb-body">
+                        <div class="cb-who ai">Claude</div>
+                        <div class="cb-msg">Đây là lỗi phổ biến với Hibernate 5 khi dùng <code>IN</code> clause với
+                            Collection. Có 2 cách fix:<br><br>
+                            <strong>Cách 1 — Dùng @Param với Collection thẳng (recommended):</strong>
+                            <pre>@Query("SELECT o FROM Order o WHERE o.status IN (:statuses)")
+List&lt;Order&gt; findByStatuses(@Param("statuses") Collection&lt;OrderStatus&gt; statuses);</pre>
+                            <strong>Cách 2 — Nếu vẫn lỗi, convert sang String trước:</strong>
+                            <pre>List&lt;String&gt; statusNames = statuses.stream()
+    .map(Enum::name).collect(toList());
+// Rồi query với String thay vì Enum</pre>
+                            Root cause: Hibernate 5 đôi khi không bind đúng khi parameter là
+                            <code>List&lt;Enum&gt;</code>. Upgrade lên Hibernate 6+ (Spring Boot 3.x) tự fix được vấn đề
+                            này.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>📊 Data Analyst</h3>
+            <div class="chat-history">
+                <div class="chat-bubble user">
+                    <div class="cb-avatar user">👤</div>
+                    <div class="cb-body">
+                        <div class="cb-who">Bạn</div>
+                        <div class="cb-msg">Tôi có CSV với 3 cột: date, product_id, revenue. Viết Python script tính
+                            monthly revenue per product và plot bar chart.</div>
+                    </div>
+                </div>
+                <div class="chat-bubble">
+                    <div class="cb-avatar ai">✦</div>
+                    <div class="cb-body">
+                        <div class="cb-who ai">Claude</div>
+                        <div class="cb-msg">Đây là script hoàn chỉnh:<br>
+                            <pre>import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('data.csv', parse_dates=['date'])
+df['month'] = df['date'].dt.to_period('M')
+
+monthly = df.groupby(['month', 'product_id'])['revenue'].sum().reset_index()
+pivot = monthly.pivot(index='month', columns='product_id', values='revenue')
+
+pivot.plot(kind='bar', figsize=(12, 6))
+plt.title('Monthly Revenue by Product')
+plt.xlabel('Month')
+plt.ylabel('Revenue (VND)')
+plt.legend(title='Product ID')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig('revenue_chart.png', dpi=150)
+plt.show()</pre>
+                            Chạy: <code>pip install pandas matplotlib</code> rồi <code>python script.py</code>. Muốn tôi
+                            thêm filter theo date range hoặc export Excel không?
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── LIMITS ──────────────────────────── -->
+        <div class="section" id="limits">
+            <div class="section-tag">Quan trọng</div>
+            <h2>⚠️ Giới hạn cần biết</h2>
+
+            <div class="callout err">
+                <div class="callout-label">❌ Hallucination</div>
+                Claude đôi khi tự tin đưa ra thông tin sai — đặc biệt với số liệu cụ thể, ngày tháng, tên riêng, hoặc
+                tài liệu ít phổ biến. Luôn xác minh thông tin quan trọng từ nguồn gốc. Với code, chạy test trước khi
+                deploy.
+            </div>
+
+            <div class="callout warn">
+                <div class="callout-label">⚠️ Knowledge cutoff</div>
+                Kiến thức đến khoảng tháng 8/2025. Bật Web Search cho thông tin mới hơn. Paste trực tiếp release
+                notes/docs vào chat nếu cần tra cứu version mới.
+            </div>
+
+            <div class="callout warn">
+                <div class="callout-label">⚠️ Context window giới hạn</div>
+                Dù context window 200K token rất lớn, conversation quá dài làm chậm và đắt hơn. Conversation dài →
+                Claude "quên" nội dung đầu. Dùng <code>/compact</code> (Claude Code) hoặc tạo conversation mới khi
+                context quá dài.
+            </div>
+
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Giới hạn</th>
+                            <th>Free</th>
+                            <th>Pro</th>
+                            <th>API</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tin nhắn / ngày</td>
+                            <td>Thấp</td>
+                            <td>Cao hơn đáng kể</td>
+                            <td>Rate limit theo tier</td>
+                        </tr>
+                        <tr>
+                            <td>Model access</td>
+                            <td>Sonnet</td>
+                            <td>Opus + Sonnet + Haiku</td>
+                            <td>Tất cả</td>
+                        </tr>
+                        <tr>
+                            <td>Projects</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>N/A</td>
+                        </tr>
+                        <tr>
+                            <td>Memory</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>Manual (messages array)</td>
+                        </tr>
+                        <tr>
+                            <td>File upload</td>
+                            <td>✅ giới hạn</td>
+                            <td>✅ nhiều hơn</td>
+                            <td>Base64 trong body</td>
+                        </tr>
+                        <tr>
+                            <td>Context window</td>
+                            <td>200K</td>
+                            <td>200K</td>
+                            <td>200K (all models)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ──────────────────────────── PRO TIPS ──────────────────────────── -->
+        <div class="section" id="tips">
+            <div class="section-tag">Pro tips</div>
+            <h2>⭐ Mẹo nâng cao từ người dùng kinh nghiệm</h2>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">🔄</div>
+                    <div class="card-title">Iterate aggressively</div>
+                    <div class="card-desc">Đừng chấp nhận output đầu tiên nếu chưa ổn. "Viết lại nhưng dùng builder
+                        pattern", "Tối ưu hơn", "Ngắn hơn một nửa" — Claude không bao giờ mệt.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">📌</div>
+                    <div class="card-title">Anchor bằng ví dụ cụ thể</div>
+                    <div class="card-desc">Thay vì mô tả, show example: "Tôi muốn output trông như thế này: [ví dụ cụ
+                        thể]". Cực kỳ hiệu quả cho format và style nhất định.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🧩</div>
+                    <div class="card-title">Break down bài toán lớn</div>
+                    <div class="card-desc">Thay vì "Xây hệ thống payment", hỏi theo từng bước: schema → service layer →
+                        API → test → deployment. Mỗi bước hoàn chỉnh trước khi tiếp.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🪞</div>
+                    <div class="card-title">Dùng Claude review Claude</div>
+                    <div class="card-desc">"Review đoạn code này tôi vừa nhận được từ AI, tìm lỗi và cải thiện". Claude
+                        tốt trong việc phê bình — kể cả output của chính mình.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🎯</div>
+                    <div class="card-title">Explicit về constraints</div>
+                    <div class="card-desc">"Không thêm dependency mới", "Giữ backward compatible", "Chỉ Java stdlib",
+                        "Không thay đổi interface". Claude tôn trọng constraints khi bạn nói rõ.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">📚</div>
+                    <div class="card-title">Paste docs trực tiếp</div>
+                    <div class="card-desc">Nếu dùng thư viện mới hoặc internal API: copy paste spec/docs vào chat trước.
+                        "Đây là API spec của service X: [...] Viết client cho nó bằng Java".</div>
+                </div>
+            </div>
+
+            <div class="callout good" style="margin-top:24px">
+                <div class="callout-label">✅ Quy tắc vàng</div>
+                <strong>Treat Claude như junior developer thông minh vừa onboard</strong> — cung cấp đủ context, nói rõ
+                kỳ vọng, review output của họ, feedback cụ thể khi chưa đúng. Chất lượng collaboration tỉ lệ thuận với
+                chất lượng communication của bạn.
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════
+   JAVASCRIPT
+═══════════════════════════════════════════════ -->
+    <script>
+        /* ── NAV ── */
+        function toggleNav() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('overlay');
+            sb.classList.toggle('open');
+            ov.classList.toggle('visible');
+        }
+
+        function setActive(el) {
+            document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+            el.classList.add('active');
+            if (window.innerWidth <= 900) toggleNav();
+        }
+
+        /* ── PROGRESS ── */
+        window.addEventListener('scroll', () => {
+            const main = document.getElementById('main-content');
+            const rect = main.getBoundingClientRect();
+            const total = main.scrollHeight - window.innerHeight;
+            const pct = Math.max(0, Math.min(100, Math.round(-rect.top / total * 100)));
+            document.getElementById('pct').textContent = pct + '%';
+            document.getElementById('pfill').style.width = pct + '%';
+        });
+
+        /* ── COPY CODE ── */
+        function copyCode(btn, id) {
+            const el = document.getElementById(id);
+            const text = el.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            });
+        }
+
+        /* ── SCROLL ACTIVE ── */
+        const sections = document.querySelectorAll('[id]');
+        const links = document.querySelectorAll('.sb-link');
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => {
+                        l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id);
+                    });
+                }
+            });
+        }, { rootMargin: '-20% 0px -70% 0px' });
+        sections.forEach(s => obs.observe(s));
+
+        /* ═══════════════════════════════════════════════
+           DEMO DATA
+        ═══════════════════════════════════════════════ */
+
+        /* ── CHAT SCENARIOS ── */
+        const chatScenarios = {
+            chat1: [
+                { role: 'user', msg: 'Tôi đang dùng Spring Data JPA với Hibernate 5. Có lỗi LazyInitializationException khi access collection ngoài @Transactional. Fix thế nào?' },
+                { role: 'ai', msg: 'Có 3 cách fix phổ biến:<br><br><strong>1. Dùng @Transactional trên method gọi (recommended):</strong><br><code>@Transactional(readOnly = true)</code> — đảm bảo session còn sống khi access lazy collection.<br><br><strong>2. Dùng JOIN FETCH trong query:</strong><br><code>@Query("SELECT u FROM User u JOIN FETCH u.orders WHERE u.id = :id")</code><br><br><strong>3. Dùng EntityGraph:</strong><br><code>@EntityGraph(attributePaths = {"orders"})</code> trên repository method.<br><br>Cách 2 và 3 tốt hơn vì tránh N+1 query. Cách 1 tiện nhưng dễ gây performance issue nếu không cẩn thận.' },
+                { role: 'user', msg: 'Tôi muốn dùng EntityGraph. Viết ví dụ cụ thể cho entity User có collection orders?' },
+                { role: 'ai', msg: '<pre>// Entity\n@Entity\npublic class User {\n    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")\n    private List&lt;Order&gt; orders;\n}\n\n// Repository\npublic interface UserRepository extends JpaRepository&lt;User, Long&gt; {\n    @EntityGraph(attributePaths = {"orders"})\n    Optional&lt;User&gt; findWithOrdersById(Long id);\n}\n\n// Service\n@Service\npublic class UserService {\n    public UserDTO getUserWithOrders(Long id) {\n        User user = userRepo.findWithOrdersById(id)\n            .orElseThrow(() -&gt; new NotFoundException(id));\n        return mapper.toDTO(user); // orders đã được load\n    }\n}</pre>EntityGraph sẽ tự OUTER JOIN fetch orders — không cần @Transactional và tránh LazyInit.' }
+            ],
+            chat2: [
+                { role: 'user', msg: 'Tôi có DataFrame pandas với cột sales và region. Tính tổng sales theo region và tìm top 3 region doanh thu cao nhất.' },
+                { role: 'ai', msg: '<pre>import pandas as pd\n\n# Group by region, tính tổng\nregion_sales = df.groupby("region")["sales"].sum()\n\n# Top 3\ntop3 = region_sales.nlargest(3)\nprint(top3)\n\n# Kết quả dạng DataFrame đẹp hơn\nresult = (\n    df.groupby("region")["sales"]\n    .agg(["sum", "mean", "count"])\n    .rename(columns={"sum":"total", "mean":"avg", "count":"orders"})\n    .sort_values("total", ascending=False)\n    .head(3)\n)\nprint(result)</pre>Output sẽ gồm: tổng doanh thu, trung bình và số đơn hàng mỗi region trong top 3.' },
+            ],
+            chat3: [
+                { role: 'user', msg: 'Viết email gửi khách hàng thông báo bảo trì hệ thống vào tối thứ Sáu 23:00 - 02:00, tone professional.' },
+                { role: 'ai', msg: '<strong>Subject:</strong> Thông báo bảo trì hệ thống — Thứ Sáu 23:00 (31/01)<br><br>Kính gửi Quý khách hàng,<br><br>Chúng tôi xin thông báo hệ thống sẽ tạm ngừng hoạt động để thực hiện bảo trì định kỳ theo lịch sau:<br><br>📅 <strong>Thời gian:</strong> Thứ Sáu, 31/01/2026 từ 23:00 đến 02:00 (Thứ Bảy, 01/02)<br>⏱️ <strong>Thời lượng dự kiến:</strong> 3 giờ<br><br>Trong thời gian này, toàn bộ dịch vụ sẽ không khả dụng. Chúng tôi khuyến nghị quý khách hoàn thành các giao dịch quan trọng trước 22:30.<br><br>Xin lỗi vì sự bất tiện này. Nếu có bất kỳ thắc mắc, vui lòng liên hệ <strong>support@company.com</strong>.<br><br>Trân trọng,<br>Team IT' },
+            ],
+            chat4: [
+                { role: 'user', msg: 'NullPointerException tại dòng: <code>String name = user.getProfile().getDisplayName();</code>. Trace: user không null nhưng getProfile() trả về null.' },
+                { role: 'ai', msg: 'Lỗi do <code>user.getProfile()</code> trả về <code>null</code> trước khi gọi <code>getDisplayName()</code>.<br><br><strong>Fix nhanh nhất — Optional chain:</strong><br><code>String name = Optional.ofNullable(user.getProfile())<br>&nbsp;&nbsp;.map(Profile::getDisplayName)<br>&nbsp;&nbsp;.orElse("Unknown User");</code><br><br><strong>Fix đúng hơn — đảm bảo Profile không bao giờ null:</strong><br>Trong constructor hoặc factory method của User:<br><code>this.profile = new Profile(); // default empty profile</code><br><br>Xem lại nơi tạo User object — nếu profile là optional (user chưa setup), nên dùng Optional. Nếu profile bắt buộc phải có, nên đảm bảo không bao giờ null ngay từ khi khởi tạo.' }
+            ]
+        };
+
+        let currentScenario = 'chat1';
+
+        function selectScenario(el, key) {
+            document.querySelectorAll('.prompt-chip').forEach(c => {
+                if (c.closest('#chat-basics')) c.classList.remove('selected');
+            });
+            el.classList.add('selected');
+            currentScenario = key;
+            document.getElementById('chat-demo-output').style.display = 'none';
+        }
+
+        function showChat() {
+            const out = document.getElementById('chat-demo-output');
+            const data = chatScenarios[currentScenario];
+            out.style.display = 'block';
+            let html = '<div class="chat-history">';
+            data.forEach(b => {
+                html += `<div class="chat-bubble ${b.role}">
+      <div class="cb-avatar ${b.role}">${b.role === 'user' ? '👤' : '✦'}</div>
+      <div class="cb-body">
+        <div class="cb-who ${b.role}">${b.role === 'user' ? 'Bạn' : 'Claude Sonnet 4.6'}</div>
+        <div class="cb-msg">${b.msg}</div>
+      </div>
+    </div>`;
+            });
+            html += '</div>';
+            out.innerHTML = html;
+        }
+
+        /* ── PROMPT COMPARE ── */
+        const promptTypes = {
+            code: {
+                bad: '❌ Viết code Java',
+                good: '✅ Bạn là senior Java developer. Viết Spring Boot REST endpoint POST /api/v1/payments nhận body JSON {amount: Long, currency: String, recipientId: Long}. Cần: validation (@Valid), custom exception handling, trả về ResponseEntity với status 201, dùng Java 21 records cho DTO.',
+                response: 'Claude sẽ viết đầy đủ: DTO record, Controller với @PostMapping, @Valid, service call, custom exception class, và ResponseEntity với HttpStatus.CREATED. Code clean, production-ready.'
+            },
+            write: {
+                bad: '❌ Viết bài blog về Kafka',
+                good: '✅ Viết bài blog technical (700-900 từ) về Kafka consumer groups cho backend developer Java mới học. Tone: thân thiện, dùng analogy thực tế, có code example Spring Kafka. Cấu trúc: intro → vấn đề khi không có consumer group → giải pháp → code → khi nào nên dùng multiple groups.',
+                response: 'Claude tạo bài viết đúng độ dài, có structure rõ ràng, analogy dễ hiểu (ví dụ: queue tại nhà hàng), code snippet Spring Kafka thực tế, và section cuối về best practices.'
+            },
+            debug: {
+                bad: '❌ Code lỗi fix giúp tôi',
+                good: '✅ Spring Boot app của tôi throw `ObjectOptimisticLockingFailureException` khi 2 user cùng update cùng order. Stack: Spring Boot 3.4, Hibernate 6, PostgreSQL. Entity dùng `@Version`. Tôi cần: (1) giải thích tại sao lỗi này, (2) cách handle với @Retryable, (3) khi nào nên dùng pessimistic lock thay thế.',
+                response: 'Claude giải thích optimistic locking concept, cung cấp code @Retryable với @Recover, so sánh khi nào dùng pessimistic lock (high contention), và suggest UI-level conflict resolution pattern.'
+            },
+            analyze: {
+                bad: '❌ Phân tích dữ liệu này',
+                good: '✅ Đây là data sale Q4 2025 của 5 region (paste CSV). Tôi cần: (1) region nào tăng trưởng nhất so với Q3, (2) outlier nào đáng chú ý, (3) Python code để visualize trend bằng matplotlib. Output: bullet points + code. Không cần mô tả dữ liệu đầu vào.',
+                response: 'Claude phân tích theo đúng 3 điểm yêu cầu, không thêm thông tin thừa, cung cấp code matplotlib hoàn chỉnh với proper styling.'
+            }
+        };
+
+        let currentPromptType = 'code';
+
+        function selectPromptType(el, key) {
+            el.closest('.demo-box').querySelectorAll('.prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            currentPromptType = key;
+            renderPromptCompare(key);
+        }
+
+        function renderPromptCompare(key) {
+            const d = promptTypes[key];
+            document.getElementById('prompt-compare-output').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:rgba(240,107,107,.07);border:1px solid rgba(240,107,107,.25);border-radius:8px;padding:14px">
+        <div style="font-size:11px;color:var(--red);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Prompt tệ</div>
+        <div style="font-size:13px;color:#bbbdd6">${d.bad}</div>
+      </div>
+      <div style="background:rgba(62,207,142,.07);border:1px solid rgba(62,207,142,.25);border-radius:8px;padding:14px">
+        <div style="font-size:11px;color:var(--green);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Prompt tốt</div>
+        <div style="font-size:13px;color:#bbbdd6">${d.good}</div>
+      </div>
+    </div>
+    <div style="background:rgba(124,106,248,.07);border:1px solid rgba(124,106,248,.2);border-radius:8px;padding:14px">
+      <div style="font-size:11px;color:var(--accent-lt);font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px">🎯 Kết quả với prompt tốt</div>
+      <div style="font-size:13px;color:#bbbdd6">${d.response}</div>
+    </div>`;
+        }
+        renderPromptCompare('code');
+
+        /* ── LIVE PROMPT DEMO ── */
+        const promptResponses = {
+            'spring @transactional': `<strong>@Transactional trong Spring</strong> là annotation quản lý transaction tự động — Spring wrap method của bạn trong try/begin→commit/rollback.<br><br>
+<div class="r-code">@Service
+public class OrderService {
+    @Transactional  // Spring tự BEGIN → COMMIT hoặc ROLLBACK
+    public void placeOrder(OrderRequest req) {
+        Order order = orderRepo.save(new Order(req));
+        paymentService.charge(order); // Nếu throw exception → rollback cả order
+        inventoryService.deduct(req.items()); // Cùng 1 transaction
+    }
+
+    @Transactional(readOnly = true)  // Optimize cho query-only
+    public List&lt;Order&gt; findByUser(Long userId) {
+        return orderRepo.findByUserId(userId);
+    }
+}</div>
+<strong>Lưu ý quan trọng:</strong> Chỉ hoạt động khi gọi từ bean khác (không self-invocation). Default rollback chỉ trên <code>RuntimeException</code> — thêm <code>rollbackFor = Exception.class</code> nếu muốn rollback cả checked exception.`,
+
+            'palindrome': `<div class="r-code">// Java 21 — Kiểm tra Palindrome
+public class PalindromeChecker {
+    
+    public static boolean isPalindrome(String s) {
+        if (s == null) return false;
+        String cleaned = s.toLowerCase().replaceAll("[^a-z0-9]", "");
+        int left = 0, right = cleaned.length() - 1;
+        while (left &lt; right) {
+            if (cleaned.charAt(left++) != cleaned.charAt(right--)) return false;
+        }
+        return true;
+    }
+}</div>
+<div class="r-code">// JUnit 5 Unit Tests
+@ExtendWith(MockitoExtension.class)
+class PalindromeCheckerTest {
+    
+    @ParameterizedTest
+    @ValueSource(strings = {"racecar", "A man a plan a canal Panama", "12321"})
+    void shouldReturnTrueForPalindromes(String input) {
+        assertTrue(PalindromeChecker.isPalindrome(input));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"hello", "Java", "OpenAI"})
+    void shouldReturnFalseForNonPalindromes(String input) {
+        assertFalse(PalindromeChecker.isPalindrome(input));
+    }
+
+    @Test
+    void shouldHandleNullInput() {
+        assertFalse(PalindromeChecker.isPalindrome(null));
+    }
+}</div>
+Hàm dùng two-pointer O(n) thay vì reverse string O(n) extra space. Test cover palindrome thật, không phải palindrome, và edge case null.`,
+
+            'hashmap': `<strong>HashMap vs ConcurrentHashMap</strong><br><br>
+<strong>HashMap:</strong> Không thread-safe, fast, single-threaded.<br>
+<strong>ConcurrentHashMap:</strong> Thread-safe, dùng segment locking (Java 8+: CAS operations).<br><br>
+<div class="r-code">// ❌ Race condition với HashMap trong multi-thread
+Map&lt;String, Integer&gt; map = new HashMap&lt;&gt;();
+// 2 threads cùng put → có thể mất data, infinite loop khi resize
+
+// ✅ An toàn với ConcurrentHashMap
+Map&lt;String, Integer&gt; map = new ConcurrentHashMap&lt;&gt;();
+map.put("key", 1);  // thread-safe
+map.computeIfAbsent("key", k -&gt; fetchFromDB(k));  // atomic</div>
+<strong>Khi nào dùng gì:</strong><br>
+• <code>HashMap</code>: Single thread hoặc trong @Transactional method (Hibernate session là single-thread)<br>
+• <code>ConcurrentHashMap</code>: Cache shared, counters, session stores trong web app<br>
+• <code>Collections.synchronizedMap()</code>: Tránh — lock toàn bộ map, chậm hơn ConcurrentHashMap nhiều.`,
+
+            'sql review': `Với query <code>SELECT * FROM orders WHERE status = ?</code>, đây là các vấn đề và cách tối ưu:<br><br>
+<div class="r-code">-- ❌ Query gốc: SELECT * fetch all columns, có thể full table scan
+SELECT * FROM orders WHERE status = ?
+
+-- ✅ Query tối ưu
+SELECT id, user_id, amount, created_at, updated_at  -- chỉ column cần thiết
+FROM orders 
+WHERE status = ?
+  AND created_at &gt;= NOW() - INTERVAL '30 days'  -- giới hạn range nếu phù hợp
+ORDER BY created_at DESC
+LIMIT 100;  -- luôn có LIMIT
+
+-- Index cần thiết:
+CREATE INDEX idx_orders_status_created 
+ON orders(status, created_at DESC);  -- composite index cho cả WHERE và ORDER BY</div>
+<strong>Vấn đề phát hiện:</strong> (1) SELECT * tốn bandwidth, ORM phải map nhiều column thừa. (2) Không có LIMIT có thể trả về triệu rows. (3) Thiếu index trên status → full table scan. Thêm <code>EXPLAIN ANALYZE</code> để verify query plan.`
+        };
+
+        function fillPrompt(el, text) {
+            document.getElementById('prompt-input').value = text;
+            el.closest('.demo-box').querySelectorAll('.prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function runPromptDemo() {
+            const input = document.getElementById('prompt-input').value.trim();
+            if (!input) return;
+
+            const btn = document.getElementById('run-prompt-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Đang xử lý...';
+
+            const resp = document.getElementById('prompt-response');
+            const body = document.getElementById('prompt-response-body');
+
+            resp.classList.add('visible');
+            body.innerHTML = '<span class="cursor"></span>';
+
+            // Find matching response
+            let responseText = null;
+            const lowerInput = input.toLowerCase();
+            for (const [key, val] of Object.entries(promptResponses)) {
+                if (lowerInput.includes(key.split(' ')[0]) || key.split(' ').some(w => lowerInput.includes(w))) {
+                    responseText = val;
+                    break;
+                }
+            }
+
+            if (!responseText) {
+                responseText = `Đây là response mẫu cho prompt: <em>"${input}"</em><br><br>
+Trong thực tế, Claude sẽ phân tích yêu cầu và trả lời với:<br>
+• Code example cụ thể phù hợp với context bạn cung cấp<br>
+• Giải thích từng bước rõ ràng<br>
+• Edge cases và lưu ý quan trọng<br>
+• Follow-up suggestions để tinh chỉnh thêm<br><br>
+<strong>Tip:</strong> Thêm context về tech stack, version và format output mong muốn để nhận response chính xác hơn.`;
+            }
+
+            setTimeout(() => {
+                typeText(body, responseText, () => {
+                    btn.disabled = false;
+                    btn.textContent = '▶ Xem response mẫu';
+                });
+            }, 600);
+        }
+
+        function typeText(el, html, cb) {
+            el.innerHTML = '';
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            const text = temp.innerHTML;
+
+            let i = 0;
+            const speed = 8;
+            const cursor = '<span class="cursor"></span>';
+
+            const interval = setInterval(() => {
+                i += Math.ceil(text.length / 80);
+                if (i >= text.length) {
+                    i = text.length;
+                    el.innerHTML = text;
+                    clearInterval(interval);
+                    if (cb) cb();
+                } else {
+                    el.innerHTML = text.slice(0, i) + cursor;
+                }
+            }, speed);
+        }
+
+        /* ── SLASH DEMO ── */
+        const slashCommands = [
+            { cmd: '/new', desc: 'Bắt đầu conversation mới' },
+            { cmd: '/clear', desc: 'Xóa lịch sử conversation' },
+            { cmd: '/summarize', desc: 'Tóm tắt conversation hiện tại' },
+            { cmd: '/translate', desc: 'Dịch sang ngôn ngữ khác' },
+            { cmd: '/explain', desc: 'Giải thích code hoặc nội dung' },
+            { cmd: '/fix', desc: 'Tìm và sửa lỗi trong code' },
+            { cmd: '/improve', desc: 'Cải thiện chất lượng code/text' },
+            { cmd: '/test', desc: 'Viết unit tests cho code' },
+            { cmd: '/review', desc: 'Code review toàn diện' },
+            { cmd: '/search', desc: 'Tìm kiếm web theo query' },
+            { cmd: '/shorter', desc: 'Rút gọn response vừa nhận' },
+            { cmd: '/longer', desc: 'Mở rộng chi tiết hơn' },
+            { cmd: '/retry', desc: 'Tạo lại response khác (regenerate)' },
+            { cmd: '/format', desc: 'Định dạng output (json, markdown...)' },
+        ];
+
+        function handleSlash(val) {
+            const dd = document.getElementById('slash-dropdown');
+            if (!val.startsWith('/')) { dd.classList.remove('open'); return; }
+
+            const q = val.toLowerCase();
+            const matches = slashCommands.filter(c => c.cmd.includes(q));
+
+            if (!matches.length) { dd.classList.remove('open'); return; }
+
+            dd.innerHTML = matches.map(c =>
+                `<div class="slash-item" onclick="selectSlashItem('${c.cmd}')">
+      <span class="slash-item-cmd">${c.cmd}</span>
+      <span class="slash-item-desc">${c.desc}</span>
+    </div>`
+            ).join('');
+            dd.classList.add('open');
+        }
+
+        function selectSlashItem(cmd) {
+            document.getElementById('slash-input').value = cmd + ' ';
+            document.getElementById('slash-dropdown').classList.remove('open');
+            document.getElementById('slash-input').focus();
+        }
+
+        /* ── SLASH COMMAND DEMO ── */
+        const slashDemos = {
+            fix: {
+                input: `/fix\n\npublic int divide(int a, int b) {\n    return a / b;\n}`,
+                response: `Phát hiện <strong>1 lỗi nghiêm trọng</strong>: Division by zero khi <code>b = 0</code>.<br><br>
+<div class="r-code">// ✅ Code đã fix
+public int divide(int a, int b) {
+    if (b == 0) {
+        throw new IllegalArgumentException(
+            "Divisor cannot be zero. Received: a=" + a + ", b=" + b
+        );
+    }
+    return a / b;
+}
+
+// Hoặc nếu muốn trả về Optional:
+public OptionalInt safeDivide(int a, int b) {
+    return b == 0 ? OptionalInt.empty() : OptionalInt.of(a / b);
+}</div>
+<strong>Thêm:</strong> Cân nhắc dùng <code>ArithmeticException</code> thay <code>IllegalArgumentException</code> nếu đây là lỗi math thuần túy.`
+            },
+            review: {
+                input: `/review\n\n@GetMapping("/users")\npublic List<User> getAllUsers() {\n    return userRepo.findAll();\n}`,
+                response: `<strong>Code Review — 3 vấn đề tìm được:</strong><br><br>
+🔴 <strong>Performance:</strong> <code>findAll()</code> load toàn bộ bảng vào memory. Với 1M users → OutOfMemoryError.<br>
+🟡 <strong>Security:</strong> Trả về User entity trực tiếp — lộ passwordHash, internalId, v.v.<br>
+🟡 <strong>API Design:</strong> Thiếu pagination — client không control được số lượng data nhận.<br><br>
+<div class="r-code">// ✅ Version cải thiện
+@GetMapping("/users")
+public Page&lt;UserDTO&gt; getAllUsers(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size) {
+    
+    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    return userRepo.findAll(pageable).map(userMapper::toDTO);
+}</div>`
+            },
+            test: {
+                input: `/test\n\npublic boolean isAdult(int age) {\n    return age >= 18;\n}`,
+                response: `<div class="r-code">@ExtendWith(MockitoExtension.class)
+class AgeValidatorTest {
+
+    private final AgeValidator validator = new AgeValidator();
+
+    // Happy paths
+    @Test
+    void shouldReturnTrueWhenAgeIsExactly18() {
+        assertTrue(validator.isAdult(18));
+    }
+
+    @Test
+    void shouldReturnTrueWhenAgeIsAbove18() {
+        assertTrue(validator.isAdult(25));
+        assertTrue(validator.isAdult(100));
+    }
+
+    // Edge cases
+    @Test
+    void shouldReturnFalseWhenAgeIs17() {
+        assertFalse(validator.isAdult(17));
+    }
+
+    @Test
+    void shouldReturnFalseWhenAgeIsZero() {
+        assertFalse(validator.isAdult(0));
+    }
+
+    @Test
+    void shouldReturnFalseWhenAgeIsNegative() {
+        assertFalse(validator.isAdult(-1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {18, 19, 30, 65, 99})
+    void shouldReturnTrueForAdultAges(int age) {
+        assertTrue(validator.isAdult(age));
+    }
+}</div>
+7 test cases cover: boundary (18), above, below, zero, negative, và parameterized group.`
+            },
+            explain: {
+                input: `/explain\n\nOptional.ofNullable(user)\n    .map(User::getProfile)\n    .flatMap(p -> Optional.ofNullable(p.getAvatar()))\n    .orElse("default-avatar.png");`,
+                response: `Đây là <strong>Optional chaining</strong> — pattern tránh NullPointerException khi navigate object graph sâu.<br><br>
+<strong>Đọc từng bước:</strong><br>
+1. <code>Optional.ofNullable(user)</code> — wrap user, an toàn nếu null<br>
+2. <code>.map(User::getProfile)</code> — nếu user != null, lấy profile. Nếu null, skip<br>
+3. <code>.flatMap(p -> Optional.ofNullable(p.getAvatar()))</code> — flatMap vì getAvatar() đã trả Optional (tránh Optional&lt;Optional&gt;)<br>
+4. <code>.orElse("default-avatar.png")</code> — nếu bất kỳ bước nào ra null, dùng giá trị default<br><br>
+<strong>Tương đương code cũ (ugly):</strong><br>
+<code>String avatar = "default-avatar.png";<br>if (user != null && user.getProfile() != null && user.getProfile().getAvatar() != null) {<br>&nbsp;&nbsp;avatar = user.getProfile().getAvatar();<br>}</code>`
+            }
+        };
+
+        let currentSlashDemo = 'fix';
+
+        function selectSlashDemo(el, key) {
+            el.closest('.demo-box').querySelectorAll('.prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            currentSlashDemo = key;
+            renderSlashDemo(key);
+        }
+
+        function renderSlashDemo(key) {
+            const d = slashDemos[key];
+            document.getElementById('slash-demo-output').innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);margin-bottom:6px">Input của bạn:</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:var(--font-mono);font-size:13px;color:var(--accent-lt);white-space:pre-wrap">${d.input}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);margin-bottom:6px">Response của Claude:</div>
+      <div class="demo-response visible">
+        <div class="response-header">
+          <div class="claude-avatar">✦</div>
+          <div class="response-name">Claude Sonnet 4.6</div>
+        </div>
+        <div class="response-body">${d.response}</div>
+      </div>
+    </div>`;
+        }
+        renderSlashDemo('fix');
+
+        /* ── FILE DEMO ── */
+        const fileDemos = {
+            pdf: {
+                prompt: '📄 file: Q4_2025_Report.pdf\n\nTóm tắt report này và liệt kê 5 insight quan trọng nhất.',
+                response: `Đã đọc báo cáo Q4 2025 (47 trang). Đây là tóm tắt và top 5 insights:<br><br>
+<strong>📊 Tổng quan:</strong> Doanh thu đạt 2.4 tỷ VND, tăng 23% so với Q3. Lợi nhuận ròng 18%.<br><br>
+<strong>🔑 Top 5 Insights:</strong><br>
+1. <strong>Region Hà Nội</strong> đóng góp 41% tổng doanh thu — tăng mạnh nhất (+38% YoY)<br>
+2. <strong>Sản phẩm bảo hiểm UL Gen4</strong> chiếm 67% mix — vượt target Q4 15%<br>
+3. <strong>Churn rate</strong> giảm từ 4.2% xuống 3.1% — hiệu quả của chương trình retention<br>
+4. <strong>Digital channel</strong> chiếm 58% đơn hàng mới — tăng 20pp so với Q4 2024<br>
+5. <strong>Cost per acquisition</strong> giảm 12% nhờ tối ưu marketing automation<br><br>
+Bạn muốn tôi phân tích sâu hơn phần nào không?`
+            },
+            csv: {
+                prompt: '📊 file: sales_data.csv (5000 rows)\n\nViết Python code phân tích data này và tìm outliers.',
+                response: `<div class="r-code">import pandas as pd
+import numpy as np
+
+df = pd.read_csv('sales_data.csv')
+
+# Thống kê cơ bản
+print(df.describe())
+
+# Tìm outliers bằng IQR method
+Q1 = df['revenue'].quantile(0.25)
+Q3 = df['revenue'].quantile(0.75)
+IQR = Q3 - Q1
+
+outliers = df[
+    (df['revenue'] &lt; Q1 - 1.5 * IQR) | 
+    (df['revenue'] &gt; Q3 + 1.5 * IQR)
+]
+
+print(f"Phát hiện {len(outliers)} outliers ({len(outliers)/len(df)*100:.1f}%)")
+print(outliers[['date', 'product_id', 'revenue', 'region']].head(10))</div>
+Phát hiện 47 outliers (0.94%). Phần lớn là orders bất thường vào 15/12 từ region Miền Nam — có thể là bulk order hoặc data entry error. Cần kiểm tra thủ công.`
+            },
+            code: {
+                prompt: '☕ file: OrderService.java (450 lines)\n\nTìm tất cả potential N+1 query và đề xuất fix.',
+                response: `Đã scan <code>OrderService.java</code>. Phát hiện <strong>3 chỗ có N+1 query</strong>:<br><br>
+<strong>🔴 Dòng 87 — Critical:</strong><br>
+<code>orders.forEach(o -> o.getItems().size()); // Mỗi order = 1 query</code><br>
+→ Fix: <code>@EntityGraph(attributePaths = {"items"})</code> hoặc JOIN FETCH<br><br>
+<strong>🟡 Dòng 134 — Moderate:</strong><br>
+<code>orders.stream().map(o -> o.getUser().getName())</code><br>
+→ Fix: FETCH JOIN User trong query ban đầu<br><br>
+<strong>🟡 Dòng 201 — Conditional:</strong><br>
+<code>if (includePayment) { order.getPayment(); }</code><br>
+→ Fix: Dùng EntityGraph có điều kiện hoặc DTO projection<br><br>
+Bạn muốn tôi viết fix code cho từng chỗ không?`
+            },
+            img: {
+                prompt: '🖼️ [screenshot: 404 error page]\n\nAnalyze lỗi này và gợi ý fix.',
+                response: `Nhìn vào screenshot, tôi thấy:<br><br>
+<strong>Lỗi:</strong> <code>404 Not Found — /api/v1/users/profile</code><br>
+<strong>Headers:</strong> Request có <code>Authorization: Bearer ...</code> nhưng endpoint trả 404<br><br>
+<strong>Nguyên nhân có thể:</strong><br>
+1. Route chưa được định nghĩa — kiểm tra <code>@RequestMapping</code> trên controller<br>
+2. Context path sai — app có thể chạy ở <code>/api/v2</code> không phải <code>/api/v1</code><br>
+3. Spring Security block trước khi route — kiểm tra SecurityConfig<br><br>
+<strong>Debug steps:</strong><br>
+<code>curl -v http://localhost:8080/actuator/mappings | grep "profile"</code><br>để xem tất cả routes đang registered.`
+            }
+        };
+
+        let currentFileDemo = 'pdf';
+
+        function selectFileDemo(el, key) {
+            el.closest('.demo-box').querySelectorAll('.prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            currentFileDemo = key;
+            renderFileDemo(key);
+        }
+
+        function renderFileDemo(key) {
+            const d = fileDemos[key];
+            document.getElementById('file-demo-output').innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);margin-bottom:6px">Prompt của bạn:</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;color:#bbbdd6;white-space:pre-wrap">${d.prompt}</div>
+    </div>
+    <div class="demo-response visible">
+      <div class="response-header">
+        <div class="claude-avatar">✦</div>
+        <div class="response-name">Claude Sonnet 4.6</div>
+      </div>
+      <div class="response-body">${d.response}</div>
+    </div>`;
+        }
+        renderFileDemo('pdf');
+
+        /* ── VISION DEMO ── */
+        const visionDemos = {
+            chart: {
+                desc: '📊 Line chart: Monthly Active Users Jan-Dec 2025',
+                response: `Phân tích biểu đồ MAU 2025:<br><br>
+<strong>📈 Trend tổng thể:</strong> Tăng trưởng tốt — từ 45K (Jan) lên 128K (Dec), tổng +184% trong năm.<br><br>
+<strong>🔍 Điểm đáng chú ý:</strong><br>
+• <strong>Drop tháng 8</strong> (từ 98K → 82K): Giảm 16% — có thể do summer churn hoặc sự cố kỹ thuật<br>
+• <strong>Spike tháng 11</strong> (+34% MoM): Có thể do chiến dịch marketing hoặc feature launch<br>
+• <strong>Tháng 3-5</strong>: Tăng trưởng đều 8-12% MoM — growth organic tốt nhất<br><br>
+<strong>💡 Recommendation:</strong> Investigate nguyên nhân drop tháng 8. Nếu là kỹ thuật, đây là rủi ro cần monitor.`
+            },
+            error: {
+                desc: '❌ Screenshot: Spring Boot error page — 500 Internal Server Error',
+                response: `Đọc error page, đây là analysis:<br><br>
+<strong>Root cause:</strong> <code>NullPointerException at PaymentService.java:156</code><br><br>
+<div class="r-code">java.lang.NullPointerException: Cannot invoke "String.trim()" 
+  because "this.config.gatewayUrl" is null
+    at com.mbal.PaymentService.buildRequest(PaymentService.java:156)
+    at com.mbal.PaymentService.processPayment(PaymentService.java:89)</div>
+<strong>Nguyên nhân:</strong> <code>gatewayUrl</code> config chưa được inject — kiểm tra <code>application.yml</code> có key <code>payment.gateway.url</code> chưa.<br><br>
+<strong>Fix ngay:</strong><br>
+<code>@Value("${payment.gateway.url}")</code> trên field <code>gatewayUrl</code><br>Hoặc thêm <code>@Validated</code> + <code>@NotNull</code> vào config class để fail-fast khi start.`
+            },
+            arch: {
+                desc: '🏗️ Whiteboard photo: Microservices architecture diagram',
+                response: `Nhận diện được architecture diagram gồm <strong>7 services</strong>:<br><br>
+<strong>Services identified:</strong><br>
+• API Gateway (entry point, có load balancer)<br>
+• Auth Service (JWT validation)<br>
+• User Service → PostgreSQL<br>
+• Order Service → PostgreSQL (riêng)<br>
+• Payment Service → external Stripe API<br>
+• Notification Service → Kafka consumer<br>
+• Report Service → Read replica DB<br><br>
+<strong>🔍 Observations:</strong><br>
+1. Order→Payment là sync call — risk nếu Payment slow (consider async + saga pattern)<br>
+2. Report Service dùng read replica tốt — giảm load production DB<br>
+3. Chưa thấy circuit breaker giữa services — recommend Resilience4j<br><br>
+Bạn muốn tôi suggest cải thiện phần nào?`
+            }
+        };
+
+        let currentVisionDemo = 'chart';
+
+        function selectVisionDemo(el, key) {
+            el.closest('.demo-box').querySelectorAll('.prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            currentVisionDemo = key;
+            renderVisionDemo(key);
+        }
+
+        function renderVisionDemo(key) {
+            const d = visionDemos[key];
+            document.getElementById('vision-demo-output').innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);margin-bottom:6px">Image được upload:</div>
+      <div style="background:var(--surface2);border:1px dashed var(--border2);border-radius:8px;padding:14px 16px;font-size:13.5px;color:var(--muted2);text-align:center">${d.desc}</div>
+    </div>
+    <div class="demo-response visible">
+      <div class="response-header">
+        <div class="claude-avatar">✦</div>
+        <div class="response-name">Claude Sonnet 4.6</div>
+      </div>
+      <div class="response-body">${d.response}</div>
+    </div>`;
+        }
+        renderVisionDemo('chart');
+
+        /* ── ARTIFACT DEMO ── */
+        const artifactDemos = {
+            html: {
+                prompt: 'Tạo trang HTML dashboard đơn giản hiển thị 4 metric cards: Revenue, Users, Orders, Conversion Rate với số giả lập và màu sắc đẹp.',
+                response: 'Claude tạo HTML artifact với:<br>• 4 metric cards có màu gradient riêng biệt<br>• Animated counter khi load<br>• Responsive grid layout<br>• Preview hiện ngay trong panel bên phải — click "Open in new tab" để xem full screen<br>• Nút "Download" để tải về file .html'
+            },
+            react: {
+                prompt: 'Viết React component TodoList với add, complete và delete, dùng Tailwind CSS.',
+                response: 'Claude tạo React artifact với:<br>• useState hook cho state management<br>• Input để thêm todo mới<br>• Checkbox để mark complete (strikethrough visual)<br>• Delete button với animation<br>• Filter: All / Active / Completed<br>• Live preview render ngay trong Claude — interactive, có thể thêm todo thật sự'
+            },
+            svg: {
+                prompt: 'Vẽ SVG sơ đồ microservices architecture với API Gateway, 3 services và database.',
+                response: 'Claude tạo SVG artifact với:<br>• API Gateway box ở trên cùng với arrow xuống<br>• 3 service boxes ở giữa: UserService, OrderService, PaymentService<br>• Database cylinders phía dưới mỗi service<br>• Labels rõ ràng, màu sắc phân biệt theo loại component<br>• Tải về file .svg, scale vô hạn không vỡ'
+            }
+        };
+
+        let currentArtifactDemo = 'html';
+
+        function selectArtifactDemo(el, key) {
+            el.closest('.demo-box').querySelectorAll('.prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            currentArtifactDemo = key;
+            renderArtifactDemo(key);
+        }
+
+        function renderArtifactDemo(key) {
+            const d = artifactDemos[key];
+            document.getElementById('artifact-demo-output').innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);margin-bottom:6px">Prompt của bạn:</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13.5px;color:#bbbdd6">${d.prompt}</div>
+    </div>
+    <div class="demo-response visible">
+      <div class="response-header">
+        <div class="claude-avatar">✦</div>
+        <div class="response-name">Claude Sonnet 4.6</div>
+      </div>
+      <div class="response-body">${d.response}<br><br>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">🎨</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px">Artifact panel xuất hiện bên phải</div>
+            <div style="font-size:12px;color:var(--muted)">Preview → Edit → Download → Share</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+        }
+        renderArtifactDemo('html');
+
+        /* ── SEARCH DEMO ── */
+        const searchDemos = {
+            tech: {
+                query: 'Kotlin 2.1 có gì mới so với 2.0?',
+                response: `🔍 <em>Đang tìm kiếm... tìm thấy 8 nguồn</em><br><br>
+Dựa trên JetBrains release notes và blog posts:<br><br>
+<strong>Kotlin 2.1 (released Dec 2024) — highlights:</strong><br>
+• <strong>K2 compiler stable</strong> — 2x nhanh hơn, better error messages<br>
+• <strong>Non-local break/continue</strong> trong inline lambdas (highly requested)<br>
+• <strong>Multi-dollar string interpolation:</strong> <code>$$"${'{'}raw${'}'}"</code><br>
+• Improved type inference cho complex generics<br>
+• <strong>Kotlin/Wasm</strong> improvements — WebAssembly support mạnh hơn<br><br>
+<small style="color:var(--muted)">Sources: kotlinlang.org/docs, JetBrains blog, kotlin.github.io</small>`
+            },
+            docs: {
+                query: 'Spring Boot 3.4 @RestClient documentation',
+                response: `🔍 <em>Searching docs.spring.io...</em><br><br>
+<strong>Spring 6.1+ RestClient</strong> là thay thế fluent cho RestTemplate:<br><br>
+<div class="r-code">// Tạo RestClient
+RestClient client = RestClient.builder()
+    .baseUrl("https://api.example.com")
+    .defaultHeader("Authorization", "Bearer " + token)
+    .build();
+
+// GET request
+User user = client.get()
+    .uri("/users/{id}", userId)
+    .retrieve()
+    .body(User.class);
+
+// POST request
+ResponseEntity&lt;Void&gt; response = client.post()
+    .uri("/users")
+    .body(newUser)
+    .retrieve()
+    .toBodilessEntity();</div>
+<small style="color:var(--muted)">Source: docs.spring.io/spring-framework/reference/integration/rest-clients.html</small>`
+            },
+            compare: {
+                query: 'So sánh Kafka vs RabbitMQ 2025 — nên dùng cái nào?',
+                response: `🔍 <em>Searching multiple sources...</em><br><br>
+<strong>Kafka vs RabbitMQ — Updated 2025:</strong><br><br>
+<strong>Chọn Kafka khi:</strong><br>
+✅ Event streaming, log aggregation, audit trail<br>
+✅ Cần replay messages (consumer đọc lại lịch sử)<br>
+✅ Throughput cực cao (triệu msg/s)<br>
+✅ Retention dài ngày<br><br>
+<strong>Chọn RabbitMQ khi:</strong><br>
+✅ Task queue, job processing<br>
+✅ Complex routing (exchanges, bindings)<br>
+✅ Lower latency quan trọng hơn throughput<br>
+✅ Team mới với message queues<br><br>
+<strong>Recommendation 2025:</strong> Với insurance/fintech platform → Kafka là lựa chọn tốt hơn vì audit trail và event sourcing.<br><br>
+<small style="color:var(--muted)">Sources: Confluent blog, CloudAMQP docs, ThoughtWorks radar 2024</small>`
+            }
+        };
+
+        let currentSearchDemo = 'tech';
+
+        function selectSearchDemo(el, key) {
+            el.closest('.demo-box').querySelectorAll('.prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            currentSearchDemo = key;
+            renderSearchDemo(key);
+        }
+
+        function renderSearchDemo(key) {
+            const d = searchDemos[key];
+            document.getElementById('search-demo-output').innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);margin-bottom:6px">Query của bạn:</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13.5px;color:#bbbdd6">${d.query}</div>
+    </div>
+    <div class="demo-response visible">
+      <div class="response-header">
+        <div class="claude-avatar">✦</div>
+        <div class="response-name">Claude + Web Search</div>
+      </div>
+      <div class="response-body">${d.response}</div>
+    </div>`;
+        }
+        renderSearchDemo('tech');
+
+        // Init
+        showChat();
+    </script>
+</body>
+
+</html>

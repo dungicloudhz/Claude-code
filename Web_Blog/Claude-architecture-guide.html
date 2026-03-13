@@ -1,0 +1,2981 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Architecture — Cấu trúc dự án tối ưu cho AI</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Karla:ital,wght@0,300;0,400;0,500;1,400&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ═══════ TOKENS ═══════ */
+        :root {
+            --bg: #0b0c10;
+            --bg2: #0f1116;
+            --s1: #14161e;
+            --s2: #1a1d28;
+            --s3: #20243380;
+            --bdr: #272b3d;
+            --bdr2: #333751;
+            --teal: #2dd4bf;
+            --teal-d: #14b8a6;
+            --teal-glow: rgba(45, 212, 191, .12);
+            --amber: #fbbf24;
+            --amber-d: #f59e0b;
+            --rose: #fb7185;
+            --violet: #a78bfa;
+            --sky: #38bdf8;
+            --green: #4ade80;
+            --text: #e2e5f1;
+            --muted: #6b7194;
+            --muted2: #9298b8;
+            --nav-w: 290px;
+            --r: 10px;
+            --mono: 'Fira Code', monospace;
+            --body: 'Karla', sans-serif;
+            --head: 'Cabinet Grotesk', sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: var(--body);
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+            font-size: 15px;
+            line-height: 1.75;
+        }
+
+        /* ─── scrollbar ─── */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bdr2);
+            border-radius: 99px
+        }
+
+        /* ═══════ SIDEBAR ═══════ */
+        #sb {
+            width: var(--nav-w);
+            min-height: 100vh;
+            background: var(--bg2);
+            border-right: 1px solid var(--bdr);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            transition: transform .3s;
+        }
+
+        .sb-top {
+            padding: 22px 20px 16px;
+            border-bottom: 1px solid var(--bdr);
+        }
+
+        .sb-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .sb-gem {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--teal) 0%, var(--sky) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 0 20px rgba(45, 212, 191, .3);
+            animation: gemPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes gemPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(45, 212, 191, .3)
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(45, 212, 191, .5)
+            }
+        }
+
+        .sb-name {
+            font-family: var(--head);
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -.02em;
+        }
+
+        .sb-sub {
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: .06em;
+            font-family: var(--mono)
+        }
+
+        .sb-arch-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--teal);
+            background: var(--teal-glow);
+            border: 1px solid rgba(45, 212, 191, .2);
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-family: var(--mono);
+        }
+
+        .sb-arch-badge .live {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--teal);
+            animation: blink 2s infinite
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        .sb-sec {
+            padding: 16px 14px 4px
+        }
+
+        .sb-sec-label {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: 0 6px;
+            margin-bottom: 4px;
+            font-family: var(--mono);
+        }
+
+        .sb-a {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--muted2);
+            font-size: 13px;
+            transition: all .15s;
+            cursor: pointer;
+            margin-bottom: 1px;
+            position: relative;
+        }
+
+        .sb-a:hover {
+            background: var(--s2);
+            color: var(--text)
+        }
+
+        .sb-a.on {
+            background: rgba(45, 212, 191, .1);
+            color: var(--teal);
+        }
+
+        .sb-a.on::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 2px;
+            background: var(--teal);
+            border-radius: 1px;
+        }
+
+        .sb-ico {
+            font-size: 14px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0
+        }
+
+        .sb-tag {
+            margin-left: auto;
+            font-size: 10px;
+            padding: 1px 7px;
+            border-radius: 99px;
+            font-family: var(--mono);
+        }
+
+        .sb-tag.be {
+            background: rgba(56, 189, 248, .15);
+            color: var(--sky)
+        }
+
+        .sb-tag.fe {
+            background: rgba(251, 191, 36, .15);
+            color: var(--amber)
+        }
+
+        .sb-tag.ai {
+            background: rgba(45, 212, 191, .15);
+            color: var(--teal)
+        }
+
+        .sb-foot {
+            margin-top: auto;
+            padding: 14px 20px;
+            border-top: 1px solid var(--bdr);
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--mono);
+        }
+
+        /* ═══════ MAIN ═══════ */
+        main {
+            margin-left: var(--nav-w);
+            flex: 1;
+            max-width: 920px;
+        }
+
+        /* section */
+        .sec {
+            padding: 56px 64px;
+            border-bottom: 1px solid var(--bdr);
+            scroll-margin-top: 16px;
+        }
+
+        .sec-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--teal);
+            font-weight: 600;
+            font-family: var(--mono);
+            margin-bottom: 14px;
+        }
+
+        .sec-tag::before {
+            content: '';
+            width: 18px;
+            height: 1px;
+            background: currentColor
+        }
+
+        h1 {
+            font-family: var(--head);
+            font-size: 46px;
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -.03em;
+            margin-bottom: 18px;
+        }
+
+        .g1 {
+            background: linear-gradient(135deg, #fff 20%, var(--teal) 60%, var(--sky));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-family: var(--head);
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            margin-bottom: 12px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            font-family: var(--head);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 28px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        p {
+            color: #8e93b2;
+            margin-bottom: 14px
+        }
+
+        strong {
+            color: var(--text)
+        }
+
+        /* ═══════ COMPONENTS ═══════ */
+
+        /* callout */
+        .box {
+            border-left: 3px solid var(--teal);
+            padding: 14px 18px;
+            background: var(--teal-glow);
+            border-radius: 0 8px 8px 0;
+            margin: 18px 0;
+            font-size: 13.5px;
+            color: #9dacc2;
+        }
+
+        .box-lbl {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: var(--teal);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--mono);
+        }
+
+        .box.warn {
+            border-color: var(--amber);
+            background: rgba(251, 191, 36, .07)
+        }
+
+        .box.warn .box-lbl {
+            color: var(--amber)
+        }
+
+        .box.ok {
+            border-color: var(--green);
+            background: rgba(74, 222, 128, .07)
+        }
+
+        .box.ok .box-lbl {
+            color: var(--green)
+        }
+
+        .box.violet {
+            border-color: var(--violet);
+            background: rgba(167, 139, 250, .07)
+        }
+
+        .box.violet .box-lbl {
+            color: var(--violet)
+        }
+
+        /* cards */
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 18px 0
+        }
+
+        .cards.c3 {
+            grid-template-columns: 1fr 1fr 1fr
+        }
+
+        .card {
+            background: var(--s1);
+            border: 1px solid var(--bdr);
+            border-radius: var(--r);
+            padding: 18px;
+            transition: border-color .2s, transform .2s, box-shadow .2s;
+        }
+
+        .card:hover {
+            border-color: var(--teal);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(45, 212, 191, .08)
+        }
+
+        .card-ico {
+            font-size: 22px;
+            margin-bottom: 10px
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-family: var(--head);
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: var(--text)
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--muted2);
+            line-height: 1.55
+        }
+
+        /* table */
+        .tw {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: var(--r);
+            border: 1px solid var(--bdr)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 16px;
+            background: var(--s2);
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            font-weight: 600;
+            border-bottom: 1px solid var(--bdr);
+            font-family: var(--mono);
+        }
+
+        td {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--bdr);
+            color: #9298b8;
+            vertical-align: top
+        }
+
+        tr:last-child td {
+            border: none
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, .015)
+        }
+
+        td strong {
+            color: var(--text)
+        }
+
+        td code {
+            font-family: var(--mono);
+            background: var(--s2);
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--teal)
+        }
+
+        /* feat list */
+        .fl {
+            list-style: none;
+            margin: 10px 0
+        }
+
+        .fl li {
+            padding: 8px 0 8px 22px;
+            position: relative;
+            font-size: 14px;
+            color: #8e93b2;
+            border-bottom: 1px solid rgba(39, 43, 61, .6);
+        }
+
+        .fl li:last-child {
+            border: none
+        }
+
+        .fl li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--teal)
+        }
+
+        .fl li strong {
+            color: var(--text)
+        }
+
+        /* steps */
+        .steps {
+            margin: 18px 0
+        }
+
+        .step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 22px;
+            align-items: flex-start
+        }
+
+        .snum {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--teal), var(--sky));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+            color: #000;
+            font-family: var(--mono);
+        }
+
+        .stitle {
+            font-weight: 700;
+            font-family: var(--head);
+            color: var(--text);
+            margin-bottom: 4px
+        }
+
+        .sdesc {
+            font-size: 13.5px;
+            color: var(--muted2)
+        }
+
+        /* ═══════ CODE BLOCK ═══════ */
+        .cw {
+            background: #080a0e;
+            border: 1px solid var(--bdr);
+            border-radius: var(--r);
+            margin: 16px 0;
+            overflow: hidden
+        }
+
+        .ch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 16px;
+            background: var(--s1);
+            border-bottom: 1px solid var(--bdr);
+        }
+
+        .cdots {
+            display: flex;
+            gap: 5px
+        }
+
+        .cdot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%
+        }
+
+        .cdot:nth-child(1) {
+            background: #ff5f57
+        }
+
+        .cdot:nth-child(2) {
+            background: #febc2e
+        }
+
+        .cdot:nth-child(3) {
+            background: #28c840
+        }
+
+        .clang {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .cbtn {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            background: var(--s2);
+            border: 1px solid var(--bdr);
+            padding: 2px 9px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .cbtn:hover {
+            color: var(--text);
+            border-color: var(--teal)
+        }
+
+        .cbtn.copied {
+            color: var(--green);
+            border-color: var(--green)
+        }
+
+        pre {
+            padding: 18px 20px;
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-x: auto;
+            color: #8e93b2;
+        }
+
+        .kw {
+            color: var(--violet)
+        }
+
+        .st {
+            color: var(--green)
+        }
+
+        .cm {
+            color: var(--muted);
+            font-style: italic
+        }
+
+        .nm {
+            color: var(--amber)
+        }
+
+        .fn {
+            color: var(--sky)
+        }
+
+        .tl {
+            color: var(--teal)
+        }
+
+        .prop {
+            color: #93c5fd
+        }
+
+        .pu {
+            color: var(--rose)
+        }
+
+        /* ═══════ FILE TREE ═══════ */
+        .tree {
+            background: #080a0e;
+            border: 1px solid var(--bdr);
+            border-radius: var(--r);
+            padding: 18px 20px;
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.85;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+
+        .tree-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 0
+        }
+
+        .tree-pre {
+            color: var(--muted);
+            white-space: pre;
+            flex-shrink: 0
+        }
+
+        .tree-name {
+            white-space: nowrap
+        }
+
+        .td {
+            color: var(--teal);
+            font-weight: 500
+        }
+
+        /* directory */
+        .tf {
+            color: #c4c9e0
+        }
+
+        /* file */
+        .tf.md {
+            color: var(--amber)
+        }
+
+        .tf.ts {
+            color: var(--sky)
+        }
+
+        .tf.py {
+            color: var(--green)
+        }
+
+        .tf.java {
+            color: var(--rose)
+        }
+
+        .tf.yml {
+            color: var(--violet)
+        }
+
+        .tf.json {
+            color: #fb923c
+        }
+
+        .tc {
+            color: var(--muted);
+            margin-left: 10px;
+            font-size: 12px
+        }
+
+        /* comment */
+        .tr-sec {
+            margin: 10px 0 4px;
+            font-size: 11px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--bdr);
+            padding-bottom: 4px;
+            margin-bottom: 6px
+        }
+
+        /* ═══════ CONCEPT CARD ═══════ */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin: 18px 0
+        }
+
+        .concept {
+            background: var(--s1);
+            border: 1px solid var(--bdr);
+            border-radius: var(--r);
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: all .2s;
+        }
+
+        .concept::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--c, var(--teal));
+        }
+
+        .concept:hover {
+            border-color: var(--bdr2);
+            transform: translateY(-1px)
+        }
+
+        .concept-icon {
+            font-size: 24px;
+            margin-bottom: 8px
+        }
+
+        .concept-name {
+            font-family: var(--head);
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 4px;
+            letter-spacing: -.01em;
+        }
+
+        .concept-type {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .concept-desc {
+            font-size: 12.5px;
+            color: var(--muted2);
+            line-height: 1.55
+        }
+
+        /* ═══════ FLOW DIAGRAM ═══════ */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin: 20px 0;
+            overflow-x: auto;
+            padding: 4px 0;
+        }
+
+        .flow-node {
+            background: var(--s2);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 12.5px;
+            font-family: var(--mono);
+            color: var(--text);
+            white-space: nowrap;
+            flex-shrink: 0;
+            text-align: center;
+            transition: border-color .2s;
+        }
+
+        .flow-node:hover {
+            border-color: var(--teal)
+        }
+
+        .flow-node.hl {
+            background: rgba(45, 212, 191, .1);
+            border-color: rgba(45, 212, 191, .35);
+            color: var(--teal)
+        }
+
+        .flow-node.warn {
+            background: rgba(251, 191, 36, .08);
+            border-color: rgba(251, 191, 36, .3);
+            color: var(--amber)
+        }
+
+        .flow-node.violet {
+            background: rgba(167, 139, 250, .1);
+            border-color: rgba(167, 139, 250, .3);
+            color: var(--violet)
+        }
+
+        .flow-arr {
+            color: var(--muted);
+            font-size: 18px;
+            padding: 0 6px;
+            flex-shrink: 0
+        }
+
+        .flow-sub {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 3px;
+            font-family: var(--body)
+        }
+
+        /* ═══════ HERO ═══════ */
+        .hero {
+            padding: 68px 64px 56px;
+            border-bottom: 1px solid var(--bdr);
+            background:
+                radial-gradient(ellipse 60% 40% at 80% 0%, rgba(45, 212, 191, .07) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 10% 100%, rgba(56, 189, 248, .05) 0%, transparent 50%);
+        }
+
+        .hero-chips {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+            margin-top: 20px
+        }
+
+        .hchip {
+            font-family: var(--mono);
+            font-size: 11px;
+            padding: 3px 11px;
+            border-radius: 99px;
+            background: var(--s1);
+            border: 1px solid var(--bdr);
+            color: var(--muted2);
+        }
+
+        /* ═══════ LAYER DIAGRAM ═══════ */
+        .layers {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 20px 0
+        }
+
+        .layer {
+            border-radius: 10px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid var(--bdr);
+            transition: transform .2s, border-color .2s;
+        }
+
+        .layer:hover {
+            transform: translateX(4px)
+        }
+
+        .layer-num {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            width: 28px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .layer-body {
+            flex: 1
+        }
+
+        .layer-name {
+            font-family: var(--head);
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text)
+        }
+
+        .layer-desc {
+            font-size: 13px;
+            color: var(--muted2)
+        }
+
+        .layer-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 5px;
+            flex-wrap: wrap
+        }
+
+        .ltag {
+            font-family: var(--mono);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 99px
+        }
+
+        /* ═══════ COMPARE ═══════ */
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 18px 0
+        }
+
+        .cmp-box {
+            background: var(--s1);
+            border: 1px solid var(--bdr);
+            border-radius: var(--r);
+            overflow: hidden
+        }
+
+        .cmp-head {
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--mono);
+            letter-spacing: .05em;
+        }
+
+        .cmp-body {
+            padding: 14px 16px;
+            font-size: 13px;
+            color: var(--muted2);
+            line-height: 1.65
+        }
+
+        .cmp-body code {
+            font-family: var(--mono);
+            background: var(--s2);
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--teal)
+        }
+
+        /* ═══════ HAMBURGER ═══════ */
+        #hbg {
+            display: none;
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 300;
+            background: var(--s1);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        #ov {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            z-index: 150
+        }
+
+        #ov.v {
+            display: block
+        }
+
+        @media(max-width:900px) {
+            #hbg {
+                display: flex
+            }
+
+            #sb {
+                transform: translateX(-100%)
+            }
+
+            #sb.open {
+                transform: translateX(0);
+                box-shadow: 16px 0 48px rgba(0, 0, 0, .5)
+            }
+
+            main {
+                margin-left: 0
+            }
+
+            .sec,
+            .hero {
+                padding: 48px 22px
+            }
+
+            .cards,
+            .cards.c3,
+            .concept-grid,
+            .compare {
+                grid-template-columns: 1fr
+            }
+
+            h1 {
+                font-size: 32px
+            }
+        }
+
+        /* ═══════ ANIMATIONS ═══════ */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .sec,
+        .hero {
+            animation: fadeUp .5s ease both
+        }
+
+        /* ═══════ BREADCRUMB ═══════ */
+        .crumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        .crumb span {
+            color: var(--teal)
+        }
+
+        .crumb .sep {
+            color: var(--bdr2)
+        }
+
+        /* ═══════ INLINE CODE ═══════ */
+        .ic {
+            font-family: var(--mono);
+            background: var(--s2);
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 12.5px;
+            color: var(--teal);
+            border: 1px solid var(--bdr);
+        }
+
+        /* ═══════ DIVIDER ═══════ */
+        .div {
+            height: 1px;
+            background: linear-gradient(90deg, var(--bdr), transparent);
+            margin: 32px 0
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="hbg" onclick="tog()">☰</button>
+    <div id="ov" onclick="tog()"></div>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <nav id="sb">
+        <div class="sb-top">
+            <div class="sb-logo">
+                <div class="sb-gem">⬡</div>
+                <div>
+                    <div class="sb-name">Claude Arch</div>
+                    <div class="sb-sub">project structure guide</div>
+                </div>
+            </div>
+            <div class="sb-arch-badge"><span class="live"></span>v2.0 · 2026</div>
+        </div>
+
+        <nav class="sb-sec" aria-label="Page navigation">
+            <div class="sb-sec-label">🔄 Chuyển trang</div>
+            <a class="sb-a on" href="Claude-architecture-guide.html"><span class="sb-ico">📐</span>Arch Guide</a>
+            <a class="sb-a" href="claude-guide.html"><span class="sb-ico">📖</span>Claude Guide</a>
+            <a class="sb-a" href="antigravity-guide.html"><span class="sb-ico">🚀</span>AntiGravity</a>
+        </nav>
+
+        <div class="sb-sec">
+            <div class="sb-sec-label">🗺 Tổng quan</div>
+            <a class="sb-a on" href="#intro" onclick="sa(this)"><span class="sb-ico">🏠</span>Giới thiệu</a>
+            <a class="sb-a" href="#concepts" onclick="sa(this)"><span class="sb-ico">🧩</span>Khái niệm cốt lõi</a>
+            <a class="sb-a" href="#layers" onclick="sa(this)"><span class="sb-ico">🏗</span>Kiến trúc phân tầng</a>
+        </div>
+
+        <div class="sb-sec">
+            <div class="sb-sec-label">📂 Cấu trúc thư mục</div>
+            <a class="sb-a" href="#root-structure" onclick="sa(this)"><span class="sb-ico">📁</span>Root structure<span
+                    class="sb-tag ai">AI</span></a>
+            <a class="sb-a" href="#backend-structure" onclick="sa(this)"><span class="sb-ico">☕</span>Backend
+                (Java)<span class="sb-tag be">BE</span></a>
+            <a class="sb-a" href="#frontend-structure" onclick="sa(this)"><span class="sb-ico">⚛️</span>Frontend
+                (React)<span class="sb-tag fe">FE</span></a>
+        </div>
+
+        <div class="sb-sec">
+            <div class="sb-sec-label">🤖 AI Building Blocks</div>
+            <a class="sb-a" href="#rules" onclick="sa(this)"><span class="sb-ico">📜</span>Rules</a>
+            <a class="sb-a" href="#skills" onclick="sa(this)"><span class="sb-ico">⚡</span>Skills</a>
+            <a class="sb-a" href="#tools" onclick="sa(this)"><span class="sb-ico">🔧</span>Tools</a>
+            <a class="sb-a" href="#agents" onclick="sa(this)"><span class="sb-ico">🤖</span>Agents</a>
+            <a class="sb-a" href="#workflows" onclick="sa(this)"><span class="sb-ico">🔄</span>Workflows</a>
+            <a class="sb-a" href="#memory" onclick="sa(this)"><span class="sb-ico">🧠</span>Memory</a>
+            <a class="sb-a" href="#context" onclick="sa(this)"><span class="sb-ico">📋</span>Context & Prompt</a>
+        </div>
+
+        <div class="sb-sec">
+            <div class="sb-sec-label">🛠 Thực hành</div>
+            <a class="sb-a" href="#be-example" onclick="sa(this)"><span class="sb-ico">☕</span>Ví dụ BE hoàn chỉnh<span
+                    class="sb-tag be">BE</span></a>
+            <a class="sb-a" href="#fe-example" onclick="sa(this)"><span class="sb-ico">⚛️</span>Ví dụ FE hoàn chỉnh<span
+                    class="sb-tag fe">FE</span></a>
+            <a class="sb-a" href="#multi-agent" onclick="sa(this)"><span class="sb-ico">🕸</span>Multi-agent system</a>
+            <a class="sb-a" href="#claude-md" onclick="sa(this)"><span class="sb-ico">📝</span>CLAUDE.md chuẩn</a>
+            <a class="sb-a" href="#checklist" onclick="sa(this)"><span class="sb-ico">✅</span>Checklist tối ưu</a>
+        </div>
+
+        <div class="sb-foot">Claude Architecture Guide © 2026</div>
+    </nav>
+
+    <!-- ═══ MAIN ═══ -->
+    <main id="mc">
+
+        <!-- ─── HERO ─── -->
+        <div class="hero" id="intro">
+            <div class="crumb"><span>Claude</span><span class="sep">/</span><span>Architecture</span><span
+                    class="sep">/</span>Guide</div>
+            <div class="sec-tag">Kiến trúc dự án</div>
+            <h1><span class="g1">Cấu trúc dự án<br>tối ưu cho Claude</span></h1>
+            <p>Hướng dẫn thiết kế cấu trúc thư mục, định nghĩa <strong>Rules</strong>, <strong>Skills</strong>,
+                <strong>Tools</strong>, <strong>Agents</strong>, <strong>Workflows</strong> và <strong>Memory</strong> —
+                để Claude đọc hiểu codebase và hỗ trợ lập trình hiệu quả nhất.</p>
+            <div class="hero-chips">
+                <span class="hchip">Backend Java/Spring Boot</span>
+                <span class="hchip">Frontend React/TS</span>
+                <span class="hchip">CLAUDE.md</span>
+                <span class="hchip">MCP Tools</span>
+                <span class="hchip">Multi-agent</span>
+                <span class="hchip">Microservices</span>
+            </div>
+
+            <div class="box" style="margin-top:28px">
+                <div class="box-lbl">💡 Tại sao cần cấu trúc đặc biệt?</div>
+                Claude không "nhớ" codebase của bạn tự động. Mỗi lần mở conversation mới là một tờ giấy trắng. Cấu trúc
+                tốt = <strong>giúp Claude hiểu ngữ cảnh nhanh</strong>, code đúng convention, không lặp lỗi cũ, và làm
+                việc như một team member thực sự.
+            </div>
+        </div>
+
+        <!-- ─── CONCEPTS ─── -->
+        <div class="sec" id="concepts">
+            <div class="sec-tag">Khái niệm</div>
+            <h2>🧩 Các khái niệm cốt lõi</h2>
+            <p>Hiểu rõ 7 building block này là nền tảng để xây dựng workflow AI hiệu quả cho dự án của bạn.</p>
+
+            <div class="concept-grid">
+                <div class="concept" style="--c:var(--teal)">
+                    <div class="concept-icon">📜</div>
+                    <div class="concept-name">Rules</div>
+                    <div class="concept-type">Quy tắc & Ràng buộc</div>
+                    <div class="concept-desc">Những điều Claude PHẢI làm hoặc KHÔNG được làm. Coding conventions,
+                        security rules, naming patterns của dự án.</div>
+                </div>
+                <div class="concept" style="--c:var(--amber)">
+                    <div class="concept-icon">⚡</div>
+                    <div class="concept-name">Skills</div>
+                    <div class="concept-type">Năng lực cụ thể</div>
+                    <div class="concept-desc">Tập hợp kiến thức và kỹ năng cho domain cụ thể. Ví dụ: skill viết JPA
+                        query, skill tạo React component theo design system.</div>
+                </div>
+                <div class="concept" style="--c:var(--sky)">
+                    <div class="concept-icon">🔧</div>
+                    <div class="concept-name">Tools</div>
+                    <div class="concept-type">Công cụ thực thi</div>
+                    <div class="concept-desc">Functions Claude có thể gọi để tương tác với hệ thống: đọc file, query DB,
+                        gọi API, chạy terminal commands.</div>
+                </div>
+                <div class="concept" style="--c:var(--violet)">
+                    <div class="concept-icon">🤖</div>
+                    <div class="concept-name">Agents</div>
+                    <div class="concept-type">Tác nhân tự động</div>
+                    <div class="concept-desc">Claude instance chuyên trách một domain: Backend Agent, Frontend Agent, QA
+                        Agent, DevOps Agent. Mỗi agent có context và tools riêng.</div>
+                </div>
+                <div class="concept" style="--c:var(--rose)">
+                    <div class="concept-icon">🔄</div>
+                    <div class="concept-name">Workflows</div>
+                    <div class="concept-type">Quy trình tự động hóa</div>
+                    <div class="concept-desc">Chuỗi bước tự động được định nghĩa trước: từ nhận yêu cầu → phân tích →
+                        implement → test → review → deploy.</div>
+                </div>
+                <div class="concept" style="--c:var(--green)">
+                    <div class="concept-icon">🧠</div>
+                    <div class="concept-name">Memory</div>
+                    <div class="concept-type">Bộ nhớ ngữ cảnh</div>
+                    <div class="concept-desc">Nơi lưu trữ kiến thức quan trọng: decisions đã được đưa ra, bugs đã gặp,
+                        patterns đang dùng, tech debt cần xử lý.</div>
+                </div>
+                <div class="concept" style="--c:#fb923c">
+                    <div class="concept-icon">📋</div>
+                    <div class="concept-name">Context</div>
+                    <div class="concept-type">Ngữ cảnh dự án</div>
+                    <div class="concept-desc">CLAUDE.md — file markdown chứa mọi thông tin Claude cần biết về dự án ngay
+                        khi mở conversation mới.</div>
+                </div>
+            </div>
+
+            <h3>🔗 Mối quan hệ giữa các khái niệm</h3>
+            <div class="flow" style="flex-wrap:wrap;gap:8px">
+                <div class="flow-node hl">📋 Context<div class="flow-sub">CLAUDE.md</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node">🤖 Agent<div class="flow-sub">Claude instance</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node warn">📜 Rules<div class="flow-sub">constraints</div>
+                </div>
+                <div class="flow-arr">+</div>
+                <div class="flow-node warn">⚡ Skills<div class="flow-sub">capabilities</div>
+                </div>
+                <div class="flow-arr">+</div>
+                <div class="flow-node warn">🔧 Tools<div class="flow-sub">actions</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node violet">🔄 Workflow<div class="flow-sub">execution</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node hl">🧠 Memory<div class="flow-sub">persistence</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── LAYERS ─── -->
+        <div class="sec" id="layers">
+            <div class="sec-tag">Kiến trúc</div>
+            <h2>🏗 Kiến trúc phân tầng</h2>
+            <p>Một dự án AI-optimized được tổ chức theo 5 tầng rõ ràng, từ hạ tầng đến giao tiếp với Claude.</p>
+
+            <div class="layers">
+                <div class="layer" style="background:rgba(45,212,191,.05);border-color:rgba(45,212,191,.25)">
+                    <div class="layer-num">L5</div>
+                    <div class="layer-body">
+                        <div class="layer-name" style="color:var(--teal)">AI Interaction Layer</div>
+                        <div class="layer-desc">CLAUDE.md, .cursorrules, agents, workflows, memory files — nơi Claude
+                            đọc context</div>
+                        <div class="layer-tags">
+                            <span class="ltag"
+                                style="background:rgba(45,212,191,.15);color:var(--teal)">CLAUDE.md</span>
+                            <span class="ltag"
+                                style="background:rgba(45,212,191,.15);color:var(--teal)">.cursorrules</span>
+                            <span class="ltag" style="background:rgba(45,212,191,.15);color:var(--teal)">/ai/</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="layer" style="background:rgba(167,139,250,.04);border-color:rgba(167,139,250,.2)">
+                    <div class="layer-num">L4</div>
+                    <div class="layer-body">
+                        <div class="layer-name" style="color:var(--violet)">Application Layer</div>
+                        <div class="layer-desc">Frontend (React/Next.js) + Backend (Spring Boot) — business logic và UI
+                        </div>
+                        <div class="layer-tags">
+                            <span class="ltag"
+                                style="background:rgba(167,139,250,.15);color:var(--violet)">frontend/</span>
+                            <span class="ltag"
+                                style="background:rgba(167,139,250,.15);color:var(--violet)">backend/</span>
+                            <span class="ltag" style="background:rgba(167,139,250,.15);color:var(--violet)">API
+                                contracts</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="layer" style="background:rgba(251,191,36,.04);border-color:rgba(251,191,36,.2)">
+                    <div class="layer-num">L3</div>
+                    <div class="layer-body">
+                        <div class="layer-name" style="color:var(--amber)">Domain Layer</div>
+                        <div class="layer-desc">Entities, aggregates, domain events, value objects — pure business logic
+                        </div>
+                        <div class="layer-tags">
+                            <span class="ltag" style="background:rgba(251,191,36,.15);color:var(--amber)">domain/</span>
+                            <span class="ltag"
+                                style="background:rgba(251,191,36,.15);color:var(--amber)">entities/</span>
+                            <span class="ltag" style="background:rgba(251,191,36,.15);color:var(--amber)">events/</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="layer" style="background:rgba(56,189,248,.04);border-color:rgba(56,189,248,.2)">
+                    <div class="layer-num">L2</div>
+                    <div class="layer-body">
+                        <div class="layer-name" style="color:var(--sky)">Infrastructure Layer</div>
+                        <div class="layer-desc">Database, cache, message queue, external APIs — adapters và
+                            implementations</div>
+                        <div class="layer-tags">
+                            <span class="ltag"
+                                style="background:rgba(56,189,248,.15);color:var(--sky)">persistence/</span>
+                            <span class="ltag"
+                                style="background:rgba(56,189,248,.15);color:var(--sky)">messaging/</span>
+                            <span class="ltag"
+                                style="background:rgba(56,189,248,.15);color:var(--sky)">integration/</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="layer" style="background:rgba(74,222,128,.04);border-color:rgba(74,222,128,.2)">
+                    <div class="layer-num">L1</div>
+                    <div class="layer-body">
+                        <div class="layer-name" style="color:var(--green)">DevOps Layer</div>
+                        <div class="layer-desc">Docker, K8s manifests, CI/CD pipelines, IaC (Terraform) — deployment
+                        </div>
+                        <div class="layer-tags">
+                            <span class="ltag" style="background:rgba(74,222,128,.15);color:var(--green)">deploy/</span>
+                            <span class="ltag" style="background:rgba(74,222,128,.15);color:var(--green)">k8s/</span>
+                            <span class="ltag"
+                                style="background:rgba(74,222,128,.15);color:var(--green)">.gitlab-ci.yml</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── ROOT STRUCTURE ─── -->
+        <div class="sec" id="root-structure">
+            <div class="sec-tag">Cấu trúc</div>
+            <h2>📁 Root — Cấu trúc gốc dự án</h2>
+            <p>Đây là cấu trúc thư mục chuẩn cho một dự án fullstack với AI layer được tích hợp đầy đủ. Mỗi thư mục có
+                mục đích rõ ràng để Claude hiểu ngay.</p>
+
+            <div class="tree">
+                <div class="tr-sec">📦 project-root/</div>
+
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">📁 .ai/</span><span
+                        class="tc">← AI layer: context cho Claude</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name tf md">CLAUDE.md</span><span class="tc">← entry point, Claude đọc đầu
+                        tiên</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">rules/</span><span
+                        class="tc">← coding rules & constraints</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf md">global.md</span><span class="tc">← rules áp dụng toàn project</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf md">backend.md</span><span class="tc">← Java/Spring Boot rules</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf md">frontend.md</span><span class="tc">← React/TS rules</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name td">skills/</span><span class="tc">← kỹ năng domain-specific</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf md">jpa-query.md</span><span class="tc">← cách viết JPA queries</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf md">api-design.md</span><span class="tc">← REST API conventions</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf md">react-patterns.md</span><span class="tc">← component patterns</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">tools/</span><span
+                        class="tc">← MCP tool definitions</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf json">db-tools.json</span><span class="tc">← query database tools</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf json">git-tools.json</span><span class="tc">← git operation tools</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name td">agents/</span><span class="tc">← agent definitions</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf md">backend-agent.md</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf md">frontend-agent.md</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf md">qa-agent.md</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name td">workflows/</span><span class="tc">← automation workflows</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf md">feature-dev.md</span><span class="tc">← feature development flow</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf md">bug-fix.md</span><span class="tc">← bug fix flow</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name td">memory/</span><span class="tc">← persistent knowledge</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name tf md">decisions.md</span><span class="tc">← architectural decisions</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name tf md">known-issues.md</span><span class="tc">← bugs & workarounds</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name tf md">tech-debt.md</span><span class="tc">← items cần refactor</span></div>
+
+                <div class="tree-line" style="margin-top:8px"><span class="tree-pre">├── </span><span
+                        class="tree-name td">📁 backend/</span><span class="tc">← Spring Boot microservices</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">📁
+                        frontend/</span><span class="tc">← React/Next.js app</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">📁
+                        deploy/</span><span class="tc">← K8s, Docker, Terraform</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">📁 docs/</span><span
+                        class="tc">← API specs, ADRs, diagrams</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span
+                        class="tree-name tf md">CLAUDE.md</span><span class="tc">← symlink → .ai/CLAUDE.md</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name tf">📄
+                        .cursorrules</span><span class="tc">← rules cho Cursor IDE</span></div>
+                <div class="tree-line"><span class="tree-pre">└── </span><span
+                        class="tree-name tf yml">docker-compose.yml</span></div>
+            </div>
+
+            <div class="box ok">
+                <div class="box-lbl">✅ Nguyên tắc thiết kế thư mục</div>
+                Đặt toàn bộ AI context trong thư mục <span class="ic">.ai/</span> — dễ gitignore nếu cần, dễ share giữa
+                team, và Claude biết đây là "nguồn sự thật" về dự án. File <span class="ic">CLAUDE.md</span> ở root là
+                symlink để Claude tự động đọc khi mở project.
+            </div>
+        </div>
+
+        <!-- ─── BACKEND STRUCTURE ─── -->
+        <div class="sec" id="backend-structure">
+            <div class="sec-tag">Backend · Java/Spring Boot</div>
+            <h2>☕ Cấu trúc Backend tối ưu</h2>
+            <p>Cấu trúc theo <strong>Hexagonal Architecture</strong> (Ports &amp; Adapters) kết hợp DDD — giúp Claude
+                hiểu boundary rõ ràng và generate code đúng layer.</p>
+
+            <div class="tree">
+                <div class="tr-sec">backend/ (Spring Boot 3 · Java 21)</div>
+
+                <div class="tree-line"><span class="tree-pre">src/main/java/com/company/app/</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">domain/</span><span
+                        class="tc">← Pure business logic, no framework</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">model/</span><span
+                        class="tc">← Entities, Value Objects</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf java">Order.java</span><span class="tc">← Aggregate root</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf java">OrderId.java</span><span class="tc">← Value Object (record)</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf java">Money.java</span><span class="tc">← Value Object</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">event/</span><span
+                        class="tc">← Domain events</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf java">OrderPlacedEvent.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">port/</span><span
+                        class="tc">← Interfaces (Ports)</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span class="tree-name td">in/</span><span
+                        class="tc">← Use case interfaces (input ports)</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ └── </span><span
+                        class="tree-name tf java">PlaceOrderUseCase.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span class="tree-name td">out/</span><span
+                        class="tc">← Repository interfaces (output ports)</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf java">OrderRepository.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name td">service/</span><span class="tc">← Domain services</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name tf java">OrderDomainService.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span
+                        class="tree-name td">application/</span><span class="tc">← Use case implementations</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">usecase/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf java">PlaceOrderUseCaseImpl.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span class="tree-name td">dto/</span><span
+                        class="tc">← Request/Response DTOs (records)</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name tf java">PlaceOrderRequest.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name tf java">OrderResponse.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">adapter/</span><span
+                        class="tc">← Framework adapters (Adapters)</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">in/</span><span
+                        class="tc">← Inbound adapters</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name td">rest/</span><span class="tc">← REST Controllers</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ ├── </span><span
+                        class="tree-name tf java">OrderController.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ └── </span><span
+                        class="tree-name tf java">OrderControllerAdvice.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name td">kafka/</span><span class="tc">← Kafka consumers</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf java">PaymentEventConsumer.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span class="tree-name td">out/</span><span
+                        class="tc">← Outbound adapters</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name td">persistence/</span><span class="tc">← JPA implementations</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf java">OrderJpaRepository.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf java">OrderRepositoryAdapter.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf java">OrderEntity.java</span><span class="tc">← @Entity (JPA)</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span class="tree-name td">kafka/</span><span
+                        class="tc">← Kafka producers</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name tf java">OrderEventPublisher.java</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">└── </span><span class="tree-name td">config/</span><span
+                        class="tc">← Spring configurations</span></div>
+                <div class="tree-line"><span class="tree-pre"> ├── </span><span
+                        class="tree-name tf java">SecurityConfig.java</span></div>
+                <div class="tree-line"><span class="tree-pre"> ├── </span><span
+                        class="tree-name tf java">KafkaConfig.java</span></div>
+                <div class="tree-line"><span class="tree-pre"> └── </span><span
+                        class="tree-name tf java">OpenApiConfig.java</span></div>
+
+                <div style="margin-top:10px"></div>
+                <div class="tree-line"><span class="tree-pre">src/main/resources/</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span
+                        class="tree-name tf yml">application.yml</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span
+                        class="tree-name tf yml">application-local.yml</span></div>
+                <div class="tree-line"><span class="tree-pre">└── </span><span
+                        class="tree-name td">db/migration/</span><span class="tc">← Liquibase changesets</span></div>
+                <div class="tree-line"><span class="tree-pre"> └── </span><span
+                        class="tree-name tf">V001__create_orders.sql</span></div>
+            </div>
+
+            <div class="box violet">
+                <div class="box-lbl">🔑 Lý do dùng Hexagonal Architecture</div>
+                Claude hiểu rõ: <strong>domain/</strong> = không có Spring annotation nào, <strong>application/</strong>
+                = orchestration logic, <strong>adapter/</strong> = framework code. Khi bạn nói "viết use case mới",
+                Claude biết đặt file ở đâu mà không cần hỏi thêm.
+            </div>
+        </div>
+
+        <!-- ─── FRONTEND STRUCTURE ─── -->
+        <div class="sec" id="frontend-structure">
+            <div class="sec-tag">Frontend · React/TypeScript</div>
+            <h2>⚛️ Cấu trúc Frontend tối ưu</h2>
+            <p>Feature-based structure theo <strong>Feature-Sliced Design (FSD)</strong> — Claude biết chính xác
+                component nào thuộc layer nào.</p>
+
+            <div class="tree">
+                <div class="tr-sec">frontend/ (React 19 · TypeScript · Vite)</div>
+
+                <div class="tree-line"><span class="tree-pre">src/</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">app/</span><span
+                        class="tc">← App setup, providers, routing</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name tf ts">App.tsx</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span
+                        class="tree-name tf ts">providers.tsx</span><span class="tc">← QueryClient, Auth, Theme</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name tf ts">router.tsx</span><span class="tc">← React Router v7</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">pages/</span><span
+                        class="tc">← Route-level components (thin shells)</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">orders/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf ts">OrderListPage.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf ts">OrderDetailPage.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span class="tree-name td">auth/</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name tf ts">LoginPage.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span
+                        class="tree-name td">features/</span><span class="tc">← Feature modules (bounded
+                        contexts)</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">orders/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name td">components/</span><span class="tc">← Feature-specific components</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ ├── </span><span
+                        class="tree-name tf ts">OrderCard.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ └── </span><span
+                        class="tree-name tf ts">OrderForm.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span class="tree-name td">hooks/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ ├── </span><span
+                        class="tree-name tf ts">useOrders.ts</span><span class="tc">← React Query hooks</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ └── </span><span
+                        class="tree-name tf ts">useOrderForm.ts</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span class="tree-name td">api/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ └── </span><span
+                        class="tree-name tf ts">orders.api.ts</span><span class="tc">← axios calls</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span class="tree-name td">store/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ │ └── </span><span
+                        class="tree-name tf ts">ordersSlice.ts</span><span class="tc">← Zustand / Redux slice</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span class="tree-name td">types/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf ts">order.types.ts</span></div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span class="tree-name td">auth/</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">components/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">hooks/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name tf ts">AuthContext.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">├── </span><span class="tree-name td">shared/</span><span
+                        class="tc">← Shared, reusable code</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">ui/</span><span
+                        class="tc">← Design system components</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf ts">Button.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf ts">Modal.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf ts">DataTable.tsx</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">hooks/</span><span
+                        class="tc">← Generic hooks</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf ts">useDebounce.ts</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf ts">usePagination.ts</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">utils/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ │ ├── </span><span
+                        class="tree-name tf ts">format.ts</span><span class="tc">← date, currency, number</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf ts">validation.ts</span></div>
+                <div class="tree-line"><span class="tree-pre">│ ├── </span><span class="tree-name td">api/</span></div>
+                <div class="tree-line"><span class="tree-pre">│ │ └── </span><span
+                        class="tree-name tf ts">client.ts</span><span class="tc">← axios instance + interceptors</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span class="tree-name td">types/</span>
+                </div>
+                <div class="tree-line"><span class="tree-pre">│ └── </span><span
+                        class="tree-name tf ts">global.types.ts</span></div>
+                <div class="tree-line"><span class="tree-pre">│</span></div>
+                <div class="tree-line"><span class="tree-pre">└── </span><span class="tree-name td">assets/</span><span
+                        class="tc">← Static files</span></div>
+            </div>
+
+            <div class="box ok">
+                <div class="box-lbl">✅ FSD Import Rule cho Claude</div>
+                <span class="ic">pages/</span> chỉ được import từ <span class="ic">features/</span> và <span
+                    class="ic">shared/</span>. <span class="ic">features/</span> chỉ import từ <span
+                    class="ic">shared/</span>. Không bao giờ import ngược chiều. Khi Claude thêm import, nó tuân theo
+                rule này nếu bạn ghi rõ trong <span class="ic">.ai/rules/frontend.md</span>.
+            </div>
+        </div>
+
+        <!-- ─── RULES ─── -->
+        <div class="sec" id="rules">
+            <div class="sec-tag">Building Block #1</div>
+            <h2>📜 Rules — Quy tắc bắt buộc</h2>
+            <p>Rules là những ràng buộc Claude PHẢI tuân theo. Không phải gợi ý — là luật. Ghi rõ ràng, ngắn gọn, dễ
+                kiểm tra.</p>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/rules/backend.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · backend.md</span><button class="cbtn"
+                        onclick="cp(this,'r1')">Copy</button>
+                </div>
+                <pre id="r1"><span class="cm"># Backend Rules — Spring Boot 3 / Java 21</span>
+
+<span class="cm">## ❌ KHÔNG ĐƯỢC LÀM</span>
+- Không dùng field injection (@Autowired trên field) — chỉ dùng constructor injection
+- Không trả về Entity trực tiếp từ Controller — phải qua DTO
+- Không dùng Optional.get() không có isPresent() check
+- Không dùng System.out.println() — chỉ dùng SLF4J Logger
+- Không bao giờ catch(Exception e) mà không log hoặc rethrow
+- Không đặt business logic trong @Entity class
+- Không dùng @Transactional trên private method
+
+<span class="cm">## ✅ PHẢI LÀM</span>
+- Mọi method public phải có Javadoc
+- DTO phải là Java records (immutable)
+- Repository method phải có @Query rõ ràng, không dùng derived method nếu query phức tạp
+- Service layer phải có @Transactional(readOnly = true) cho read operations
+- Exception handling: throw custom exception, handle tại @ControllerAdvice
+- Mọi API response phải wrap trong ApiResponse&lt;T&gt; generic wrapper
+- Test: minimum 80% coverage cho domain và application layer
+
+<span class="cm">## 📏 NAMING CONVENTIONS</span>
+- Entity: PascalCase, không có suffix (Order, không phải OrderEntity)
+- JPA Entity class: OrderJpaEntity (suffix JpaEntity)
+- Repository interface: OrderRepository (port), OrderJpaRepository (adapter)
+- Use case: PlaceOrderUseCase (interface), PlaceOrderUseCaseImpl (impl)
+- DTO: PlaceOrderRequest, OrderResponse (không dùng DTO suffix)
+- Constants: ALL_CAPS_SNAKE_CASE trong enum hoặc class riêng</pre>
+            </div>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/rules/frontend.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · frontend.md</span><button class="cbtn"
+                        onclick="cp(this,'r2')">Copy</button>
+                </div>
+                <pre id="r2"><span class="cm"># Frontend Rules — React 19 / TypeScript</span>
+
+<span class="cm">## ❌ KHÔNG ĐƯỢC LÀM</span>
+- Không dùng 'any' type — luôn type explicit
+- Không dùng default export cho components — chỉ named export
+- Không gọi API trực tiếp trong component — phải qua custom hook
+- Không dùng useEffect cho data fetching — dùng React Query
+- Không mutate state trực tiếp — luôn tạo object mới
+- Không import từ layer cao hơn trong FSD hierarchy
+
+<span class="cm">## ✅ PHẢI LÀM</span>
+- Mọi component phải có TypeScript interface cho props
+- Dùng Zod cho form validation và API response validation
+- Error boundary cho mỗi feature module
+- Suspense + skeleton loading cho async components
+- Memoization: useMemo cho expensive calculations, useCallback cho handlers
+- Tên component file = tên component (OrderCard.tsx export { OrderCard })
+
+<span class="cm">## 🎨 STYLING</span>
+- Dùng Tailwind CSS utility classes
+- Custom design tokens trong tailwind.config.ts
+- Không inline style trừ dynamic values (height, width computed)
+- Dark mode: dùng dark: prefix của Tailwind
+
+<span class="cm">## 📡 API CALLS</span>
+- Mọi request qua shared/api/client.ts (axios instance đã config)
+- React Query keys: ['orders', orderId] — array format
+- Error: toast notification qua react-hot-toast
+- Loading: skeleton component, không dùng spinner riêng lẻ</pre>
+            </div>
+        </div>
+
+        <!-- ─── SKILLS ─── -->
+        <div class="sec" id="skills">
+            <div class="sec-tag">Building Block #2</div>
+            <h2>⚡ Skills — Kỹ năng chuyên biệt</h2>
+            <p>Skills là "playbook" cho Claude về cách xử lý một tác vụ cụ thể. Khác với rules (cấm/cho phép), skills là
+                <strong>hướng dẫn chi tiết cách làm tốt nhất</strong>.</p>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/skills/jpa-query.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · jpa-query.md</span><button class="cbtn"
+                        onclick="cp(this,'s1')">Copy</button>
+                </div>
+                <pre id="s1"><span class="cm"># Skill: JPA Query Optimization</span>
+
+<span class="cm">## Khi nào áp dụng</span>
+Khi viết Repository methods, @Query annotations, hoặc khi nhận được
+yêu cầu liên quan đến database query performance.
+
+<span class="cm">## Nguyên tắc cốt lõi</span>
+
+<span class="cm">### 1. Luôn kiểm tra N+1 risk</span>
+Nếu entity có @OneToMany hoặc @ManyToMany:
+- DEFAULT: fetch = FetchType.LAZY (luôn lazy)
+- Khi cần join: dùng @EntityGraph hoặc JOIN FETCH
+- Không bao giờ fetch EAGER cho collection
+
+<span class="cm">### 2. Ưu tiên Projection cho read queries</span>
+Thay vì load toàn bộ entity, dùng DTO projection:
+
+```java
+// Thay vì:
+List&lt;Order&gt; findByUserId(Long userId);
+
+// Dùng:
+@Query("SELECT new com.app.dto.OrderSummary(o.id, o.status, o.total) " +
+       "FROM Order o WHERE o.userId = :userId")
+List&lt;OrderSummary&gt; findSummaryByUserId(@Param("userId") Long userId);
+```
+
+<span class="cm">### 3. Pagination bắt buộc cho list queries</span>
+Không bao giờ trả về List không giới hạn — luôn dùng Pageable:
+
+```java
+Page&lt;OrderSummary&gt; findByUserId(Long userId, Pageable pageable);
+```
+
+<span class="cm">### 4. Index hints trong @Query</span>
+Với query phức tạp, comment index đang dùng:
+```java
+@Query(value = "/* INDEX(orders idx_user_status) */ ...")
+```
+
+<span class="cm">## Anti-patterns cần tránh</span>
+- findAll() không có filter/pagination
+- Gọi repository trong vòng lặp (N+1 pattern)
+- COUNT query riêng để check tồn tại — dùng EXISTS thay thế
+- JPQL với string concatenation — luôn dùng @Param</pre>
+            </div>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/skills/react-patterns.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · react-patterns.md</span><button class="cbtn"
+                        onclick="cp(this,'s2')">Copy</button>
+                </div>
+                <pre id="s2"><span class="cm"># Skill: React Component Patterns</span>
+
+<span class="cm">## Data Fetching Pattern (React Query)</span>
+```typescript
+<span class="cm">// hooks/useOrders.ts</span>
+<span class="kw">export function</span> <span class="fn">useOrders</span>(filters: OrderFilters) {
+  <span class="kw">return</span> <span class="fn">useQuery</span>({
+    queryKey: [<span class="st">'orders'</span>, filters],
+    queryFn: () =&gt; ordersApi.<span class="fn">getAll</span>(filters),
+    staleTime: <span class="nm">5</span> * <span class="nm">60</span> * <span class="nm">1000</span>, <span class="cm">// 5 minutes</span>
+    select: (data) =&gt; data.items,   <span class="cm">// transform ngay trong query</span>
+  });
+}
+
+<span class="cm">// Component sử dụng</span>
+<span class="kw">export function</span> <span class="fn">OrderList</span>() {
+  <span class="kw">const</span> { data, isLoading, error } = <span class="fn">useOrders</span>({ status: <span class="st">'ACTIVE'</span> });
+  
+  <span class="kw">if</span> (isLoading) <span class="kw">return</span> &lt;<span class="fn">OrderListSkeleton</span> /&gt;;
+  <span class="kw">if</span> (error) <span class="kw">return</span> &lt;<span class="fn">ErrorState</span> error={error} /&gt;;
+  <span class="kw">return</span> &lt;<span class="fn">OrderGrid</span> orders={data} /&gt;;
+}
+```
+
+<span class="cm">## Form Pattern (React Hook Form + Zod)</span>
+```typescript
+<span class="kw">const</span> schema = z.<span class="fn">object</span>({
+  amount: z.<span class="fn">number</span>().<span class="fn">positive</span>().<span class="fn">max</span>(<span class="nm">1_000_000</span>),
+  note: z.<span class="fn">string</span>().<span class="fn">max</span>(<span class="nm">500</span>).<span class="fn">optional</span>(),
+});
+
+<span class="kw">export function</span> <span class="fn">OrderForm</span>({ onSuccess }: Props) {
+  <span class="kw">const</span> { register, handleSubmit, formState } = <span class="fn">useForm</span>({
+    resolver: <span class="fn">zodResolver</span>(schema),
+  });
+  <span class="kw">const</span> mutation = <span class="fn">usePlaceOrder</span>();
+  
+  <span class="kw">return</span> (
+    &lt;<span class="fn">form</span> onSubmit={<span class="fn">handleSubmit</span>((data) =&gt; mutation.<span class="fn">mutate</span>(data))}&gt;
+      ...
+    &lt;/form&gt;
+  );
+}
+```</pre>
+            </div>
+        </div>
+
+        <!-- ─── TOOLS ─── -->
+        <div class="sec" id="tools">
+            <div class="sec-tag">Building Block #3</div>
+            <h2>🔧 Tools — Công cụ thực thi</h2>
+            <p>Tools là functions Claude có thể gọi để tương tác với hệ thống thực. Định nghĩa qua MCP (Model Context
+                Protocol) hoặc trong system prompt.</p>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">🗄️</div>
+                    <div class="card-title">Database Tools</div>
+                    <div class="card-desc">Query PostgreSQL, xem schema, explain query plan, kiểm tra index usage.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">📦</div>
+                    <div class="card-title">Git Tools</div>
+                    <div class="card-desc">Read file, list changes, create branch, commit, xem diff, blame.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🔍</div>
+                    <div class="card-title">Search Tools</div>
+                    <div class="card-desc">Tìm kiếm trong codebase, grep pattern, tìm usages của function/class.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🧪</div>
+                    <div class="card-title">Test Tools</div>
+                    <div class="card-desc">Chạy unit test, xem coverage report, run specific test class.</div>
+                </div>
+            </div>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/tools/db-tools.json</span> (MCP format)</h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">JSON · MCP Tool Definition</span><button class="cbtn"
+                        onclick="cp(this,'t1')">Copy</button>
+                </div>
+                <pre id="t1">{
+  <span class="prop">"tools"</span>: [
+    {
+      <span class="prop">"name"</span>: <span class="st">"query_database"</span>,
+      <span class="prop">"description"</span>: <span class="st">"Chạy SELECT query trên PostgreSQL database của project. Chỉ SELECT — không INSERT/UPDATE/DELETE."</span>,
+      <span class="prop">"inputSchema"</span>: {
+        <span class="prop">"type"</span>: <span class="st">"object"</span>,
+        <span class="prop">"properties"</span>: {
+          <span class="prop">"sql"</span>: {
+            <span class="prop">"type"</span>: <span class="st">"string"</span>,
+            <span class="prop">"description"</span>: <span class="st">"SQL SELECT query. Không được chứa DDL hoặc DML."</span>
+          },
+          <span class="prop">"limit"</span>: {
+            <span class="prop">"type"</span>: <span class="st">"number"</span>,
+            <span class="prop">"default"</span>: <span class="nm">20</span>,
+            <span class="prop">"description"</span>: <span class="st">"Số rows tối đa trả về"</span>
+          }
+        },
+        <span class="prop">"required"</span>: [<span class="st">"sql"</span>]
+      }
+    },
+    {
+      <span class="prop">"name"</span>: <span class="st">"get_table_schema"</span>,
+      <span class="prop">"description"</span>: <span class="st">"Lấy schema (columns, types, constraints) của một bảng"</span>,
+      <span class="prop">"inputSchema"</span>: {
+        <span class="prop">"type"</span>: <span class="st">"object"</span>,
+        <span class="prop">"properties"</span>: {
+          <span class="prop">"table_name"</span>: { <span class="prop">"type"</span>: <span class="st">"string"</span> }
+        },
+        <span class="prop">"required"</span>: [<span class="st">"table_name"</span>]
+      }
+    },
+    {
+      <span class="prop">"name"</span>: <span class="st">"explain_query"</span>,
+      <span class="prop">"description"</span>: <span class="st">"Chạy EXPLAIN ANALYZE để xem query execution plan"</span>,
+      <span class="prop">"inputSchema"</span>: {
+        <span class="prop">"type"</span>: <span class="st">"object"</span>,
+        <span class="prop">"properties"</span>: {
+          <span class="prop">"sql"</span>: { <span class="prop">"type"</span>: <span class="st">"string"</span> }
+        },
+        <span class="prop">"required"</span>: [<span class="st">"sql"</span>]
+      }
+    }
+  ]
+}</pre>
+            </div>
+        </div>
+
+        <!-- ─── AGENTS ─── -->
+        <div class="sec" id="agents">
+            <div class="sec-tag">Building Block #4</div>
+            <h2>🤖 Agents — Chuyên gia AI</h2>
+            <p>Mỗi Agent là một Claude instance được cấu hình cho một domain cụ thể — có system prompt riêng, tools
+                riêng, và rules riêng.</p>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/agents/backend-agent.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · backend-agent.md</span><button class="cbtn"
+                        onclick="cp(this,'a1')">Copy</button>
+                </div>
+                <pre id="a1"><span class="cm"># Backend Agent — System Prompt</span>
+
+<span class="cm">## Vai trò</span>
+Bạn là Senior Java Backend Developer với 10 năm kinh nghiệm Spring Boot.
+Bạn làm việc trên project MB Ageas Life — insurance platform, microservices.
+
+<span class="cm">## Stack hiện tại</span>
+- Java 21 (records, sealed interfaces, pattern matching)
+- Spring Boot 3.4 (Spring Security 6, Spring Data JPA 3)
+- Hibernate 6 / PostgreSQL 16
+- Kafka (confluent platform)
+- AWS EKS deployment, GitLab CI/CD
+- Liquibase migration
+
+<span class="cm">## Context dự án</span>
+- Package root: com.mbal.digital_platform
+- Services: declaration-service, rider-service, ul-gen4
+- API prefix: /api/v1/
+- Auth: JWT Bearer token, roles: AGENT, ADMIN, CUSTOMER
+- DB: mbal_db, schema: dps (digital platform schema)
+
+<span class="cm">## Tools có thể dùng</span>
+- query_database: đọc data để hiểu structure
+- get_table_schema: xem schema trước khi viết JPA entity
+- explain_query: debug slow queries
+
+<span class="cm">## Khi nhận yêu cầu implement feature</span>
+1. Hỏi rõ business requirement nếu chưa rõ
+2. Kiểm tra schema liên quan bằng get_table_schema tool
+3. Thiết kế domain model trước (entities, value objects)
+4. Implement theo thứ tự: domain → application → adapter
+5. Viết test song song với code
+6. Kiểm tra không vi phạm Rules
+
+<span class="cm">## Output format</span>
+- Luôn trả lời bằng tiếng Việt
+- Code phải compile được ngay, đầy đủ import
+- Giải thích quyết định thiết kế quan trọng
+- Đánh dấu TODO nếu cần thêm logic</pre>
+            </div>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/agents/qa-agent.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · qa-agent.md</span><button class="cbtn"
+                        onclick="cp(this,'a2')">Copy</button>
+                </div>
+                <pre id="a2"><span class="cm"># QA Agent — System Prompt</span>
+
+<span class="cm">## Vai trò</span>
+Bạn là QA Engineer kiêm Test Architect. Nhiệm vụ: đảm bảo code quality,
+viết comprehensive tests, và tìm bugs trước khi code vào production.
+
+<span class="cm">## Test Stack</span>
+- JUnit 5 + Mockito (unit tests)
+- Spring Boot Test + TestContainers (integration tests)
+- Wiremock (mock external services)
+- Frontend: Jest + React Testing Library + Playwright (E2E)
+
+<span class="cm">## Chiến lược test</span>
+- Unit test: domain và application layer (no Spring context)
+- Integration test: adapter layer (real DB via TestContainers)
+- Contract test: API contracts với Pact
+- E2E: happy paths và critical error paths
+
+<span class="cm">## Khi review code</span>
+Kiểm tra theo thứ tự:
+1. Test coverage — thiếu case nào?
+2. Security vulnerabilities (SQL injection, XSS, IDOR)
+3. Performance issues (N+1, missing index, unbounded queries)
+4. Error handling — edge cases chưa được handle
+5. Code conventions theo .ai/rules/
+
+<span class="cm">## Output</span>
+- Báo lỗi theo mức độ: 🔴 Critical, 🟡 Warning, 🟢 Suggestion
+- Luôn kèm code fix cho mỗi issue tìm được
+- Đề xuất thêm test cases còn thiếu</pre>
+            </div>
+        </div>
+
+        <!-- ─── WORKFLOWS ─── -->
+        <div class="sec" id="workflows">
+            <div class="sec-tag">Building Block #5</div>
+            <h2>🔄 Workflows — Quy trình tự động</h2>
+            <p>Workflows định nghĩa chuỗi bước Claude cần thực hiện cho một tác vụ phức tạp. Biến công việc lặp đi lặp
+                lại thành quy trình nhất quán.</p>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/workflows/feature-dev.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · feature-dev.md</span><button class="cbtn"
+                        onclick="cp(this,'w1')">Copy</button>
+                </div>
+                <pre id="w1"><span class="cm"># Workflow: Feature Development</span>
+
+<span class="cm">## Trigger</span>
+Khi nhận yêu cầu: "Implement feature X" hoặc "Thêm API endpoint Y"
+
+<span class="cm">## Bước 1: Phân tích yêu cầu (Analysis)</span>
+[ ] Xác nhận business requirement với user
+[ ] Identify affected services/modules
+[ ] List entities và tables liên quan
+[ ] Xác định API contract (endpoint, request, response schema)
+[ ] Estimate complexity: S/M/L
+
+<span class="cm">## Bước 2: Database design</span>
+[ ] Kiểm tra schema hiện tại (dùng get_table_schema tool)
+[ ] Thiết kế migration Liquibase nếu cần thay đổi schema
+[ ] Review index strategy cho query patterns mới
+
+<span class="cm">## Bước 3: Backend implementation</span>
+[ ] Domain model: Entity/ValueObject mới hoặc cập nhật
+[ ] Port interface: UseCase (in) + Repository (out)
+[ ] Use case implementation
+[ ] Repository adapter (JPA)
+[ ] REST Controller với proper validation
+[ ] Exception handling tại ControllerAdvice
+
+<span class="cm">## Bước 4: Tests</span>
+[ ] Unit tests cho domain logic (không cần Spring context)
+[ ] Use case tests với mocked ports
+[ ] Integration test cho Repository với TestContainers
+[ ] Controller test với MockMvc
+
+<span class="cm">## Bước 5: Frontend implementation</span>
+[ ] TypeScript types/interfaces
+[ ] API function trong feature/api/
+[ ] React Query hook
+[ ] UI Components
+[ ] Form với validation nếu cần
+
+<span class="cm">## Bước 6: Review checklist</span>
+[ ] Không vi phạm Rules (check .ai/rules/)
+[ ] Performance: không có N+1 query
+[ ] Security: proper auth/authz
+[ ] Error cases được handle
+[ ] Docs: Javadoc + Swagger annotation
+
+<span class="cm">## Output format</span>
+Sau mỗi bước, report: ✅ Done / ⏳ In progress / ❌ Blocked + reason</pre>
+            </div>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/workflows/bug-fix.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · bug-fix.md</span><button class="cbtn"
+                        onclick="cp(this,'w2')">Copy</button>
+                </div>
+                <pre id="w2"><span class="cm"># Workflow: Bug Fix</span>
+
+<span class="cm">## Trigger</span>
+Khi nhận error log, stack trace, hoặc mô tả bug
+
+<span class="cm">## Bước 1: Reproduce & Understand</span>
+[ ] Xác định chính xác điều kiện gây ra bug
+[ ] Trace stack từ trên xuống, xác định root cause
+[ ] Query DB nếu cần verify data state (dùng query_database tool)
+
+<span class="cm">## Bước 2: Fix</span>
+[ ] Implement fix tối thiểu nhất (surgical fix)
+[ ] Không refactor code khác trong cùng PR — tách thành PR riêng
+[ ] Đảm bảo fix không break existing behavior
+
+<span class="cm">## Bước 3: Test</span>
+[ ] Viết failing test reproduce bug TRƯỚC KHI fix
+[ ] Verify test pass SAU KHI fix
+[ ] Kiểm tra regression: run related tests
+
+<span class="cm">## Bước 4: Document</span>
+[ ] Comment trong code giải thích tại sao fix như vậy
+[ ] Update .ai/memory/known-issues.md
+[ ] Nếu là systemic issue: tạo entry trong tech-debt.md
+
+<span class="cm">## Template comment trong code</span>
+```java
+// FIX(2026-01-15): [Mô tả bug]
+// Root cause: [Nguyên nhân]
+// Solution: [Giải thích fix]
+// Related ticket: #JIRA-123</pre>
+            </div>
+        </div>
+
+        <!-- ─── MEMORY ─── -->
+        <div class="sec" id="memory">
+            <div class="sec-tag">Building Block #6</div>
+            <h2>🧠 Memory — Bộ nhớ dự án</h2>
+            <p>Memory là nơi lưu trữ kiến thức accumulated về dự án — để Claude "nhớ" quyết định đã làm, lỗi đã gặp, và
+                context quan trọng mà không cần giải thích lại mỗi lần.</p>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/memory/decisions.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · decisions.md</span><button class="cbtn"
+                        onclick="cp(this,'m1')">Copy</button>
+                </div>
+                <pre id="m1"><span class="cm"># Architectural Decisions Log</span>
+
+<span class="cm">## [ADR-001] Dùng Hexagonal Architecture</span>
+**Date:** 2025-11-01 | **Status:** Accepted
+**Decision:** Áp dụng Hexagonal Architecture cho tất cả services
+**Reason:** Team hay nhầm lẫn giữa domain logic và infrastructure code.
+Hexagonal tạo boundary rõ ràng, test dễ hơn (domain không cần Spring context).
+**Consequence:** Thêm boilerplate (port interfaces), nhưng đáng.
+
+---
+
+<span class="cm">## [ADR-002] Không dùng Lombok</span>
+**Date:** 2025-11-15 | **Status:** Accepted
+**Decision:** Loại bỏ Lombok khỏi toàn bộ project
+**Reason:** Java 21 records thay thế được @Data/@Value.
+Lombok gây friction với IDE và annotation processing.
+**Rule:** DTO = records, Entity = handwritten getters nếu cần.
+
+---
+
+<span class="cm">## [ADR-003] Kafka event naming convention</span>
+**Date:** 2025-12-01 | **Status:** Accepted
+**Decision:** Topic format: {domain}.{entity}.{event} (lowercase, dot-separated)
+**Examples:** 
+  - payment.order.placed
+  - notification.email.sent
+  - declaration.form.submitted
+**Reason:** Nhất quán, dễ filter, dễ wildcard subscription.
+
+---
+
+<span class="cm">## [ADR-004] Response wrapper ApiResponse&lt;T&gt;</span>
+**Date:** 2026-01-10 | **Status:** Accepted
+**Decision:** Mọi API response wrap trong:
+```json
+{ "success": true, "data": {...}, "timestamp": "...", "requestId": "..." }
+```
+**Reason:** Frontend cần consistent error handling, request tracing.</pre>
+            </div>
+
+            <h3>📄 Ví dụ: <span class="ic">.ai/memory/known-issues.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · known-issues.md</span><button class="cbtn"
+                        onclick="cp(this,'m2')">Copy</button>
+                </div>
+                <pre id="m2"><span class="cm"># Known Issues & Workarounds</span>
+
+<span class="cm">## [ISSUE-001] Hibernate 5: IN clause với Enum Collection</span>
+**Symptom:** SQLGrammarException khi dùng `WHERE status IN :statuses`
+  với `List&lt;StatusEnum&gt;` parameter.
+**Root cause:** Hibernate 5 không bind đúng Enum collection.
+**Workaround:** Convert sang List&lt;String&gt; trước khi truyền vào query:
+```java
+List&lt;String&gt; statusNames = statuses.stream()
+    .map(Enum::name).collect(toList());
+```
+**Status:** Fixed in Hibernate 6 (Spring Boot 3.x). Còn tồn tại ở declaration-service (Spring Boot 2.7).
+
+---
+
+<span class="cm">## [ISSUE-002] Liquibase timeout trên EKS cold start</span>
+**Symptom:** Pod crash với "Liquibase lock timeout" khi deploy mới.
+**Root cause:** Previous pod chết giữa chừng, không release Liquibase lock.
+**Workaround:** Manual fix: `UPDATE databasechangeloglock SET LOCKED=0`
+**Prevention:** `spring.liquibase.lock-wait-time=10m` trong application.yml
+
+---
+
+<span class="cm">## [ISSUE-003] @Transactional không hoạt động trên private method</span>
+**Context:** Hay gặp khi self-invocation trong Service class.
+**Root cause:** Spring AOP proxy không intercept private hoặc self-call.
+**Fix:** Extract sang method public hoặc sang class khác.
+**Note:** Claude sẽ cảnh báo về pattern này khi review code.</pre>
+            </div>
+        </div>
+
+        <!-- ─── CONTEXT / CLAUDE.MD ─── -->
+        <div class="sec" id="context">
+            <div class="sec-tag">Building Block #7</div>
+            <h2>📋 Context — CLAUDE.md chuẩn</h2>
+            <p>CLAUDE.md là file Claude đọc đầu tiên khi mở project. Đây là "bản đồ" dự án — phải ngắn gọn, có cấu trúc,
+                và liên kết đến các file chi tiết hơn.</p>
+
+            <div class="box warn">
+                <div class="box-lbl">⚠️ Nguyên tắc viết CLAUDE.md</div>
+                CLAUDE.md không nên quá dài (tối đa 200-300 dòng). Đây là index — cung cấp context cần thiết ngay và
+                <strong>link đến chi tiết</strong> trong thư mục .ai/. Claude đọc file này đầu tiên mỗi conversation.
+            </div>
+        </div>
+
+        <!-- ─── CLAUDE.MD FULL EXAMPLE ─── -->
+        <div class="sec" id="claude-md">
+            <div class="sec-tag">Template</div>
+            <h2>📝 CLAUDE.md — Template hoàn chỉnh</h2>
+
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · CLAUDE.md</span><button class="cbtn"
+                        onclick="cp(this,'cm1')">Copy</button>
+                </div>
+                <pre id="cm1"><span class="cm"># CLAUDE.md — MB Ageas Life Digital Platform</span>
+<span class="cm">> Last updated: 2026-01-15 | Stack: Java 21 + Spring Boot 3.4 + React 19</span>
+
+<span class="cm">## 🎯 Dự án là gì?</span>
+Platform bán bảo hiểm nhân thọ trực tuyến cho MB Ageas Life.
+Kiến trúc microservices, deploy trên AWS EKS, 500k+ users.
+
+**Services chính:**
+- `declaration-service` — form khai báo sức khỏe của khách hàng
+- `rider-service` — quản lý rider (quyền lợi bổ sung)
+- `ul-gen4` — sản phẩm bảo hiểm liên kết đầu tư thế hệ 4
+- `notification-service` — email/SMS/push notification
+
+<span class="cm">## 📂 Đọc thêm chi tiết</span>
+- Coding rules: `.ai/rules/backend.md` và `.ai/rules/frontend.md`
+- Skills: `.ai/skills/` (jpa-query.md, api-design.md, react-patterns.md)
+- Agents: `.ai/agents/` (backend-agent.md, frontend-agent.md, qa-agent.md)
+- Workflows: `.ai/workflows/` (feature-dev.md, bug-fix.md)
+- Known issues: `.ai/memory/known-issues.md` ← đọc trước khi debug
+- Decisions: `.ai/memory/decisions.md` ← tại sao code lại như vậy
+
+<span class="cm">## 🏗️ Kiến trúc Backend</span>
+**Pattern:** Hexagonal Architecture + DDD
+```
+domain/          ← No framework, pure Java
+application/     ← Use cases (orchestration)
+adapter/in/      ← REST controllers, Kafka consumers
+adapter/out/     ← JPA repositories, Kafka producers
+config/          ← Spring configuration
+```
+
+<span class="cm">## ⚡ Quick Reference</span>
+
+**Package root:** `com.mbal.digital_platform`
+**API prefix:** `/api/v1/`
+**DB schema:** `dps` (digital platform schema)
+**Auth:** JWT Bearer, header: `Authorization: Bearer {token}`
+**Roles:** AGENT, ADMIN, CUSTOMER, SYSTEM
+
+**Kafka topics (format: domain.entity.event):**
+- `payment.order.placed`
+- `declaration.form.submitted`
+- `notification.email.requested`
+
+<span class="cm">## ⚠️ QUAN TRỌNG — Đọc trước khi code</span>
+1. Xem `.ai/memory/known-issues.md` để biết bugs đã biết và workarounds
+2. KHÔNG dùng Lombok — dùng Java records cho DTOs
+3. KHÔNG trả về Entity từ Controller — luôn dùng DTO
+4. Mọi query có Collection parameter: xem ISSUE-001 trong known-issues.md
+5. Response format: luôn wrap trong `ApiResponse&lt;T&gt;`
+
+<span class="cm">## 🚀 Chạy local</span>
+```bash
+# Start dependencies
+docker-compose up -d postgres kafka redis
+
+# Run service
+./mvnw spring-boot:run -pl declaration-service -Dspring.profiles.active=local
+
+# Frontend
+cd frontend && npm run dev
+```
+
+<span class="cm">## 🤝 Khi nào dùng Agent nào?</span>
+- **Backend questions** → Đọc `.ai/agents/backend-agent.md`
+- **Frontend questions** → Đọc `.ai/agents/frontend-agent.md`
+- **Code review / bugs** → Đọc `.ai/agents/qa-agent.md`
+- **New feature** → Follow `.ai/workflows/feature-dev.md`</pre>
+            </div>
+        </div>
+
+        <!-- ─── BACKEND EXAMPLE ─── -->
+        <div class="sec" id="be-example">
+            <div class="sec-tag">Ví dụ thực tế · Backend</div>
+            <h2>☕ Ví dụ Backend hoàn chỉnh</h2>
+            <p>Một feature hoàn chỉnh: API tạo health declaration form — từ domain model đến REST endpoint, theo đúng
+                Hexagonal Architecture.</p>
+
+            <h3>1. Domain Model</h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Java · domain/model/HealthDeclaration.java</span><button class="cbtn"
+                        onclick="cp(this,'be1')">Copy</button>
+                </div>
+                <pre id="be1"><span class="cm">// domain/model/HealthDeclaration.java — Aggregate Root</span>
+<span class="cm">// ✅ Không có Spring annotation nào ở đây</span>
+<span class="kw">public class</span> <span class="fn">HealthDeclaration</span> {
+
+    <span class="kw">private final</span> DeclarationId id;
+    <span class="kw">private final</span> CustomerId customerId;
+    <span class="kw">private</span> DeclarationStatus status;
+    <span class="kw">private</span> List&lt;HealthAnswer&gt; answers;
+    <span class="kw">private final</span> LocalDateTime createdAt;
+
+    <span class="cm">// Factory method — không dùng constructor trực tiếp</span>
+    <span class="kw">public static</span> HealthDeclaration <span class="fn">create</span>(CustomerId customerId) {
+        <span class="kw">return new</span> <span class="fn">HealthDeclaration</span>(
+            DeclarationId.<span class="fn">generate</span>(),
+            customerId,
+            DeclarationStatus.DRAFT,
+            <span class="kw">new</span> ArrayList&lt;&gt;(),
+            LocalDateTime.<span class="fn">now</span>()
+        );
+    }
+
+    <span class="cm">// Business logic ở đây, không ở Service</span>
+    <span class="kw">public void</span> <span class="fn">submitAnswer</span>(QuestionId questionId, String answer) {
+        <span class="kw">if</span> (status != DeclarationStatus.DRAFT) {
+            <span class="kw">throw new</span> <span class="fn">DomainException</span>(<span class="st">"Chỉ DRAFT declaration mới có thể sửa"</span>);
+        }
+        answers.<span class="fn">removeIf</span>(a -&gt; a.questionId().<span class="fn">equals</span>(questionId));
+        answers.<span class="fn">add</span>(<span class="kw">new</span> <span class="fn">HealthAnswer</span>(questionId, answer));
+    }
+
+    <span class="kw">public void</span> <span class="fn">submit</span>() {
+        <span class="kw">if</span> (answers.<span class="fn">isEmpty</span>()) {
+            <span class="kw">throw new</span> <span class="fn">DomainException</span>(<span class="st">"Không thể submit form rỗng"</span>);
+        }
+        <span class="kw">this</span>.status = DeclarationStatus.SUBMITTED;
+    }
+}</pre>
+            </div>
+
+            <h3>2. Use Case (Application Layer)</h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Java · application/usecase/SubmitDeclarationUseCaseImpl.java</span><button
+                        class="cbtn" onclick="cp(this,'be2')">Copy</button>
+                </div>
+                <pre id="be2"><span class="cm">// ✅ @Service ở đây (application layer) — không ở domain</span>
+<span class="kw">@Service</span>
+<span class="kw">@RequiredArgsConstructor</span>
+<span class="kw">@Slf4j</span>
+<span class="kw">public class</span> <span class="fn">SubmitDeclarationUseCaseImpl</span> <span class="kw">implements</span> SubmitDeclarationUseCase {
+
+    <span class="kw">private final</span> DeclarationRepository declarationRepo;   <span class="cm">// output port</span>
+    <span class="kw">private final</span> DeclarationEventPublisher eventPublisher;  <span class="cm">// output port</span>
+
+    <span class="kw">@Override</span>
+    <span class="kw">@Transactional</span>
+    <span class="kw">public</span> DeclarationResponse <span class="fn">submit</span>(SubmitDeclarationCommand cmd) {
+        log.<span class="fn">info</span>(<span class="st">"Submitting declaration: {}"</span>, cmd.declarationId());
+
+        HealthDeclaration declaration = declarationRepo
+            .<span class="fn">findById</span>(cmd.declarationId())
+            .<span class="fn">orElseThrow</span>(() -&gt; <span class="kw">new</span> <span class="fn">DeclarationNotFoundException</span>(cmd.declarationId()));
+
+        <span class="cm">// Business logic trong domain object</span>
+        declaration.<span class="fn">submit</span>();
+
+        declarationRepo.<span class="fn">save</span>(declaration);
+        eventPublisher.<span class="fn">publish</span>(<span class="kw">new</span> <span class="fn">DeclarationSubmittedEvent</span>(declaration));
+
+        <span class="kw">return</span> DeclarationResponse.<span class="fn">from</span>(declaration);
+    }
+}</pre>
+            </div>
+
+            <h3>3. REST Controller (Adapter Layer)</h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Java · adapter/in/rest/DeclarationController.java</span><button
+                        class="cbtn" onclick="cp(this,'be3')">Copy</button>
+                </div>
+                <pre id="be3"><span class="kw">@RestController</span>
+<span class="kw">@RequestMapping</span>(<span class="st">"/api/v1/declarations"</span>)
+<span class="kw">@RequiredArgsConstructor</span>
+<span class="kw">@Tag</span>(name = <span class="st">"Declaration"</span>, description = <span class="st">"Health Declaration API"</span>)
+<span class="kw">public class</span> <span class="fn">DeclarationController</span> {
+
+    <span class="kw">private final</span> SubmitDeclarationUseCase submitUseCase;  <span class="cm">// input port</span>
+
+    <span class="kw">@PostMapping</span>(<span class="st">"/{id}/submit"</span>)
+    <span class="kw">@PreAuthorize</span>(<span class="st">"hasRole('CUSTOMER')"</span>)
+    <span class="kw">@Operation</span>(summary = <span class="st">"Submit health declaration form"</span>)
+    <span class="kw">public</span> ResponseEntity&lt;ApiResponse&lt;DeclarationResponse&gt;&gt; <span class="fn">submit</span>(
+            <span class="kw">@PathVariable</span> UUID id,
+            <span class="kw">@AuthenticationPrincipal</span> UserPrincipal user) {
+
+        <span class="kw">var</span> command = <span class="kw">new</span> <span class="fn">SubmitDeclarationCommand</span>(
+            DeclarationId.<span class="fn">of</span>(id),
+            CustomerId.<span class="fn">of</span>(user.getId())
+        );
+
+        DeclarationResponse result = submitUseCase.<span class="fn">submit</span>(command);
+        <span class="kw">return</span> ResponseEntity
+            .<span class="fn">ok</span>(ApiResponse.<span class="fn">success</span>(result));
+    }
+}
+
+<span class="cm">// DTO — Java record (không dùng Lombok)</span>
+<span class="kw">public record</span> <span class="fn">DeclarationResponse</span>(
+    UUID id,
+    String status,
+    <span class="kw">int</span> answerCount,
+    LocalDateTime submittedAt
+) {
+    <span class="kw">public static</span> DeclarationResponse <span class="fn">from</span>(HealthDeclaration d) {
+        <span class="kw">return new</span> <span class="fn">DeclarationResponse</span>(
+            d.getId().value(),
+            d.getStatus().name(),
+            d.getAnswers().size(),
+            LocalDateTime.<span class="fn">now</span>()
+        );
+    }
+}</pre>
+            </div>
+        </div>
+
+        <!-- ─── FRONTEND EXAMPLE ─── -->
+        <div class="sec" id="fe-example">
+            <div class="sec-tag">Ví dụ thực tế · Frontend</div>
+            <h2>⚛️ Ví dụ Frontend hoàn chỉnh</h2>
+            <p>Feature hoàn chỉnh: Order list với React Query, Zod validation, và proper TypeScript typing theo FSD
+                structure.</p>
+
+            <h3>1. Types & API</h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">TypeScript · features/orders/types/order.types.ts</span><button
+                        class="cbtn" onclick="cp(this,'fe1')">Copy</button>
+                </div>
+                <pre id="fe1"><span class="cm">// TypeScript types — never use 'any'</span>
+<span class="kw">import</span> { z } <span class="kw">from</span> <span class="st">'zod'</span>;
+
+<span class="cm">// Zod schema — validation + type inference</span>
+<span class="kw">export const</span> OrderSchema = z.<span class="fn">object</span>({
+  id: z.<span class="fn">string</span>().<span class="fn">uuid</span>(),
+  status: z.<span class="fn">enum</span>([<span class="st">'DRAFT'</span>, <span class="st">'SUBMITTED'</span>, <span class="st">'APPROVED'</span>, <span class="st">'REJECTED'</span>]),
+  customerId: z.<span class="fn">string</span>().<span class="fn">uuid</span>(),
+  totalAmount: z.<span class="fn">number</span>().<span class="fn">positive</span>(),
+  createdAt: z.<span class="fn">string</span>().<span class="fn">datetime</span>(),
+});
+
+<span class="kw">export const</span> OrderListResponseSchema = z.<span class="fn">object</span>({
+  success: z.<span class="fn">boolean</span>(),
+  data: z.<span class="fn">object</span>({
+    items: z.<span class="fn">array</span>(OrderSchema),
+    total: z.<span class="fn">number</span>(),
+    page: z.<span class="fn">number</span>(),
+    pageSize: z.<span class="fn">number</span>(),
+  }),
+});
+
+<span class="cm">// Inferred types from Zod schemas</span>
+<span class="kw">export type</span> Order = z.infer&lt;<span class="kw">typeof</span> OrderSchema&gt;;
+<span class="kw">export type</span> OrderListResponse = z.infer&lt;<span class="kw">typeof</span> OrderListResponseSchema&gt;;
+
+<span class="kw">export interface</span> OrderFilters {
+  status?: Order[<span class="st">'status'</span>];
+  page?: <span class="kw">number</span>;
+  pageSize?: <span class="kw">number</span>;
+}</pre>
+            </div>
+
+            <h3>2. API Function</h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">TypeScript · features/orders/api/orders.api.ts</span><button class="cbtn"
+                        onclick="cp(this,'fe2')">Copy</button>
+                </div>
+                <pre id="fe2"><span class="kw">import</span> { apiClient } <span class="kw">from</span> <span class="st">'@/shared/api/client'</span>;
+<span class="kw">import</span> { OrderListResponseSchema, OrderFilters } <span class="kw">from</span> <span class="st">'../types/order.types'</span>;
+
+<span class="kw">export const</span> ordersApi = {
+  <span class="cm">// Validate response với Zod — catch schema mismatch sớm</span>
+  <span class="fn">getAll</span>: <span class="kw">async</span> (filters: OrderFilters = {}) => {
+    <span class="kw">const</span> { data } = <span class="kw">await</span> apiClient.<span class="fn">get</span>(<span class="st">'/api/v1/orders'</span>, {
+      params: filters,
+    });
+    <span class="kw">return</span> OrderListResponseSchema.<span class="fn">parse</span>(data); <span class="cm">// throws if schema mismatch</span>
+  },
+
+  <span class="fn">getById</span>: <span class="kw">async</span> (id: string) => {
+    <span class="kw">const</span> { data } = <span class="kw">await</span> apiClient.<span class="fn">get</span>(<span class="st">`/api/v1/orders/${id}`</span>);
+    <span class="kw">return</span> data.data;
+  },
+
+  <span class="fn">create</span>: <span class="kw">async</span> (payload: CreateOrderPayload) => {
+    <span class="kw">const</span> { data } = <span class="kw">await</span> apiClient.<span class="fn">post</span>(<span class="st">'/api/v1/orders'</span>, payload);
+    <span class="kw">return</span> data.data;
+  },
+};</pre>
+            </div>
+
+            <h3>3. React Query Hook</h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">TypeScript · features/orders/hooks/useOrders.ts</span><button class="cbtn"
+                        onclick="cp(this,'fe3')">Copy</button>
+                </div>
+                <pre id="fe3"><span class="kw">import</span> { useQuery, useMutation, useQueryClient } <span class="kw">from</span> <span class="st">'@tanstack/react-query'</span>;
+<span class="kw">import</span> { ordersApi } <span class="kw">from</span> <span class="st">'../api/orders.api'</span>;
+<span class="kw">import</span> { OrderFilters } <span class="kw">from</span> <span class="st">'../types/order.types'</span>;
+<span class="kw">import</span> { toast } <span class="kw">from</span> <span class="st">'react-hot-toast'</span>;
+
+<span class="cm">// Query key factory — consistent, type-safe</span>
+<span class="kw">export const</span> orderKeys = {
+  all: [<span class="st">'orders'</span>] <span class="kw">as const</span>,
+  lists: () =&gt; [...orderKeys.all, <span class="st">'list'</span>] <span class="kw">as const</span>,
+  list: (filters: OrderFilters) =&gt; [...orderKeys.lists(), filters] <span class="kw">as const</span>,
+  detail: (id: string) =&gt; [...orderKeys.all, <span class="st">'detail'</span>, id] <span class="kw">as const</span>,
+};
+
+<span class="kw">export function</span> <span class="fn">useOrders</span>(filters: OrderFilters = {}) {
+  <span class="kw">return</span> <span class="fn">useQuery</span>({
+    queryKey: orderKeys.<span class="fn">list</span>(filters),
+    queryFn: () =&gt; ordersApi.<span class="fn">getAll</span>(filters),
+    staleTime: <span class="nm">5</span> * <span class="nm">60</span> * <span class="nm">1000</span>,
+    select: (res) =&gt; res.data,  <span class="cm">// transform trong query</span>
+  });
+}
+
+<span class="kw">export function</span> <span class="fn">useCreateOrder</span>() {
+  <span class="kw">const</span> queryClient = <span class="fn">useQueryClient</span>();
+
+  <span class="kw">return</span> <span class="fn">useMutation</span>({
+    mutationFn: ordersApi.create,
+    <span class="fn">onSuccess</span>: () =&gt; {
+      queryClient.<span class="fn">invalidateQueries</span>({ queryKey: orderKeys.<span class="fn">lists</span>() });
+      toast.<span class="fn">success</span>(<span class="st">'Order đã được tạo thành công!'</span>);
+    },
+    <span class="fn">onError</span>: (error) =&gt; {
+      toast.<span class="fn">error</span>(<span class="st">`Lỗi: ${error.message}`</span>);
+    },
+  });
+}</pre>
+            </div>
+
+            <h3>4. Component</h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">TypeScript · features/orders/components/OrderList.tsx</span><button
+                        class="cbtn" onclick="cp(this,'fe4')">Copy</button>
+                </div>
+                <pre id="fe4"><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="st">'react'</span>;
+<span class="kw">import</span> { useOrders } <span class="kw">from</span> <span class="st">'../hooks/useOrders'</span>;
+<span class="kw">import</span> { Order } <span class="kw">from</span> <span class="st">'../types/order.types'</span>;
+<span class="kw">import</span> { OrderCardSkeleton } <span class="kw">from</span> <span class="st">'./OrderCardSkeleton'</span>;
+<span class="kw">import</span> { ErrorState } <span class="kw">from</span> <span class="st">'@/shared/ui/ErrorState'</span>;
+
+<span class="cm">// Named export — không dùng default export</span>
+<span class="kw">export function</span> <span class="fn">OrderList</span>() {
+  <span class="kw">const</span> [status, setStatus] = <span class="fn">useState</span>&lt;Order[<span class="st">'status'</span>] | <span class="kw">undefined</span>&gt;();
+  <span class="kw">const</span> { data, isLoading, error } = <span class="fn">useOrders</span>({ status, pageSize: <span class="nm">20</span> });
+
+  <span class="kw">if</span> (isLoading) {
+    <span class="kw">return</span> (
+      &lt;div className=<span class="st">"grid grid-cols-2 gap-4"</span>&gt;
+        {Array.<span class="fn">from</span>({ length: <span class="nm">6</span> }).<span class="fn">map</span>((_, i) =&gt; (
+          &lt;<span class="fn">OrderCardSkeleton</span> key={i} /&gt;
+        ))}
+      &lt;/div&gt;
+    );
+  }
+
+  <span class="kw">if</span> (error) <span class="kw">return</span> &lt;<span class="fn">ErrorState</span> error={error} retry={() =&gt; {}} /&gt;;
+
+  <span class="kw">return</span> (
+    &lt;div&gt;
+      &lt;<span class="fn">StatusFilter</span> value={status} onChange={setStatus} /&gt;
+      &lt;div className=<span class="st">"grid grid-cols-2 gap-4 mt-4"</span>&gt;
+        {data?.items.<span class="fn">map</span>((order) =&gt; (
+          &lt;<span class="fn">OrderCard</span> key={order.id} order={order} /&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</pre>
+            </div>
+        </div>
+
+        <!-- ─── MULTI-AGENT ─── -->
+        <div class="sec" id="multi-agent">
+            <div class="sec-tag">Advanced</div>
+            <h2>🕸 Multi-agent System</h2>
+            <p>Khi dự án lớn, dùng nhiều Agent chuyên trách phối hợp nhau — Orchestrator điều phối, các sub-agent thực
+                thi.</p>
+
+            <div class="flow" style="flex-direction:column;align-items:flex-start;gap:12px">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div class="flow-node hl" style="width:160px;text-align:center">🎯 Orchestrator<div
+                            class="flow-sub">phân tích & điều phối</div>
+                    </div>
+                    <span style="color:var(--muted);font-size:13px">← nhận yêu cầu từ user</span>
+                </div>
+                <div style="display:flex;gap:20px;padding-left:40px">
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+                        <div style="color:var(--muted);font-size:20px">↓</div>
+                        <div class="flow-node" style="width:130px;text-align:center">☕ BE Agent<div class="flow-sub">
+                                Java/Spring</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+                        <div style="color:var(--muted);font-size:20px">↓</div>
+                        <div class="flow-node" style="width:130px;text-align:center">⚛️ FE Agent<div class="flow-sub">
+                                React/TS</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+                        <div style="color:var(--muted);font-size:20px">↓</div>
+                        <div class="flow-node" style="width:130px;text-align:center">🧪 QA Agent<div class="flow-sub">
+                                Tests/Review</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+                        <div style="color:var(--muted);font-size:20px">↓</div>
+                        <div class="flow-node" style="width:130px;text-align:center">🚀 DevOps Agent<div
+                                class="flow-sub">K8s/CI-CD</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>📄 <span class="ic">.ai/agents/orchestrator.md</span></h3>
+            <div class="cw">
+                <div class="ch">
+                    <div class="cdots">
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                        <div class="cdot"></div>
+                    </div><span class="clang">Markdown · orchestrator.md</span><button class="cbtn"
+                        onclick="cp(this,'ma1')">Copy</button>
+                </div>
+                <pre id="ma1"><span class="cm"># Orchestrator Agent</span>
+
+<span class="cm">## Vai trò</span>
+Bạn là Tech Lead. Nhận yêu cầu từ developer, phân tích,
+và điều phối các agent chuyên biệt thực hiện đúng phần việc của họ.
+
+<span class="cm">## Khi nhận yêu cầu mới</span>
+1. Phân tích: cần agent nào? BE, FE, QA, DevOps, hay kết hợp?
+2. Xác định thứ tự: BE trước → FE sau → QA review
+3. Giao việc rõ ràng: "Backend Agent: implement API endpoint X"
+4. Tổng hợp kết quả và report lại cho user
+
+<span class="cm">## Phân loại yêu cầu</span>
+
+**→ Backend Agent khi:**
+- "Implement use case / API endpoint"
+- "Fix JPA query", "Add Kafka consumer"
+- "Database migration", "Security issue"
+
+**→ Frontend Agent khi:**
+- "Create component", "Fix UI bug"
+- "Add React Query hook", "Form validation"
+
+**→ QA Agent khi:**
+- "Review code", "Write tests"
+- "Tìm security issues", "Performance review"
+
+**→ DevOps Agent khi:**
+- "Fix K8s deployment", "Update CI/CD"
+- "Configure monitoring", "Scale service"
+
+**→ Nhiều agent khi:**
+- "Implement full feature" → BE + FE + QA
+- "Major refactoring" → BE/FE + QA review
+
+<span class="cm">## Output format</span>
+```
+📋 PHÂN TÍCH: [tóm tắt yêu cầu]
+🎯 PLAN: [danh sách bước]
+---
+[Backend Agent]
+[nội dung cho BE agent]
+---
+[Frontend Agent]  
+[nội dung cho FE agent]
+---
+[QA Agent]
+[checklist review]
+```</pre>
+            </div>
+        </div>
+
+        <!-- ─── CHECKLIST ─── -->
+        <div class="sec" id="checklist">
+            <div class="sec-tag">Tổng kết</div>
+            <h2>✅ Checklist — Project tối ưu cho Claude</h2>
+
+            <div class="cards c3">
+                <div class="card" style="border-color:rgba(45,212,191,.3)">
+                    <div class="card-ico">📋</div>
+                    <div class="card-title">Context Layer</div>
+                    <div class="card-desc">
+                        ☐ CLAUDE.md ở root (≤300 dòng)<br>
+                        ☐ .ai/rules/ đủ 3 file (global, be, fe)<br>
+                        ☐ .ai/memory/decisions.md có ADRs<br>
+                        ☐ .ai/memory/known-issues.md<br>
+                        ☐ .cursorrules cho Cursor IDE
+                    </div>
+                </div>
+                <div class="card" style="border-color:rgba(251,191,36,.3)">
+                    <div class="card-ico">⚡</div>
+                    <div class="card-title">Skills & Agents</div>
+                    <div class="card-desc">
+                        ☐ Skills cho mỗi domain (JPA, API, React)<br>
+                        ☐ BE Agent với stack đầy đủ<br>
+                        ☐ FE Agent với component patterns<br>
+                        ☐ QA Agent với test strategy<br>
+                        ☐ Orchestrator agent nếu team lớn
+                    </div>
+                </div>
+                <div class="card" style="border-color:rgba(167,139,250,.3)">
+                    <div class="card-ico">🔄</div>
+                    <div class="card-title">Workflows</div>
+                    <div class="card-desc">
+                        ☐ feature-dev.md workflow<br>
+                        ☐ bug-fix.md workflow<br>
+                        ☐ code-review.md workflow<br>
+                        ☐ deploy.md workflow<br>
+                        ☐ Mỗi workflow có checklist rõ
+                    </div>
+                </div>
+                <div class="card" style="border-color:rgba(56,189,248,.3)">
+                    <div class="card-ico">🔧</div>
+                    <div class="card-title">Tools (MCP)</div>
+                    <div class="card-desc">
+                        ☐ Database tool (query, schema)<br>
+                        ☐ Git tool (read, diff)<br>
+                        ☐ Search tool (codebase grep)<br>
+                        ☐ Test runner tool<br>
+                        ☐ MCP server config đúng
+                    </div>
+                </div>
+                <div class="card" style="border-color:rgba(74,222,128,.3)">
+                    <div class="card-ico">🏗</div>
+                    <div class="card-title">Code Structure</div>
+                    <div class="card-desc">
+                        ☐ Backend: Hexagonal Architecture<br>
+                        ☐ Frontend: FSD structure<br>
+                        ☐ Naming conventions nhất quán<br>
+                        ☐ Import rules theo FSD<br>
+                        ☐ Layer separation rõ ràng
+                    </div>
+                </div>
+                <div class="card" style="border-color:rgba(251,113,133,.3)">
+                    <div class="card-ico">🔁</div>
+                    <div class="card-title">Maintenance</div>
+                    <div class="card-desc">
+                        ☐ Update decisions.md sau ADR mới<br>
+                        ☐ Update known-issues khi tìm bug<br>
+                        ☐ Update tech-debt khi phát hiện<br>
+                        ☐ Review .ai/ định kỳ (monthly)<br>
+                        ☐ Team share chung .ai/ qua Git
+                    </div>
+                </div>
+            </div>
+
+            <div class="box ok" style="margin-top:24px">
+                <div class="box-lbl">⭐ Kết quả khi làm đúng</div>
+                Claude sẽ: code đúng naming convention ngay lần đầu, biết đặt file ở đúng layer, không lặp lại lỗi đã
+                biết, follow workflow mà không cần nhắc, và hoạt động như một junior developer thực sự đã được onboard
+                đầy đủ vào dự án của bạn.
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /* NAV */
+        function tog() {
+            document.getElementById('sb').classList.toggle('open');
+            document.getElementById('ov').classList.toggle('v');
+        }
+        function sa(el) {
+            document.querySelectorAll('.sb-a').forEach(a => a.classList.remove('on'));
+            el.classList.add('on');
+            if (window.innerWidth <= 900) tog();
+        }
+
+        /* SCROLL SPY */
+        const secs = document.querySelectorAll('[id]');
+        const links = document.querySelectorAll('.sb-a');
+        new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => {
+                        l.classList.toggle('on', l.getAttribute('href') === '#' + e.target.id);
+                    });
+                }
+            });
+        }, { rootMargin: '-20% 0px -70% 0px' }).observe;
+        secs.forEach(s => {
+            new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting) {
+                    links.forEach(l => {
+                        l.classList.toggle('on', l.getAttribute('href') === '#' + entries[0].target.id);
+                    });
+                }
+            }, { rootMargin: '-20% 0px -70% 0px' }).observe(s);
+        });
+
+        /* COPY CODE */
+        function cp(btn, id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            navigator.clipboard.writeText(el.innerText).then(() => {
+                btn.textContent = '✓ Copied';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
