@@ -1,9 +1,7 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/claude-guide.html"
-    }
+    { "source": "/(.*)", "destination": "/$1.html" },
+    { "source": "/(.*)", "destination": "/claude-guide.html" }
   ]
 }
