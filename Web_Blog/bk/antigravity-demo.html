@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Google AntiGravity — Kiến trúc & Hướng dẫn Dev</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════
+   TOKENS — clean white-day editorial
+════════════════════════════════ */
+:root{
+  --ink:       #0f1117;
+  --ink2:      #2a2d3a;
+  --ink3:      #4a4f6a;
+  --ghost:     #f4f5f9;
+  --ghost2:    #eceef6;
+  --rim:       #dfe2ef;
+  --rim2:      #c8ccdf;
+  --blue:      #1a73e8;
+  --blue-lt:   #4285f4;
+  --blue-bg:   #e8f0fe;
+  --green:     #137333;
+  --green-bg:  #e6f4ea;
+  --amber:     #b06000;
+  --amber-bg:  #fef3e2;
+  --red:       #c5221f;
+  --red-bg:    #fce8e6;
+  --teal:      #0097a7;
+  --teal-bg:   #e0f7fa;
+  --nav-w:     268px;
+  --r:         8px;
+  --mono:      'DM Mono', monospace;
+  --body:      'DM Sans', sans-serif;
+  --serif:     'DM Serif Display', serif;
+}
+
+/* ── DARK DEMO BOXES ── */
+.demo-dark{background:#0f1117;border:1px solid #2a2d3a;border-radius:10px;overflow:hidden;margin:16px 0}
+.demo-dark-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#14161f;border-bottom:1px solid #2a2d3a}
+.demo-dark-title{font-family:var(--mono);font-size:11px;color:#6b7194;display:flex;align-items:center;gap:7px;font-weight:600}
+.demo-dark-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(26,115,232,.15);color:#4285f4;border:1px solid rgba(26,115,232,.25)}
+
+.dark-chips{display:flex;flex-wrap:wrap;gap:7px}
+.dark-chip{font-size:12.5px;padding:5px 12px;background:#14161f;border:1px solid #2a2d3a;border-radius:6px;color:#6b7194;cursor:pointer;transition:all .12s;font-family:var(--body)}
+.dark-chip:hover{border-color:#3d4060;color:#c4c9e0}
+.dark-chip.on{border-color:#4285f4;color:#82aaff;background:rgba(26,115,232,.1)}
+
+/* typewriter response */
+.tw-resp{display:none;border-top:1px solid #2a2d3a;padding:16px 18px}
+.tw-resp.show{display:block}
+.tw-resp-hd{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.tw-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#1a73e8,#4285f4);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;font-family:var(--mono);flex-shrink:0}
+.tw-name{font-family:var(--mono);font-size:11px;color:#4285f4;font-weight:600}
+.tw-body{font-size:13.5px;color:#9da5c3;line-height:1.8}
+.tw-body code{font-family:var(--mono);background:#1e1f2e;padding:1px 5px;border-radius:4px;font-size:12px;color:#82aaff;border:1px solid #2d2f3e}
+.tw-body pre{background:#0a0b10;border:1px solid #2a2d3a;border-radius:7px;padding:12px 15px;font-size:12px;color:#4ade80;margin:9px 0;overflow-x:auto;font-family:var(--mono);line-height:1.7;white-space:pre-wrap}
+.tw-curs{display:inline-block;width:2px;height:13px;background:#4285f4;vertical-align:middle;animation:blink .7s infinite;margin-left:1px}
+
+/* sandbox prompt input */
+.sandbox-input-row{padding:0 16px 14px;display:flex;gap:9px}
+.sandbox-input{
+  flex:1;background:#0f1117;border:1px solid #2a2d3a;border-radius:7px;
+  padding:9px 13px;font-family:var(--body);font-size:13.5px;color:#c4c9e0;
+  outline:none;transition:border-color .15s;resize:none;
+}
+.sandbox-input:focus{border-color:#4285f4}
+.sandbox-input::placeholder{color:#4a4f6a}
+.run-btn{
+  display:flex;align-items:center;gap:6px;padding:0 16px;
+  background:linear-gradient(135deg,#1a73e8,#4285f4);color:#fff;
+  border:none;border-radius:7px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:opacity .15s,transform .15s;
+  white-space:nowrap;font-family:var(--body);
+}
+.run-btn:hover{opacity:.9;transform:scale(1.02)}
+.run-btn:active{transform:scale(.98)}
+.run-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* slash demo */
+.slash-demo-box{background:#0f1117;border:1px solid #2a2d3a;border-radius:10px;overflow:hidden;margin:16px 0;font-family:var(--mono)}
+.slash-bar{display:flex;align-items:center;gap:9px;padding:10px 15px;background:#14161f;border-bottom:1px solid #2a2d3a;font-size:11px;color:#4a4f6a}
+.slash-input-area{padding:12px 16px}
+#ag-slash-input{width:100%;background:transparent;border:none;outline:none;font-family:var(--mono);font-size:13px;color:#c4c9e0}
+#ag-slash-input::placeholder{color:#4a4f6a}
+.slash-dd{border-top:1px solid #2a2d3a;display:none}
+.slash-dd.open{display:block}
+.slash-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background .1s;border-bottom:1px solid rgba(42,45,58,.5)}
+.slash-item:last-child{border:none}
+.slash-item:hover,.slash-item.sel{background:rgba(26,115,232,.1)}
+.slash-item-cmd{color:#82aaff;font-weight:600;min-width:160px;font-size:13px}
+.slash-item-desc{color:#6b7194;font-size:12px}
+
+/* prompt compare */
+.pcmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.pcmp-box{border-radius:8px;padding:14px 16px}
+.pcmp-box.bad{background:rgba(197,34,31,.06);border:1px solid rgba(197,34,31,.25)}
+.pcmp-box.good{background:rgba(19,115,51,.06);border:1px solid rgba(19,115,51,.25)}
+.pcmp-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px}
+.pcmp-lbl.bad{color:#c5221f}.pcmp-lbl.good{color:#137333}
+.pcmp-text{font-size:13px;color:#4a4f6a}
+.pcmp-result{background:rgba(26,115,232,.06);border:1px solid rgba(26,115,232,.2);border-radius:8px;padding:13px 16px;margin-top:12px}
+.pcmp-result-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+.pcmp-result-text{font-size:13px;color:#4a4f6a}
+
+@media(max-width:700px){.pcmp{grid-template-columns:1fr}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:15px}
+body{
+  font-family:var(--body);
+  background:#fff;
+  color:var(--ink);
+  display:flex;
+  min-height:100vh;
+  line-height:1.75;
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--rim2);border-radius:9px}
+
+/* ════════════════════════════════
+   SIDEBAR
+════════════════════════════════ */
+#sb{
+  width:var(--nav-w);
+  min-height:100vh;
+  background:var(--ghost);
+  border-right:1px solid var(--rim);
+  position:fixed;top:0;left:0;bottom:0;
+  overflow-y:auto;z-index:200;
+  display:flex;flex-direction:column;
+  transition:transform .3s;
+}
+
+.sb-top{padding:20px 18px 14px;border-bottom:1px solid var(--rim)}
+.sb-logo{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.sb-gem{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,#1a73e8,#4285f4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:#fff;font-weight:700;font-family:var(--mono);
+  box-shadow:0 2px 8px rgba(26,115,232,.3);
+}
+.sb-name{font-family:var(--serif);font-size:17px;color:var(--ink)}
+.sb-ver{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:10px;
+  background:var(--blue-bg);color:var(--blue);
+  padding:2px 9px;border-radius:99px;
+  border:1px solid rgba(26,115,232,.2);
+}
+.ver-dot{width:5px;height:5px;border-radius:50%;background:var(--blue);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.sb-prog{padding:10px 18px 8px;border-bottom:1px solid var(--rim)}
+.sb-prog-row{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);margin-bottom:4px;font-family:var(--mono)}
+.prog-bar{height:2px;background:var(--rim);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:99px;width:0%;transition:width .3s}
+
+.sb-grp{padding:12px 12px 2px}
+.sb-grp-lbl{font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:0 6px;margin-bottom:3px;font-family:var(--mono)}
+
+.sb-a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 10px;border-radius:6px;
+  text-decoration:none;color:var(--ink3);
+  font-size:13px;transition:all .12s;
+  cursor:pointer;margin-bottom:1px;position:relative;
+}
+.sb-a:hover{background:var(--ghost2);color:var(--ink)}
+.sb-a.on{background:var(--blue-bg);color:var(--blue)}
+.sb-a.on::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:2px;background:var(--blue);border-radius:1px}
+.sb-ico{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.sb-chip{
+  margin-left:auto;font-family:var(--mono);font-size:9px;
+  padding:1px 6px;border-radius:99px;
+}
+.sb-chip.new{background:var(--green-bg);color:var(--green)}
+.sb-chip.key{background:var(--blue-bg);color:var(--blue)}
+
+.sb-foot{margin-top:auto;padding:12px 18px;border-top:1px solid var(--rim);font-size:10px;color:var(--ink3);font-family:var(--mono)}
+
+/* ════════════════════════════════
+   MAIN
+════════════════════════════════ */
+main{margin-left:var(--nav-w);flex:1;max-width:920px}
+
+.sec{padding:52px 60px;border-bottom:1px solid var(--rim);scroll-margin-top:16px}
+
+.stag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--blue);font-weight:600;font-family:var(--mono);
+  margin-bottom:12px;
+}
+.stag::before{content:'';width:16px;height:1px;background:currentColor}
+
+h1{font-family:var(--serif);font-size:44px;font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px;color:var(--ink)}
+h1 em{font-style:italic;color:var(--blue)}
+h2{font-family:var(--serif);font-size:26px;font-weight:400;margin-bottom:12px;color:var(--ink);display:flex;align-items:center;gap:10px}
+h3{font-size:15px;font-weight:600;color:var(--ink);margin:24px 0 9px;display:flex;align-items:center;gap:7px}
+p{color:var(--ink3);margin-bottom:12px}
+strong{color:var(--ink)}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.ic{font-family:var(--mono);background:var(--ghost2);padding:1px 6px;border-radius:4px;font-size:12.5px;color:var(--ink2);border:1px solid var(--rim)}
+
+/* ════════════════════════════════
+   CALLOUTS
+════════════════════════════════ */
+.box{border-left:3px solid var(--blue);padding:13px 17px;background:var(--blue-bg);border-radius:0 7px 7px 0;margin:16px 0;font-size:13.5px;color:var(--ink2)}
+.box-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:5px;display:flex;align-items:center;gap:4px;font-family:var(--mono)}
+.box.ok{border-color:var(--green);background:var(--green-bg)}.box.ok .box-lbl{color:var(--green)}
+.box.warn{border-color:var(--amber);background:var(--amber-bg)}.box.warn .box-lbl{color:var(--amber)}
+.box.danger{border-color:var(--red);background:var(--red-bg)}.box.danger .box-lbl{color:var(--red)}
+.box.teal{border-color:var(--teal);background:var(--teal-bg)}.box.teal .box-lbl{color:var(--teal)}
+
+/* ════════════════════════════════
+   CARDS
+════════════════════════════════ */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.cards.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--rim);border-radius:var(--r);padding:18px;transition:all .2s}
+.card:hover{border-color:var(--rim2);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.card-ico{font-size:20px;margin-bottom:9px}
+.card-title{font-weight:600;font-size:14px;color:var(--ink);margin-bottom:4px}
+.card-desc{font-size:13px;color:var(--ink3);line-height:1.55}
+
+/* concept cards */
+.cc{background:#fff;border:1px solid var(--rim);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;transition:all .2s}
+.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--blue))}
+.cc:hover{box-shadow:0 4px 16px rgba(0,0,0,.07);transform:translateY(-1px)}
+.cc-ico{font-size:22px;margin-bottom:8px;display:block}
+.cc-name{font-weight:700;font-size:14px;color:var(--ink);margin-bottom:2px}
+.cc-type{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.06em;margin-bottom:8px}
+.cc-desc{font-size:12.5px;color:var(--ink3);line-height:1.55}
+.cgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:16px 0}
+
+/* ════════════════════════════════
+   TABLE
+════════════════════════════════ */
+.tw{overflow-x:auto;margin:14px 0;border-radius:var(--r);border:1px solid var(--rim)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:10px 14px;background:var(--ghost);color:var(--ink3);font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;border-bottom:1px solid var(--rim);font-family:var(--mono)}
+td{padding:11px 14px;border-bottom:1px solid var(--rim);color:var(--ink3);vertical-align:top}
+tr:last-child td{border:none}
+tr:hover td{background:var(--ghost)}
+td strong{color:var(--ink)}
+td code{font-family:var(--mono);background:var(--ghost2);padding:1px 5px;border-radius:4px;font-size:12px}
+
+/* ════════════════════════════════
+   FEAT LIST
+════════════════════════════════ */
+.fl{list-style:none;margin:10px 0}
+.fl li{padding:8px 0 8px 22px;position:relative;font-size:14px;color:var(--ink3);border-bottom:1px solid var(--rim)}
+.fl li:last-child{border:none}
+.fl li::before{content:'›';position:absolute;left:6px;color:var(--blue);font-size:16px;line-height:1.5}
+.fl li strong{color:var(--ink)}
+
+/* ════════════════════════════════
+   STEPS
+════════════════════════════════ */
+.steps{margin:16px 0}
+.step{display:flex;gap:14px;margin-bottom:20px}
+.snum{width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff;font-family:var(--mono);margin-top:2px}
+.stitle{font-weight:600;color:var(--ink);margin-bottom:3px}
+.sdesc{font-size:13.5px;color:var(--ink3)}
+
+/* ════════════════════════════════
+   CODE BLOCK
+════════════════════════════════ */
+.cw{background:#1e1f2e;border-radius:var(--r);margin:14px 0;overflow:hidden;border:1px solid #2d2f3e}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#161722;border-bottom:1px solid #2d2f3e}
+.cdots{display:flex;gap:5px}
+.cdot{width:10px;height:10px;border-radius:50%}
+.cdot:nth-child(1){background:#ff5f57}
+.cdot:nth-child(2){background:#febc2e}
+.cdot:nth-child(3){background:#28c840}
+.clang{font-family:var(--mono);font-size:10px;color:#666;letter-spacing:.05em}
+.cbtn{font-family:var(--mono);font-size:10px;color:#888;background:#1e1f2e;border:1px solid #3d3f52;padding:2px 9px;border-radius:4px;cursor:pointer;transition:all .15s}
+.cbtn:hover{color:#fff;border-color:#4285f4}
+.cbtn.ok2{color:#4ade80;border-color:#4ade80}
+pre{padding:16px 18px;font-family:var(--mono);font-size:12.5px;line-height:1.85;overflow-x:auto;color:#9da5c3}
+.kw{color:#c792ea}
+.st{color:#80cbc4}
+.cm{color:#546e7a;font-style:italic}
+.nm{color:#f78c6c}
+.fn{color:#82aaff}
+.tl{color:#89ddff}
+.pu{color:#f07178}
+.prop{color:#c3e88d}
+
+/* ════════════════════════════════
+   FILE TREE
+════════════════════════════════ */
+.tree{background:#1e1f2e;border:1px solid #2d2f3e;border-radius:var(--r);padding:16px 18px;font-family:var(--mono);font-size:12.5px;line-height:1.9;margin:14px 0;overflow-x:auto}
+.tree-hd{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#546e7a;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #2d2f3e}
+.tp{color:#546e7a;white-space:pre}
+.td{color:#82aaff;font-weight:500}
+.tf{color:#c3e88d}
+.tf.md{color:#f78c6c}
+.tf.json{color:#ffcb6b}
+.tf.yml{color:#c792ea}
+.tc{color:#546e7a;font-size:11px;margin-left:8px}
+
+/* ════════════════════════════════
+   LAYER DIAGRAM
+════════════════════════════════ */
+.layers{display:flex;flex-direction:column;gap:0;margin:18px 0;border:1px solid var(--rim);border-radius:var(--r);overflow:hidden}
+.layer{
+  padding:14px 20px;display:flex;align-items:center;gap:16px;
+  border-bottom:1px solid var(--rim);transition:background .15s;
+}
+.layer:last-child{border:none}
+.layer:hover{background:var(--ghost)}
+.layer-n{font-family:var(--mono);font-size:10px;color:var(--ink3);width:24px;text-align:center;flex-shrink:0}
+.layer-body{flex:1}
+.layer-title{font-weight:600;font-size:14px}
+.layer-desc{font-size:12.5px;color:var(--ink3)}
+.layer-tags{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.ltag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;border:1px solid}
+
+/* ════════════════════════════════
+   FLOW
+════════════════════════════════ */
+.flow{display:flex;align-items:center;gap:0;margin:16px 0;overflow-x:auto;padding:2px 0}
+.fn{background:var(--ghost);border:1px solid var(--rim);border-radius:6px;padding:9px 14px;font-size:12px;font-family:var(--mono);color:var(--ink2);white-space:nowrap;flex-shrink:0;text-align:center;transition:all .15s}
+.fn:hover{border-color:var(--rim2)}
+.fn.hi{background:var(--blue-bg);border-color:rgba(26,115,232,.3);color:var(--blue)}
+.fn.gn{background:var(--green-bg);border-color:rgba(19,115,51,.25);color:var(--green)}
+.fn.am{background:var(--amber-bg);border-color:rgba(176,96,0,.25);color:var(--amber)}
+.fn-sub{font-size:10px;color:var(--ink3);margin-top:2px;font-family:var(--body)}
+.farr{color:var(--rim2);font-size:16px;padding:0 5px;flex-shrink:0}
+
+/* ════════════════════════════════
+   HERO
+════════════════════════════════ */
+.hero{
+  padding:64px 60px 52px;
+  border-bottom:1px solid var(--rim);
+  background:linear-gradient(160deg,#fff 60%,var(--ghost) 100%);
+  position:relative;overflow:hidden;
+}
+.hero::after{
+  content:'AG';
+  position:absolute;right:-20px;top:30px;
+  font-family:var(--serif);font-size:220px;font-weight:400;
+  color:rgba(26,115,232,.04);line-height:1;pointer-events:none;
+  user-select:none;
+}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.hchip{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:99px;background:var(--ghost2);border:1px solid var(--rim);color:var(--ink3)}
+
+/* ════════════════════════════════
+   INTERACTIVE DEMO
+════════════════════════════════ */
+.demo{background:#fff;border:1px solid var(--rim);border-radius:var(--r);overflow:hidden;margin:16px 0}
+.demo-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--ghost);border-bottom:1px solid var(--rim)}
+.demo-title{font-size:12px;font-weight:600;color:var(--ink3);display:flex;align-items:center;gap:7px;font-family:var(--mono)}
+.demo-chip{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:99px;background:var(--blue-bg);color:var(--blue);border:1px solid rgba(26,115,232,.2)}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-size:12.5px;padding:5px 12px;background:var(--ghost);border:1px solid var(--rim);border-radius:6px;color:var(--ink3);cursor:pointer;transition:all .12s;font-family:var(--body)}
+.chip:hover{border-color:var(--rim2);color:var(--ink)}
+.chip.on{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+
+.resp{display:none;border-top:1px solid var(--rim);padding:16px 18px}
+.resp.show{display:block}
+.resp-hd{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.resp-av{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#1a73e8,#4285f4);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;font-family:var(--mono);flex-shrink:0}
+.resp-name{font-family:var(--mono);font-size:11px;color:var(--blue);font-weight:600}
+.resp-body{font-size:13.5px;color:var(--ink3);line-height:1.75}
+.resp-body code{font-family:var(--mono);background:var(--ghost2);padding:1px 5px;border-radius:4px;font-size:12px}
+.resp-body pre{background:#1e1f2e;border-radius:6px;padding:12px 14px;font-size:12px;color:#80cbc4;margin:9px 0;overflow-x:auto;font-family:var(--mono);line-height:1.7}
+.curs{display:inline-block;width:2px;height:13px;background:var(--blue);vertical-align:middle;animation:blink .7s infinite;margin-left:1px}
+
+/* chat */
+.chat{display:flex;flex-direction:column;gap:12px;margin:12px 0}
+.bbl{display:flex;gap:10px}
+.bav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:2px}
+.bav.u{background:var(--ghost2);border:1px solid var(--rim);color:var(--ink3)}
+.bav.ai{background:linear-gradient(135deg,#1a73e8,#4285f4);color:#fff;font-weight:700;font-family:var(--mono)}
+.bbd{flex:1}
+.bwho{font-family:var(--mono);font-size:10px;color:var(--ink3);margin-bottom:4px;letter-spacing:.06em}
+.bwho.ai{color:var(--blue)}
+.bmsg{background:var(--ghost);border:1px solid var(--rim);border-radius:0 8px 8px 8px;padding:11px 14px;font-size:13.5px;color:var(--ink3);line-height:1.7}
+.bbl.u .bmsg{border-radius:8px 0 8px 8px;background:#fff}
+.bmsg code{font-family:var(--mono);background:var(--ghost2);padding:1px 5px;border-radius:4px;font-size:12px}
+.bmsg pre{background:#1e1f2e;border-radius:6px;padding:10px 13px;font-size:12px;color:#80cbc4;margin:8px 0;overflow-x:auto;font-family:var(--mono);line-height:1.65}
+
+/* kbd */
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.ki{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border:1px solid var(--rim);border-radius:7px;font-size:13px;color:var(--ink3)}
+.keys{display:flex;gap:3px}
+kbd{background:var(--ghost);border:1px solid var(--rim);border-bottom:2px solid var(--rim2);border-radius:4px;padding:2px 7px;font-family:var(--mono);font-size:11px;color:var(--ink2)}
+
+/* hamburger */
+#hbg{display:none;position:fixed;top:13px;left:13px;z-index:300;background:#fff;border:1px solid var(--rim);border-radius:7px;padding:7px 10px;cursor:pointer;font-size:14px;color:var(--ink)}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:150}
+#ov.v{display:block}
+
+@media(max-width:900px){
+  #hbg{display:flex}
+  #sb{transform:translateX(-100%)}
+  #sb.open{transform:translateX(0);box-shadow:8px 0 30px rgba(0,0,0,.15)}
+  main{margin-left:0}
+  .sec,.hero{padding:44px 20px}
+  .cards,.cards.c3,.cgrid,.kgrid{grid-template-columns:1fr}
+  h1{font-size:32px}
+  .hero::after{display:none}
+}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sec,.hero{animation:up .4s ease both}
+</style>
+</head>
+<body>
+
+<button id="hbg" onclick="tog()">☰</button>
+<div id="ov" onclick="tog()"></div>
+
+<!-- ════════ SIDEBAR ════════ -->
+<nav id="sb">
+  <div class="sb-top">
+    <div class="sb-logo">
+      <div class="sb-gem">AG</div>
+      <div>
+        <div class="sb-name">AntiGravity</div>
+      </div>
+    </div>
+    <div class="sb-ver"><span class="ver-dot"></span>Public Preview · Nov 2025</div>
+  </div>
+
+  <div class="sb-prog">
+    <div class="sb-prog-row"><span>Tiến trình đọc</span><span id="pct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="pfill"></div></div>
+  </div>
+
+  <div class="sb-grp">
+    <div class="sb-grp-lbl">🗺 Tổng quan</div>
+    <a class="sb-a on" href="#intro" onclick="sa(this)"><span class="sb-ico">🏠</span>AntiGravity là gì?</a>
+    <a class="sb-a" href="#vs-cursor" onclick="sa(this)"><span class="sb-ico">⚡</span>So sánh Cursor / Windsurf</a>
+    <a class="sb-a" href="#install" onclick="sa(this)"><span class="sb-ico">💿</span>Cài đặt</a>
+  </div>
+
+  <div class="sb-grp">
+    <div class="sb-grp-lbl">🏗 Kiến trúc</div>
+    <a class="sb-a" href="#architecture" onclick="sa(this)"><span class="sb-ico">🏗</span>Kiến trúc tổng thể</a>
+    <a class="sb-a" href="#agent-manager" onclick="sa(this)"><span class="sb-ico">🎛</span>Agent Manager</a>
+    <a class="sb-a" href="#editor" onclick="sa(this)"><span class="sb-ico">📝</span>Editor View</a>
+    <a class="sb-a" href="#browser" onclick="sa(this)"><span class="sb-ico">🌐</span>Browser Subagent</a>
+    <a class="sb-a" href="#artifacts" onclick="sa(this)"><span class="sb-ico">📦</span>Artifacts<span class="sb-chip key">core</span></a>
+  </div>
+
+  <div class="sb-grp">
+    <div class="sb-grp-lbl">🧩 Customization</div>
+    <a class="sb-a" href="#rules" onclick="sa(this)"><span class="sb-ico">📜</span>Rules<span class="sb-chip key">core</span></a>
+    <a class="sb-a" href="#workflows" onclick="sa(this)"><span class="sb-ico">🔄</span>Workflows<span class="sb-chip key">core</span></a>
+    <a class="sb-a" href="#skills" onclick="sa(this)"><span class="sb-ico">⚡</span>Skills<span class="sb-chip new">new</span></a>
+    <a class="sb-a" href="#mcp" onclick="sa(this)"><span class="sb-ico">🔌</span>MCP Tools</a>
+    <a class="sb-a" href="#structure" onclick="sa(this)"><span class="sb-ico">📁</span>Cấu trúc thư mục</a>
+  </div>
+
+  <div class="sb-grp">
+    <div class="sb-grp-lbl">🔒 Security</div>
+    <a class="sb-a" href="#security" onclick="sa(this)"><span class="sb-ico">🛡</span>Agent Security</a>
+    <a class="sb-a" href="#models" onclick="sa(this)"><span class="sb-ico">🤖</span>Model Selection</a>
+    <a class="sb-a" href="#modes" onclick="sa(this)"><span class="sb-ico">⚙️</span>Planning vs Fast</a>
+  </div>
+
+  <div class="sb-grp">
+    <div class="sb-grp-lbl">💡 Thực hành</div>
+    <a class="sb-a" href="#demo-chat" onclick="sa(this)"><span class="sb-ico">💬</span>Demo conversation</a>
+    <a class="sb-a" href="#prompt-sandbox" onclick="sa(this)"><span class="sb-ico">🎮</span>Prompt sandbox<span class="sb-chip new">live</span></a>
+    <a class="sb-a" href="#slash-demo" onclick="sa(this)"><span class="sb-ico">⚡</span>Slash commands<span class="sb-chip new">live</span></a>
+    <a class="sb-a" href="#prompt-compare" onclick="sa(this)"><span class="sb-ico">🔬</span>Prompt tệ vs tốt</a>
+    <a class="sb-a" href="#shortcuts" onclick="sa(this)"><span class="sb-ico">⌨️</span>Phím tắt</a>
+    <a class="sb-a" href="#tips" onclick="sa(this)"><span class="sb-ico">⭐</span>Best practices</a>
+  </div>
+
+  <div class="sb-foot">antigravity.google · docs.google.com</div>
+</nav>
+
+<!-- ════════ MAIN ════════ -->
+<main id="mc">
+
+<!-- ── HERO ── -->
+<div class="hero" id="intro">
+  <div class="stag">Hướng dẫn toàn diện</div>
+  <h1>Google <em>AntiGravity</em><br>Kiến trúc & Developer Guide</h1>
+  <p><strong>Google AntiGravity</strong> là agentic IDE thế hệ mới được Google ra mắt tháng 11/2025 — fork từ VS Code nhưng được xây dựng lại từ gốc theo triết lý <strong>agent-first</strong>. Thay vì AI là plugin phụ trợ, agent là thực thể trung tâm của toàn bộ trải nghiệm phát triển phần mềm.</p>
+  <div class="box teal" style="margin-top:18px">
+    <div class="box-lbl">ℹ️ Trạng thái</div>
+    Public Preview — miễn phí với Gmail cá nhân. Powered bởi <strong>Gemini 3 Pro</strong> (flagship), hỗ trợ thêm <strong>Claude Sonnet/Opus 4.5</strong> và <strong>GPT-OSS-120B</strong>. Download tại <a href="https://antigravity.google/download">antigravity.google/download</a> · CLI: <span class="ic">agy</span>
+  </div>
+  <div class="hero-chips">
+    <span class="hchip">VS Code fork</span>
+    <span class="hchip">Gemini 3 Pro</span>
+    <span class="hchip">Agent Manager</span>
+    <span class="hchip">Async multi-agent</span>
+    <span class="hchip">Browser control</span>
+    <span class="hchip">Artifacts system</span>
+    <span class="hchip">Rules + Workflows</span>
+    <span class="hchip">Skills</span>
+    <span class="hchip">MCP Support</span>
+  </div>
+</div>
+
+<!-- ── SO SÁNH ── -->
+<div class="sec" id="vs-cursor">
+  <div class="stag">Định vị</div>
+  <h2>⚡ AntiGravity vs Cursor vs Windsurf</h2>
+  <p>Ba IDE AI phổ biến nhất hiện tại — cùng nền tảng VS Code nhưng triết lý thiết kế rất khác nhau.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Tiêu chí</th><th>Cursor</th><th>Windsurf</th><th>Google AntiGravity</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Mô hình tương tác</strong></td><td>Chat sidebar + inline</td><td>Cascade flow</td><td><strong>Agent Manager (async)</strong></td></tr>
+        <tr><td><strong>AI là</strong></td><td>Trợ lý trả lời chat</td><td>Trợ lý flow</td><td><strong>Autonomous agent thực thi task</strong></td></tr>
+        <tr><td><strong>Xử lý task</strong></td><td>Synchronous</td><td>Mostly sync</td><td><strong>Asynchronous, parallel agents</strong></td></tr>
+        <tr><td><strong>Browser control</strong></td><td>Không có</td><td>Không có</td><td><strong>✅ Browser subagent tích hợp</strong></td></tr>
+        <tr><td><strong>Chứng minh kết quả</strong></td><td>Xem code diff</td><td>Xem code diff</td><td><strong>Artifacts (plan, screenshot, walkthrough)</strong></td></tr>
+        <tr><td><strong>Context file</strong></td><td>.cursorrules</td><td>.windsurfrules</td><td><strong>GEMINI.md + .agent/rules/</strong></td></tr>
+        <tr><td><strong>Workflow trigger</strong></td><td>Không native</td><td>Không native</td><td><strong>/ slash command</strong></td></tr>
+        <tr><td><strong>Skills</strong></td><td>Không có</td><td>Không có</td><td><strong>✅ Progressive Disclosure Skills</strong></td></tr>
+        <tr><td><strong>Knowledge base</strong></td><td>Không tích hợp</td><td>Không tích hợp</td><td><strong>✅ Self-learning từ past tasks</strong></td></tr>
+        <tr><td><strong>Giá</strong></td><td>$20/tháng</td><td>$15/tháng</td><td><strong>Miễn phí (preview)</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="box ok">
+    <div class="box-lbl">✅ Điểm mạnh cốt lõi của AntiGravity</div>
+    <strong>Asynchronous multi-agent</strong> là differentiator lớn nhất. Thay vì chờ AI xong câu này mới hỏi câu tiếp theo, bạn dispatch 5 agents cho 5 tasks khác nhau <em>đồng thời</em>. Developer chuyển từ người viết code sang <strong>kiến trúc sư quản lý agents</strong>.
+  </div>
+</div>
+
+<!-- ── CÀI ĐẶT ── -->
+<div class="sec" id="install">
+  <div class="stag">Bắt đầu</div>
+  <h2>💿 Cài đặt & Khởi động</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="snum">1</div>
+      <div>
+        <div class="stitle">Download & Install</div>
+        <div class="sdesc">Truy cập <a href="https://antigravity.google/download">antigravity.google/download</a> — chọn macOS, Windows hoặc Linux. Chạy installer, AntiGravity sẽ offer import settings từ VS Code hoặc Cursor sẵn có.</div>
+        <div class="cw" style="margin-top:10px">
+          <div class="ch"><div class="cdots"><div class="cdot"></div><div class="cdot"></div><div class="cdot"></div></div><span class="clang">Terminal — cài CLI tool</span><button class="cbtn" onclick="cp(this,'i1')">Copy</button></div>
+          <pre id="i1"><span class="cm"># Cài CLI để mở AntiGravity từ terminal</span>
+<span class="cm"># (Trong lúc setup chọn "Install command line tool")</span>
+
+<span class="cm"># Sau khi install, mở project bằng:</span>
+agy .
+
+<span class="cm"># Hoặc mở file cụ thể:</span>
+agy path/to/project</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">2</div>
+      <div>
+        <div class="stitle">Chọn Agent Execution Mode</div>
+        <div class="sdesc">Setup wizard hỏi bạn muốn agent có quyền gì. Mỗi mode cấu hình 3 policy: <strong>Terminal Execution</strong>, <strong>Review</strong>, và <strong>JavaScript Execution</strong>.</div>
+        <div class="tw" style="margin-top:10px">
+          <table>
+            <thead><tr><th>Mode</th><th>Terminal</th><th>Review</th><th>JS Browser</th><th>Dùng khi nào</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Secure</strong></td><td>Request review</td><td>Always review</td><td>Disabled</td><td>Production, sensitive codebases</td></tr>
+              <tr><td><strong>Review-driven</strong> ⭐</td><td>Request review</td><td>Agent decides</td><td>Request review</td><td>Recommended — cân bằng autonomy & control</td></tr>
+              <tr><td><strong>Agent-driven</strong></td><td>Always proceed</td><td>Always proceed</td><td>Always proceed</td><td>Prototyping nhanh, ít risk</td></tr>
+              <tr><td><strong>Custom</strong></td><td>Tùy chỉnh</td><td>Tùy chỉnh</td><td>Tùy chỉnh</td><td>Advanced users</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">3</div>
+      <div>
+        <div class="stitle">Sign in Google & Kết nối Chrome Browser</div>
+        <div class="sdesc">Sign in bằng personal Gmail. Browser subagent cần cài Chrome Extension riêng — AntiGravity sẽ hướng dẫn khi bạn dùng tính năng browser lần đầu. Extension cho phép agent click, scroll, đọc DOM, chụp screenshot.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">4</div>
+      <div>
+        <div class="stitle">Mở Workspace & Bắt đầu task đầu tiên</div>
+        <div class="sdesc">Trong Agent Manager → <strong>Open Workspace</strong> → chọn project folder. Gõ task vào ô "Ask anything" — agent bắt đầu lên plan. Dùng <span class="ic">@filename</span> để reference file cụ thể.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── KIẾN TRÚC ── -->
+<div class="sec" id="architecture">
+  <div class="stag">Kiến trúc</div>
+  <h2>🏗 Kiến trúc tổng thể AntiGravity</h2>
+  <p>AntiGravity được xây dựng quanh 5 thành phần core — tất cả hoạt động phối hợp để tạo ra môi trường agent-first hoàn chỉnh.</p>
+
+  <div class="layers">
+    <div class="layer" style="background:var(--blue-bg)">
+      <div class="layer-n">5</div>
+      <div class="layer-body">
+        <div class="layer-title" style="color:var(--blue)">🧠 Customization Layer</div>
+        <div class="layer-desc">Rules, Workflows, Skills, GEMINI.md — developer định nghĩa hành vi của agent</div>
+        <div class="layer-tags">
+          <span class="ltag" style="background:var(--blue-bg);color:var(--blue);border-color:rgba(26,115,232,.3)">GEMINI.md</span>
+          <span class="ltag" style="background:var(--blue-bg);color:var(--blue);border-color:rgba(26,115,232,.3)">.agent/rules/</span>
+          <span class="ltag" style="background:var(--blue-bg);color:var(--blue);border-color:rgba(26,115,232,.3)">.agent/workflows/</span>
+          <span class="ltag" style="background:var(--blue-bg);color:var(--blue);border-color:rgba(26,115,232,.3)">skills/</span>
+        </div>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-n">4</div>
+      <div class="layer-body">
+        <div class="layer-title">🎛 Agent Manager</div>
+        <div class="layer-desc">Mission Control — dispatch tasks, monitor parallel agents, review Artifacts, approve/reject</div>
+        <div class="layer-tags">
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Async tasks</span>
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Multi-agent</span>
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Artifacts</span>
+        </div>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-n">3</div>
+      <div class="layer-body">
+        <div class="layer-title">📝 Editor View</div>
+        <div class="layer-desc">AI-powered IDE quen thuộc (VS Code base) — tab completion, inline commands, direct editing</div>
+        <div class="layer-tags">
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Planning mode</span>
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Fast mode</span>
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Inline edit</span>
+        </div>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-n">2</div>
+      <div class="layer-body">
+        <div class="layer-title">🌐 Browser Subagent</div>
+        <div class="layer-desc">Specialized model điều khiển Chrome — click, scroll, type, chụp screenshot, đọc DOM</div>
+        <div class="layer-tags">
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Chrome Extension</span>
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">DOM capture</span>
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Screenshot</span>
+        </div>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-n">1</div>
+      <div class="layer-body">
+        <div class="layer-title">⚙️ Tool Layer</div>
+        <div class="layer-desc">Terminal, filesystem, MCP servers (GitHub, Jira, DB...) — agent tự gọi để hoàn thành task</div>
+        <div class="layer-tags">
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">Terminal</span>
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">File I/O</span>
+          <span class="ltag" style="background:var(--ghost);color:var(--ink3);border-color:var(--rim)">MCP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>🔄 Luồng thực thi một task</h3>
+  <div class="flow">
+    <div class="fn hi">Developer<div class="fn-sub">gõ task</div></div>
+    <div class="farr">→</div>
+    <div class="fn">Agent nhận task<div class="fn-sub">Planning mode</div></div>
+    <div class="farr">→</div>
+    <div class="fn am">Task List<div class="fn-sub">Artifact #1</div></div>
+    <div class="farr">→</div>
+    <div class="fn am">Impl. Plan<div class="fn-sub">Artifact #2</div></div>
+    <div class="farr">→</div>
+    <div class="fn gn">Execute<div class="fn-sub">code + terminal</div></div>
+    <div class="farr">→</div>
+    <div class="fn gn">Verify<div class="fn-sub">browser test</div></div>
+    <div class="farr">→</div>
+    <div class="fn am">Walkthrough<div class="fn-sub">Artifact #3</div></div>
+    <div class="farr">→</div>
+    <div class="fn hi">Review<div class="fn-sub">approve/reject</div></div>
+  </div>
+</div>
+
+<!-- ── AGENT MANAGER ── -->
+<div class="sec" id="agent-manager">
+  <div class="stag">Core Component</div>
+  <h2>🎛 Agent Manager — Mission Control</h2>
+  <p>Đây là điểm khác biệt lớn nhất của AntiGravity. Thay vì chatbox tuyến tính, Agent Manager là dashboard quản lý nhiều agent song song.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">🚀</div>
+      <div class="card-title">Dispatch bất kỳ lúc nào</div>
+      <div class="card-desc">Gửi task mới ngay khi agent khác đang chạy. Không cần chờ. Mỗi task được một agent instance riêng xử lý độc lập.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📊</div>
+      <div class="card-title">Real-time status</div>
+      <div class="card-desc">Xem progress, artifacts đã tạo, pending approvals, và reasoning của từng agent đang chạy — tất cả trên cùng một dashboard.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📦</div>
+      <div class="card-title">Artifacts-based trust</div>
+      <div class="card-desc">Agent không chỉ nói "đã fix" — nó tạo artifacts (plan, diff, screenshot, walkthrough) để bạn verify trước khi approve.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🌐</div>
+      <div class="card-title">Workspaces & Playground</div>
+      <div class="card-desc"><strong>Workspace</strong>: project folder với kiểm soát chặt. <strong>Playground</strong>: scratch area để prototype nhanh, có thể convert thành workspace sau.</div>
+    </div>
+  </div>
+
+  <h3>📋 Cách sử dụng hiệu quả</h3>
+  <ul class="fl">
+    <li>Dùng <span class="ic">@filename</span> và <span class="ic">@foldername</span> để thêm context vào task</li>
+    <li><strong>Planning mode</strong> cho complex tasks — agent sẽ tạo task list và implementation plan artifact trước khi code</li>
+    <li><strong>Fast mode</strong> cho simple tasks như rename variables, format code, chạy terminal command</li>
+    <li>Review artifact ở <strong>từng bước</strong> — đừng auto-approve toàn bộ, đây là lúc phát hiện sai hướng sớm nhất</li>
+    <li>Sau khi review, comment trực tiếp vào artifact nếu cần agent điều chỉnh</li>
+  </ul>
+</div>
+
+<!-- ── EDITOR VIEW ── -->
+<div class="sec" id="editor">
+  <div class="stag">Core Component</div>
+  <h2>📝 Editor View</h2>
+  <p>Editor View là môi trường coding quen thuộc kế thừa từ VS Code — với AI được tích hợp sâu hơn plugin thông thường.</p>
+
+  <div class="cards c3">
+    <div class="card">
+      <div class="card-ico">⌨️</div>
+      <div class="card-title">Tab Completions</div>
+      <div class="card-desc">AI autocomplete inline, context-aware từ toàn bộ workspace. Hiểu codebase của bạn, không chỉ file đang mở.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">💬</div>
+      <div class="card-title">Inline Commands</div>
+      <div class="card-desc">Select code → Cmd+K để ra lệnh trực tiếp. "Refactor this to use async/await", "Add error handling" — agent sửa ngay tại chỗ.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🔄</div>
+      <div class="card-title">Bidirectional</div>
+      <div class="card-desc">Bạn edit file trong Editor, agent thấy changes ngay. Agent tạo file mới, bạn thấy trong Editor ngay. Hai chiều real-time.</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-lbl">💡 Editor vs Agent Manager — khi nào dùng gì?</div>
+    <strong>Agent Manager</strong>: task phức tạp, multi-file, cần plan, cần verify qua browser. <strong>Editor View</strong>: đang hands-on code, cần gợi ý inline nhanh, hoặc chỉnh sửa trực tiếp file mà agent vừa tạo.
+  </div>
+</div>
+
+<!-- ── BROWSER SUBAGENT ── -->
+<div class="sec" id="browser">
+  <div class="stag">Core Component</div>
+  <h2>🌐 Browser Subagent</h2>
+  <p>Tính năng độc đáo nhất của AntiGravity — agent có thể <strong>thực sự điều khiển trình duyệt</strong> để test và verify, không phải giả lập.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">🖱</div>
+      <div class="card-title">Full browser control</div>
+      <div class="card-desc">Click buttons, fill forms, scroll, navigate — agent điều khiển Chrome thật sự qua Chrome Extension được cài riêng.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">👁</div>
+      <div class="card-title">Đọc & hiểu trang</div>
+      <div class="card-desc">DOM capture, screenshot, markdown parsing — agent "đọc" được trang web, không chỉ click mù quáng.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🧪</div>
+      <div class="card-title">Automated testing</div>
+      <div class="card-desc">Agent tự deploy app, mở browser, test từng flow, chụp screenshot làm Walkthrough artifact. Bạn review video-like walkthrough thay vì đọc code.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📹</div>
+      <div class="card-title">Browser recordings</div>
+      <div class="card-desc">Agent tạo recording (video ngắn) của toàn bộ test session — đây là artifact dạng Walkthrough giúp bạn verify kết quả trực quan.</div>
+    </div>
+  </div>
+
+  <div class="box warn">
+    <div class="box-lbl">⚠️ JavaScript Execution Policy</div>
+    Browser subagent có thể chạy JavaScript trong trang. <strong>Request Review</strong> (recommended) — agent hỏi permission trước khi chạy JS. <strong>Always Proceed</strong> — tự động nhưng có risk Prompt Injection. <strong>Disabled</strong> — agent không chạy JS, hạn chế khả năng automation.
+  </div>
+</div>
+
+<!-- ── ARTIFACTS ── -->
+<div class="sec" id="artifacts">
+  <div class="stag">Core Concept</div>
+  <h2>📦 Artifacts — Hệ thống "Bằng chứng"</h2>
+  <p>Artifacts là cơ chế giải quyết "Trust Gap" — thay vì tin lời agent nói, bạn có bằng chứng cụ thể để verify. Đây là innovation quan trọng nhất của AntiGravity về mặt UX.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Artifact Type</th><th>Khi nào xuất hiện</th><th>Nội dung</th><th>Bạn cần làm gì</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>📋 Task List</strong></td>
+          <td>Ngay khi agent nhận task (Planning mode)</td>
+          <td>Danh sách subtasks có cấu trúc, dependency, ước tính thời gian</td>
+          <td>Review, comment nếu cần điều chỉnh direction</td>
+        </tr>
+        <tr>
+          <td><strong>🏗 Implementation Plan</strong></td>
+          <td>Sau Task List, trước khi code</td>
+          <td>Technical details: files sẽ thay đổi, approach cụ thể, tradeoffs</td>
+          <td><strong>Review kỹ nhất ở đây</strong> — dễ phát hiện sai hướng nhất</td>
+        </tr>
+        <tr>
+          <td><strong>📄 Code Diff</strong></td>
+          <td>Sau khi agent viết/sửa code</td>
+          <td>Diff của tất cả files thay đổi</td>
+          <td>Review changes, approve hoặc request chỉnh sửa</td>
+        </tr>
+        <tr>
+          <td><strong>🖼 Screenshot</strong></td>
+          <td>Sau browser test</td>
+          <td>Ảnh chụp UI trước/sau, kết quả test</td>
+          <td>Verify UI trông đúng như mong đợi</td>
+        </tr>
+        <tr>
+          <td><strong>🎬 Walkthrough</strong></td>
+          <td>Sau E2E testing</td>
+          <td>Recording của agent test flow trên browser thật</td>
+          <td>Xem như xem video demo — verify full flow hoạt động</td>
+        </tr>
+        <tr>
+          <td><strong>📊 Architecture Diagram</strong></td>
+          <td>Khi planning complex system</td>
+          <td>Sơ đồ kiến trúc, data flow, component diagram</td>
+          <td>Review và comment ngay trên diagram</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box ok">
+    <div class="box-lbl">⭐ Pro Tip — Artifact-first thinking</div>
+    Đừng skip artifact review để "code nhanh hơn". Thời gian review Implementation Plan là thời gian tiết kiệm được từ việc phải undo sai hướng sau đó. Rigorous interrogation tại Artifact stage = chất lượng output cao hơn.
+  </div>
+</div>
+
+<!-- ── RULES ── -->
+<div class="sec" id="rules">
+  <div class="stag">Customization #1</div>
+  <h2>📜 Rules — Hướng dẫn bất biến cho Agent</h2>
+  <p>Rules là <strong>system instructions luôn chạy ngầm</strong> — agent đọc và tuân theo mọi lúc, không cần bạn nhắc lại. Tương tự CLAUDE.md nhưng cho Gemini.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">🌍</div>
+      <div class="card-title">Global Rules</div>
+      <div class="card-desc">Áp dụng cho <em>mọi project</em> bạn mở. Định nghĩa triết lý coding cá nhân hoặc tổ chức. <strong>Vị trí:</strong> <span class="ic">~/.gemini/GEMINI.md</span></div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📁</div>
+      <div class="card-title">Workspace Rules</div>
+      <div class="card-desc">Áp dụng chỉ cho project hiện tại, override/supplement Global Rules. <strong>Vị trí:</strong> <span class="ic">.agent/rules/</span> trong project root</div>
+    </div>
+  </div>
+
+  <h3>📄 Ví dụ: <span class="ic">~/.gemini/GEMINI.md</span> — Global Rules</h3>
+  <div class="cw">
+    <div class="ch"><div class="cdots"><div class="cdot"></div><div class="cdot"></div><div class="cdot"></div></div><span class="clang">Markdown · ~/.gemini/GEMINI.md</span><button class="cbtn" onclick="cp(this,'r1')">Copy</button></div>
+    <pre id="r1"><span class="cm"># Global Rules — Personal Coding Philosophy</span>
+
+<span class="cm">## Language</span>
+- Luôn dùng TypeScript thay vì JavaScript
+- Python: dùng type hints bắt buộc (Python 3.10+)
+- Không bao giờ hardcode API keys hoặc secrets
+
+<span class="cm">## Code Quality</span>
+- Luôn thêm docstring/JSDoc cho public methods
+- Error handling: không bao giờ silent catch — luôn log hoặc rethrow
+- Tên biến: descriptive, không viết tắt trừ khi rất phổ biến (i, url, db)
+
+<span class="cm">## Testing</span>
+- Viết test trước hoặc song song với code (không phải sau)
+- Test file đặt cạnh source file: foo.ts → foo.test.ts
+
+<span class="cm">## Security</span>
+- Không generate hardcoded credentials dù là trong example code
+- SQL: luôn dùng parameterized queries, không string concatenation</pre>
+  </div>
+
+  <h3>📄 Ví dụ: <span class="ic">.agent/rules/backend.md</span> — Workspace Rules</h3>
+  <div class="cw">
+    <div class="ch"><div class="cdots"><div class="cdot"></div><div class="cdot"></div><div class="cdot"></div></div><span class="clang">Markdown · .agent/rules/backend.md</span><button class="cbtn" onclick="cp(this,'r2')">Copy</button></div>
+    <pre id="r2"><span class="cm"># Backend Rules — Payment Service</span>
+
+<span class="cm">## Stack</span>
+- Runtime: Node.js 22 + TypeScript strict mode
+- Framework: Fastify (không dùng Express)
+- DB: PostgreSQL với Prisma ORM
+- Auth: JWT + refresh tokens
+
+<span class="cm">## Architecture</span>
+Dùng Layered Architecture:
+- routes/     ← HTTP layer (thin, chỉ parse/validate)
+- services/   ← Business logic
+- repositories/ ← Database access
+- domain/     ← Types, interfaces, value objects
+
+<span class="cm">## API Design</span>
+- Response format: { data, error, meta: { requestId, timestamp } }
+- Versioning: /api/v1/ prefix
+- Validation: Zod cho tất cả input
+
+<span class="cm">## Error Handling</span>
+- Custom AppError class với code + statusCode
+- Không trả về stack trace trong production
+- Log level: error → Winston, format JSON</pre>
+  </div>
+
+  <div class="box">
+    <div class="box-lbl">💡 Rules vs Workflows</div>
+    <strong>Rules</strong> = passive, luôn chạy ngầm, không cần trigger. Giống system prompt. <strong>Workflows</strong> = active, chỉ chạy khi bạn gọi bằng <span class="ic">/slash</span> command. Giống saved prompt templates.
+  </div>
+</div>
+
+<!-- ── WORKFLOWS ── -->
+<div class="sec" id="workflows">
+  <div class="stag">Customization #2</div>
+  <h2>🔄 Workflows — Quy trình có thể gọi lại</h2>
+  <p>Workflows là <strong>saved prompts trigger-on-demand</strong> bằng <span class="ic">/slash</span> command. Định nghĩa một lần, dùng mãi mãi. Có thể chain workflows lồng nhau.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">🌍</div>
+      <div class="card-title">Global Workflows</div>
+      <div class="card-desc">Dùng được trong mọi project. <strong>Vị trí:</strong> <span class="ic">~/.gemini/antigravity/global_workflows/</span></div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📁</div>
+      <div class="card-title">Workspace Workflows</div>
+      <div class="card-desc">Chỉ dùng trong project hiện tại. <strong>Vị trí:</strong> <span class="ic">.agent/workflows/</span> trong project root</div>
+    </div>
+  </div>
+
+  <h3>📄 Ví dụ: <span class="ic">.agent/workflows/generate-tests.md</span></h3>
+  <div class="cw">
+    <div class="ch"><div class="cdots"><div class="cdot"></div><div class="cdot"></div><div class="cdot"></div></div><span class="clang">Markdown · .agent/workflows/generate-tests.md</span><button class="cbtn" onclick="cp(this,'w1')">Copy</button></div>
+    <pre id="w1"><span class="cm"># Workflow: generate-tests</span>
+<span class="cm"># Trigger: /generate-tests</span>
+<span class="cm"># Mô tả: Tạo unit tests cho file đang mở</span>
+
+<span class="nm">1.</span> Đọc file source đang được focus trong editor
+<span class="nm">2.</span> Xác định tất cả public functions/methods cần test
+<span class="nm">3.</span> Với mỗi function, tạo test cases cho:
+   - Happy path (input hợp lệ)
+   - Edge cases (null, empty, boundary values)
+   - Error cases (invalid input, exceptions)
+<span class="nm">4.</span> Tạo file test cạnh source file: {name}.test.ts
+<span class="nm">5.</span> Chạy tests bằng terminal: npm test -- {filename}
+<span class="nm">6.</span> Nếu có test fail, phân tích và fix
+<span class="nm">7.</span> Tạo Test Summary artifact hiển thị coverage và kết quả</pre>
+  </div>
+
+  <h3>📄 Ví dụ: <span class="ic">.agent/workflows/code-review.md</span></h3>
+  <div class="cw">
+    <div class="ch"><div class="cdots"><div class="cdot"></div><div class="cdot"></div><div class="cdot"></div></div><span class="clang">Markdown · .agent/workflows/code-review.md</span><button class="cbtn" onclick="cp(this,'w2')">Copy</button></div>
+    <pre id="w2"><span class="cm"># Workflow: review</span>
+<span class="cm"># Trigger: /review</span>
+<span class="cm"># Mô tả: Code review toàn diện cho staged changes</span>
+
+<span class="nm">1.</span> Chạy `git diff --staged` để xem changes
+<span class="nm">2.</span> Phân tích theo thứ tự ưu tiên:
+   - 🔴 Security issues (injection, auth bypass, data exposure)
+   - 🔴 Correctness bugs (logic errors, off-by-one, null deref)
+   - 🟡 Performance issues (N+1 queries, unnecessary computation)
+   - 🟡 Code style violations (theo .agent/rules/)
+   - 🟢 Suggestions (refactoring, naming, documentation)
+<span class="nm">3.</span> Tạo Review Report artifact với format:
+   ```
+   ## Summary
+   [Tổng quan: X critical, Y warnings, Z suggestions]
+   
+   ## Issues
+   [Danh sách từng issue với file:line, severity, explanation, fix]
+   ```
+<span class="nm">4.</span> Nếu có critical issues: đề xuất fix code cụ thể</pre>
+  </div>
+
+  <h3>📄 Ví dụ: <span class="ic">.agent/workflows/idea-to-app.md</span> (từ Google Cloud Solutions)</h3>
+  <div class="cw">
+    <div class="ch"><div class="cdots"><div class="cdot"></div><div class="cdot"></div><div class="cdot"></div></div><span class="clang">Markdown · .agent/workflows/idea-to-app.md</span><button class="cbtn" onclick="cp(this,'w3')">Copy</button></div>
+    <pre id="w3"><span class="cm"># Workflow: idea-to-app</span>
+<span class="cm"># Trigger: /idea-to-app</span>
+<span class="cm"># Dùng cho: Prototype một web app hoàn chỉnh từ mô tả</span>
+
+<span class="nm">1.</span> Hỏi: "Mô tả web app bạn muốn build (1-2 câu)"
+<span class="nm">2.</span> Tạo Architecture Diagram artifact thể hiện:
+   - Components chính
+   - Data flow
+   - Tech stack đề xuất
+<span class="nm">3.</span> Chờ user approve Architecture trước khi tiếp tục
+<span class="nm">4.</span> Tạo Implementation Plan artifact với:
+   - Danh sách files cần tạo
+   - Schema database nếu cần
+   - API endpoints
+<span class="nm">5.</span> Implement: scaffold project → backend → frontend
+<span class="nm">6.</span> Chạy app local bằng terminal
+<span class="nm">7.</span> Mở browser, test toàn bộ user flows
+<span class="nm">8.</span> Tạo Walkthrough artifact (browser recording)
+<span class="nm">9.</span> Hỏi user có muốn deploy lên Cloud Run không</pre>
+  </div>
+
+  <div class="box ok">
+    <div class="box-lbl">✅ Chain Workflows</div>
+    Workflows có thể gọi workflow khác. Ví dụ: workflow <span class="ic">/ship-feature</span> có thể include: "<em>Chạy /generate-tests trước, sau đó chạy /review, nếu pass thì tạo PR</em>". Tạo automation pipeline phức tạp chỉ bằng Markdown.
+  </div>
+</div>
+
+<!-- ── SKILLS ── -->
+<div class="sec" id="skills">
+  <div class="stag">Customization #3</div>
+  <h2>⚡ Skills — Progressive Disclosure Knowledge</h2>
+  <p>Skills giải quyết vấn đề "tool bloat" — thay vì load tất cả context vào agent ngay từ đầu (gây chậm, tốn token, confuse), Skills chỉ được load <strong>khi request match với skill's description</strong>.</p>
+
+  <div class="box teal">
+    <div class="box-lbl">🔑 Nguyên lý Progressive Disclosure</div>
+    Agent biết general programming (từ Gemini 3). Skill cung cấp <strong>specialized knowledge của bạn</strong>: project conventions, business rules, domain expertise. Khi user hỏi "run database migration", agent scan available skills, tìm <span class="ic">database-migration</span> skill, load nó vào context và thực thi đúng theo team standard.
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">🌍</div>
+      <div class="card-title">Global Skills</div>
+      <div class="card-desc">Dùng được mọi nơi, ví dụ: "Format JSON", "Generate changelog". <strong>Vị trí:</strong> <span class="ic">~/.gemini/antigravity/skills/</span></div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📁</div>
+      <div class="card-title">Workspace Skills</div>
+      <div class="card-desc">Riêng cho project, ví dụ: skill biết về domain model của bạn. <strong>Vị trí:</strong> <span class="ic">.agent/skills/</span> trong project root</div>
+    </div>
+  </div>
+
+  <h3>📄 Cấu trúc một Skill — <span class="ic">.agent/skills/db-migration/SKILL.md</span></h3>
+  <div class="tree">
+    <div class="tree-hd">.agent/skills/db-migration/</div>
+    <div style="display:flex"><span class="tp">├── </span><span class="tf md">SKILL.md</span><span class="tc">← mô tả + instructions chính</span></div>
+    <div style="display:flex"><span class="tp">├── </span><span class="tf md">examples.md</span><span class="tc">← ví dụ migration thực tế</span></div>
+    <div style="display:flex"><span class="tp">└── </span><span class="td">scripts/</span><span class="tc">← helper scripts agent có thể gọi</span></div>
+    <div style="display:flex"><span class="tp">    └── </span><span class="tf">run-migration.sh</span></div>
+  </div>
+
+  <div class="cw">
+    <div class="ch"><div class="cdots"><div class="cdot"></div><div class="cdot"></div><div class="cdot"></div></div><span class="clang">Markdown · .agent/skills/db-migration/SKILL.md</span><button class="cbtn" onclick="cp(this,'sk1')">Copy</button></div>
+    <pre id="sk1"><span class="cm">---</span>
+<span class="cm">name: database-migration</span>
+<span class="cm">description: >  </span>
+<span class="cm">  Khi nào LOAD skill này: khi user nhắc đến "migration", "migrate database",</span>
+<span class="cm">  "schema change", "Prisma migrate", "alter table".</span>
+<span class="cm">---</span>
+
+<span class="cm"># Skill: Database Migration</span>
+
+<span class="cm">## Project DB Stack</span>
+- ORM: Prisma với PostgreSQL 16
+- Migration files trong: prisma/migrations/
+- Staging DB: postgresql://staging.internal/appdb
+
+<span class="cm">## Quy trình tạo migration</span>
+1. Cập nhật prisma/schema.prisma với thay đổi cần thiết
+2. Chạy: `npx prisma migrate dev --name {descriptive-name}`
+3. Review generated SQL trong prisma/migrations/{timestamp}_{name}/
+4. Test trên staging trước: `DATABASE_URL=$STAGING npx prisma migrate deploy`
+5. Chỉ deploy production khi staging OK
+
+<span class="cm">## Naming convention</span>
+Migration name: snake_case, mô tả rõ ràng
+Ví dụ: add_user_email_index, create_payments_table, drop_legacy_sessions
+
+<span class="cm">## Không được làm</span>
+- Không edit migration file sau khi đã commit
+- Không xóa migration files cũ (dù đã applied)
+- Không dùng raw SQL trong code — luôn qua Prisma client</pre>
+  </div>
+</div>
+
+<!-- ── MCP ── -->
+<div class="sec" id="mcp">
+  <div class="stag">Customization #4</div>
+  <h2>🔌 MCP Tools — Kết nối services bên ngoài</h2>
+  <p>AntiGravity hỗ trợ <strong>Model Context Protocol (MCP)</strong> — agent có thể gọi tools kết nối với databases, GitHub, Jira, và bất kỳ service nào có MCP server.</p>
+
+  <div class="cards c3">
+    <div class="card">
+      <div class="card-ico">🐙</div>
+      <div class="card-title">GitHub MCP</div>
+      <div class="card-desc">Đọc issues, tạo PR, xem repo structure. Agent tự tạo PR sau khi implement feature.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🗄️</div>
+      <div class="card-title">Database MCP</div>
+      <div class="card-desc">Query DB trực tiếp để lấy context. Agent biết schema thực tế, không cần bạn paste.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📋</div>
+      <div class="card-title">Jira / Linear MCP</div>
+      <div class="card-desc">Đọc tickets, cập nhật status. "Fix bug từ ticket PROJ-123" — agent đọc description tự động.</div>
+    </div>
+  </div>
+
+  <h3>⚙️ Cấu hình MCP trong <span class="ic">.agent/mcp.json</span></h3>
+  <div class="cw">
+    <div class="ch"><div class="cdots"><div class="cdot"></div><div class="cdot"></div><div class="cdot"></div></div><span class="clang">JSON · .agent/mcp.json</span><button class="cbtn" onclick="cp(this,'mcp1')">Copy</button></div>
+    <pre id="mcp1">{
+  <span class="prop">"mcpServers"</span>: {
+    <span class="prop">"github"</span>: {
+      <span class="prop">"command"</span>: <span class="st">"npx"</span>,
+      <span class="prop">"args"</span>: [<span class="st">"-y"</span>, <span class="st">"@modelcontextprotocol/server-github"</span>],
+      <span class="prop">"env"</span>: {
+        <span class="prop">"GITHUB_PERSONAL_ACCESS_TOKEN"</span>: <span class="st">"${GITHUB_TOKEN}"</span>
+      }
+    },
+    <span class="prop">"postgres"</span>: {
+      <span class="prop">"command"</span>: <span class="st">"npx"</span>,
+      <span class="prop">"args"</span>: [<span class="st">"-y"</span>, <span class="st">"@modelcontextprotocol/server-postgres"</span>,
+               <span class="st">"postgresql://localhost/mydb"</span>]
+    }
+  }
+}</pre>
+  </div>
+</div>
+
+<!-- ── CẤU TRÚC THƯ MỤC ── -->
+<div class="sec" id="structure">
+  <div class="stag">Reference</div>
+  <h2>📁 Cấu trúc thư mục chuẩn</h2>
+  <p>Đây là cấu trúc <strong>chính xác theo AntiGravity spec</strong> — dựa trên tài liệu chính thức và Google Cloud Solutions examples.</p>
+
+  <div class="tree">
+    <div class="tree-hd">Project Root — AntiGravity Workspace</div>
+
+    <div style="display:flex"><span class="tp">├── </span><span class="td">.agent/</span><span class="tc">← AntiGravity workspace config (chuẩn chính thức)</span></div>
+    <div style="display:flex"><span class="tp">│   ├── </span><span class="td">rules/</span><span class="tc">← Workspace rules (luôn active)</span></div>
+    <div style="display:flex"><span class="tp">│   │   ├── </span><span class="tf md">coding-standards.md</span><span class="tc">← code style, naming</span></div>
+    <div style="display:flex"><span class="tp">│   │   ├── </span><span class="tf md">architecture.md</span><span class="tc">← patterns, layer rules</span></div>
+    <div style="display:flex"><span class="tp">│   │   └── </span><span class="tf md">security.md</span><span class="tc">← security constraints</span></div>
+    <div style="display:flex"><span class="tp">│   ├── </span><span class="td">workflows/</span><span class="tc">← Saved prompts, /slash triggers</span></div>
+    <div style="display:flex"><span class="tp">│   │   ├── </span><span class="tf md">generate-tests.md</span><span class="tc">← /generate-tests</span></div>
+    <div style="display:flex"><span class="tp">│   │   ├── </span><span class="tf md">code-review.md</span><span class="tc">← /review</span></div>
+    <div style="display:flex"><span class="tp">│   │   ├── </span><span class="tf md">idea-to-app.md</span><span class="tc">← /idea-to-app</span></div>
+    <div style="display:flex"><span class="tp">│   │   └── </span><span class="tf md">create-pr.md</span><span class="tc">← /create-pr</span></div>
+    <div style="display:flex"><span class="tp">│   ├── </span><span class="td">skills/</span><span class="tc">← Progressive disclosure packages</span></div>
+    <div style="display:flex"><span class="tp">│   │   ├── </span><span class="td">db-migration/</span></div>
+    <div style="display:flex"><span class="tp">│   │   │   └── </span><span class="tf md">SKILL.md</span><span class="tc">← mô tả + instructions</span></div>
+    <div style="display:flex"><span class="tp">│   │   └── </span><span class="td">api-design/</span></div>
+    <div style="display:flex"><span class="tp">│   │       └── </span><span class="tf md">SKILL.md</span></div>
+    <div style="display:flex"><span class="tp">│   └── </span><span class="tf json">mcp.json</span><span class="tc">← MCP server configurations</span></div>
+
+    <div style="margin:6px 0;display:flex"><span class="tp">├── </span><span class="td">src/</span><span class="tc">← Project source code</span></div>
+    <div style="display:flex"><span class="tp">├── </span><span class="tf">📄 .gitignore</span></div>
+    <div style="display:flex"><span class="tp">└── </span><span class="tf">📄 README.md</span></div>
+
+    <div style="margin-top:10px;color:#546e7a;font-size:11px;letter-spacing:.05em">── GLOBAL (ngoài project) ──</div>
+    <div style="display:flex"><span class="tp">~/.gemini/</span></div>
+    <div style="display:flex"><span class="tp">├── </span><span class="tf md">GEMINI.md</span><span class="tc">← Global Rules (mọi project)</span></div>
+    <div style="display:flex"><span class="tp">└── </span><span class="td">antigravity/</span></div>
+    <div style="display:flex"><span class="tp">    ├── </span><span class="td">global_workflows/</span><span class="tc">← Global Workflows</span></div>
+    <div style="display:flex"><span class="tp">    ├── </span><span class="td">skills/</span><span class="tc">← Global Skills</span></div>
+    <div style="display:flex"><span class="tp">    └── </span><span class="tf">browserAllowlist.txt</span><span class="tc">← Browser security allowlist</span></div>
+  </div>
+
+  <div class="box warn">
+    <div class="box-lbl">⚠️ Lưu ý quan trọng về đặt tên</div>
+    AntiGravity đọc <span class="ic">.agent/rules/</span> và <span class="ic">.agent/workflows/</span> — <strong>không phải</strong> <span class="ic">.cursorrules</span> hay <span class="ic">CLAUDE.md</span>. Global context file là <span class="ic">~/.gemini/GEMINI.md</span>. Một số community templates dùng <span class="ic">.antigravity/rules.md</span> nhưng official spec là <span class="ic">.agent/</span>.
+  </div>
+</div>
+
+<!-- ── SECURITY ── -->
+<div class="sec" id="security">
+  <div class="stag">Security</div>
+  <h2>🛡 Agent Security</h2>
+  <p>Khi agent có quyền truy cập terminal và browser, security trở thành critical. AntiGravity có hệ thống phân quyền chi tiết.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-ico">✅</div>
+      <div class="card-title">Allow List</div>
+      <div class="card-desc">Danh sách commands/domains agent được phép dùng không cần hỏi. Thêm vào <span class="ic">~/.gemini/antigravity/browserAllowlist.txt</span>.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">🚫</div>
+      <div class="card-title">Deny List</div>
+      <div class="card-desc">Danh sách commands agent <em>không bao giờ</em> được chạy — dù ở mode "Always Proceed". Ví dụ: <span class="ic">rm -rf</span>, <span class="ic">DROP TABLE</span>.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">💉</div>
+      <div class="card-title">Prompt Injection Risk</div>
+      <div class="card-desc">Khi agent đọc website hoặc file từ external source, content đó có thể chứa instructions giả mạo. Dùng "Request Review" mode để kiểm soát.</div>
+    </div>
+    <div class="card">
+      <div class="card-ico">📤</div>
+      <div class="card-title">Data Exfiltration Risk</div>
+      <div class="card-desc">Agent có thể gọi external API nếu không có restrict. Trong Secure Mode, agent không thể gửi data ra ngoài domain allowlist.</div>
+    </div>
+  </div>
+
+  <div class="box danger">
+    <div class="box-lbl">🚨 Nguyên tắc an toàn</div>
+    <strong>Không dùng Agent-driven mode cho production codebases</strong>. Luôn dùng <strong>Review-driven</strong> hoặc <strong>Secure mode</strong>. Cấu hình deny list cho các lệnh nguy hiểm. Không cấp GITHUB_TOKEN production vào MCP — dùng token có scope giới hạn nhất.
+  </div>
+</div>
+
+<!-- ── MODELS ── -->
+<div class="sec" id="models">
+  <div class="stag">Models</div>
+  <h2>🤖 Model Selection</h2>
+  <p>AntiGravity hỗ trợ nhiều AI models — chọn đúng model cho đúng task để tối ưu hiệu quả và cost.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Model</th><th>Provider</th><th>Năng lực</th><th>Tốt nhất cho</th><th>Quota</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Gemini 3 Pro (High)</strong> ⭐</td><td>Google</td><td>★★★★★</td><td>Complex planning, architecture, deep research</td><td>Giới hạn (free preview)</td></tr>
+        <tr><td><strong>Gemini 3 Pro (Low)</strong></td><td>Google</td><td>★★★★☆</td><td>Standard coding tasks, balanced</td><td>Generous (free preview)</td></tr>
+        <tr><td><strong>Claude Sonnet 4.5</strong></td><td>Anthropic</td><td>★★★★☆</td><td>Code review, writing, reasoning</td><td>Theo Anthropic limits</td></tr>
+        <tr><td><strong>Claude Opus 4.5</strong></td><td>Anthropic</td><td>★★★★★</td><td>Complex reasoning, critical review</td><td>Theo Anthropic limits</td></tr>
+        <tr><td><strong>GPT-OSS-120B</strong></td><td>OpenAI (OSS)</td><td>★★★☆☆</td><td>General tasks, open source preference</td><td>Generous</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── PLANNING vs FAST ── -->
+<div class="sec" id="modes">
+  <div class="stag">Agent Modes</div>
+  <h2>⚙️ Planning Mode vs Fast Mode</h2>
+  <p>Hai mode quyết định agent "suy nghĩ" bao nhiêu trước khi hành động — ảnh hưởng trực tiếp đến chất lượng và tốc độ.</p>
+
+  <div class="cards">
+    <div class="card" style="border-color:rgba(26,115,232,.3)">
+      <div class="card-ico">🧠</div>
+      <div class="card-title">Planning Mode (default)</div>
+      <div class="card-desc">Agent suy nghĩ sâu, tạo Task List → Implementation Plan artifacts trước khi viết bất kỳ dòng code nào. Tổ chức work thành task groups. Output chất lượng cao hơn nhiều.<br><br><strong>Dùng khi:</strong> feature mới, refactoring phức tạp, architecture decisions, bất kỳ task &gt;30 phút.</div>
+    </div>
+    <div class="card" style="border-color:rgba(19,115,51,.3)">
+      <div class="card-ico">⚡</div>
+      <div class="card-title">Fast Mode</div>
+      <div class="card-desc">Agent thực thi trực tiếp, không tạo plan artifacts. Nhanh hơn đáng kể.<br><br><strong>Dùng khi:</strong> rename variable, fix typo, format code, thêm một câu log, chạy bash commands đơn giản, tasks rõ ràng có thể hoàn thành trong &lt;5 phút.</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-lbl">💡 Mental model</div>
+    Planning Mode = "Thinking budget cao" — agent dùng nhiều compute để reason trước khi act. Fast Mode = "Thinking budget thấp" — execute nhanh. Tương tự DeepThink vs standard mode trong Gemini API.
+  </div>
+</div>
+
+<!-- ── DEMO CHAT ── -->
+<div class="sec" id="demo-chat">
+  <div class="stag">Demo · Interactive</div>
+  <h2>💬 Demo conversation thực tế</h2>
+  <p>Xem cách AntiGravity hoạt động trong thực tế với các scenario khác nhau.</p>
+
+  <div class="demo">
+    <div class="demo-hd">
+      <div class="demo-title">🎮 Chọn scenario để xem conversation</div>
+      <span class="demo-chip">interactive</span>
+    </div>
+    <div style="padding:12px 16px 0">
+      <div class="chips">
+        <div class="chip on" onclick="showDemo(this,'d1')">⚡ Feature mới</div>
+        <div class="chip" onclick="showDemo(this,'d2')">🐛 Debug lỗi</div>
+        <div class="chip" onclick="showDemo(this,'d3')">🔄 /review workflow</div>
+        <div class="chip" onclick="showDemo(this,'d4')">🌐 Browser testing</div>
+      </div>
+    </div>
+    <div style="padding:12px 16px 14px">
+      <button onclick="playDemo()" style="width:100%;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--body)">▶ Xem demo</button>
+    </div>
+    <div id="demo-out" style="display:none;border-top:1px solid var(--rim);padding:16px 18px"></div>
+  </div>
+</div>
+
+<!-- ── PROMPT SANDBOX ── -->
+<div class="sec" id="prompt-sandbox">
+  <div class="stag">Demo · Live</div>
+  <h2>🎮 Prompt Sandbox — Thử ngay</h2>
+  <p>Nhập bất kỳ task nào bạn muốn giao cho AntiGravity. Chọn scenario mẫu hoặc tự gõ — xem response mẫu với typewriter animation.</p>
+
+  <div class="demo-dark">
+    <div class="demo-dark-hd">
+      <div class="demo-dark-title">💬 Agent Manager — Playground</div>
+      <span class="demo-dark-badge">sandbox</span>
+    </div>
+    <div style="padding:13px 16px 0">
+      <div style="font-family:var(--mono);font-size:10px;color:#4a4f6a;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Chọn task mẫu hoặc tự gõ:</div>
+      <div class="dark-chips">
+        <div class="dark-chip" onclick="fillPrompt(this,'Implement REST API cho user authentication với JWT + refresh tokens. Stack: Fastify, Prisma, PostgreSQL.')">🔐 Auth API</div>
+        <div class="dark-chip" onclick="fillPrompt(this,'Review code trong @src/services/payment.service.ts — tìm security issues và performance problems.')">🔍 Code review</div>
+        <div class="dark-chip" onclick="fillPrompt(this,'Tạo unit tests cho tất cả public methods trong @src/services/order.service.ts. Framework: Vitest.')">🧪 Generate tests</div>
+        <div class="dark-chip" onclick="fillPrompt(this,'Deploy app lên localhost:3000, mở browser và test toàn bộ checkout flow từ đầu đến cuối.')">🌐 E2E test</div>
+        <div class="dark-chip" onclick="fillPrompt(this,'Refactor @src/utils/helpers.ts — tách thành modules nhỏ hơn theo single responsibility principle.')">♻️ Refactor</div>
+      </div>
+    </div>
+    <div class="sandbox-input-row" style="margin-top:12px">
+      <textarea class="sandbox-input" id="ag-prompt-input" rows="3" placeholder="Mô tả task cho AntiGravity agent..."></textarea>
+    </div>
+    <div style="padding:0 16px 14px;display:flex;gap:9px">
+      <button class="run-btn" onclick="runSandbox()" id="ag-run-btn">▶ Run agent</button>
+    </div>
+    <div class="tw-resp" id="ag-tw-resp">
+      <div class="tw-resp-hd">
+        <div class="tw-av">AG</div>
+        <div class="tw-name">ANTIGRAVITY AGENT · Planning Mode</div>
+      </div>
+      <div class="tw-body" id="ag-tw-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLASH DEMO ── -->
+<div class="sec" id="slash-demo">
+  <div class="stag">Slash Commands · Live</div>
+  <h2>⚡ Slash Commands — Thử gõ ngay</h2>
+  <p>Gõ <span class="ic">/</span> vào ô chat của Agent Manager để trigger workflow đã định nghĩa. Dưới đây là live demo — gõ thật để xem dropdown.</p>
+
+  <div class="slash-demo-box">
+    <div class="slash-bar">
+      <span>🎛</span><span>Agent Manager — Workspace: my-project</span>
+    </div>
+    <div class="slash-input-area">
+      <input id="ag-slash-input" type="text" placeholder='Gõ "/" để xem workflows...' oninput="onAgSlash(this.value)" autocomplete="off">
+    </div>
+    <div class="slash-dd" id="ag-slash-dd"></div>
+  </div>
+
+  <h3>📋 Danh sách Slash Commands & Workflows</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0">
+
+    <div style="background:#fff;border:1px solid var(--rim);border-radius:8px;padding:15px">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:5px">/review</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:7px">Code review toàn diện: security, bugs, performance. Tạo Review Report artifact.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#9298b8">→ <span style="color:var(--green)">/review</span> (chạy trên staged changes)</div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--rim);border-radius:8px;padding:15px">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:5px">/generate-tests</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:7px">Tạo unit tests cho file đang mở — happy path, edge cases, error cases.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#9298b8">→ <span style="color:var(--green)">/generate-tests</span></div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--rim);border-radius:8px;padding:15px">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:5px">/create-pr</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:7px">Tạo GitHub PR từ staged changes — tự điền title, description, reviewers.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#9298b8">→ <span style="color:var(--green)">/create-pr</span> "feat: add auth"</div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--rim);border-radius:8px;padding:15px">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:5px">/idea-to-app</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:7px">Prototype web app hoàn chỉnh từ một mô tả — plan, scaffold, implement, test browser.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#9298b8">→ <span style="color:var(--green)">/idea-to-app</span></div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--rim);border-radius:8px;padding:15px">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:5px">/security-scan</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:7px">Quét toàn bộ codebase tìm security vulnerabilities — OWASP Top 10 checklist.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#9298b8">→ <span style="color:var(--green)">/security-scan</span></div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--rim);border-radius:8px;padding:15px">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:5px">/explain</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:7px">Giải thích đoạn code được chọn — logic, patterns, potential issues.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#9298b8">→ <span style="color:var(--green)">/explain</span> (sau khi select code)</div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--rim);border-radius:8px;padding:15px">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:5px">/migrate-db</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:7px">Tạo database migration — cập nhật schema, tạo SQL, test trên staging trước.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#9298b8">→ <span style="color:var(--green)">/migrate-db</span> "add users index"</div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--rim);border-radius:8px;padding:15px">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:5px">/ship-feature</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:7px">Chain workflow: generate-tests → review → create-pr. Một lệnh hoàn thành cả pipeline.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#9298b8">→ <span style="color:var(--green)">/ship-feature</span></div>
+    </div>
+
+  </div>
+
+  <div class="box">
+    <div class="box-lbl">💡 Tự tạo workflow của bạn</div>
+    Tạo file <span class="ic">.agent/workflows/ten-workflow.md</span>, mô tả các bước bằng Markdown. Tiếp theo, gõ <span class="ic">/ten-workflow</span> trong Agent Manager — AntiGravity tự nhận diện và hiện trong dropdown.
+  </div>
+</div>
+
+<!-- ── PROMPT COMPARE ── -->
+<div class="sec" id="prompt-compare">
+  <div class="stag">Kỹ thuật · Demo</div>
+  <h2>🔬 Prompt tệ vs Prompt tốt</h2>
+  <p>Chất lượng Artifacts — Task List, Implementation Plan, Walkthrough — phụ thuộc trực tiếp vào chất lượng task description. Đây là sự khác biệt thực tế.</p>
+
+  <div class="demo-dark">
+    <div class="demo-dark-hd">
+      <div class="demo-dark-title">🔬 Chọn loại task để so sánh</div>
+      <span class="demo-dark-badge">interactive</span>
+    </div>
+    <div style="padding:13px 16px 14px">
+      <div class="dark-chips">
+        <div class="dark-chip on" onclick="showPcmp(this,'p1')">⚙️ Implement feature</div>
+        <div class="dark-chip" onclick="showPcmp(this,'p2')">🐛 Debug lỗi</div>
+        <div class="dark-chip" onclick="showPcmp(this,'p3')">🧪 Viết tests</div>
+        <div class="dark-chip" onclick="showPcmp(this,'p4')">♻️ Refactor</div>
+      </div>
+    </div>
+    <div id="pcmp-output" style="padding:0 16px 16px"></div>
+  </div>
+</div>
+
+<!-- ── SHORTCUTS ── -->
+<div class="sec" id="shortcuts">
+  <div class="stag">Reference</div>
+  <h2>⌨️ Phím tắt AntiGravity</h2>
+  <div class="kgrid">
+    <div class="ki"><span>Mở Agent Manager</span><div class="keys"><kbd>Cmd</kbd><kbd>Shift</kbd><kbd>A</kbd></div></div>
+    <div class="ki"><span>Mở Editor View</span><div class="keys"><kbd>Cmd</kbd><kbd>Shift</kbd><kbd>E</kbd></div></div>
+    <div class="ki"><span>Inline command (Editor)</span><div class="keys"><kbd>Cmd</kbd><kbd>K</kbd></div></div>
+    <div class="ki"><span>Chat với agent (Editor)</span><div class="keys"><kbd>Cmd</kbd><kbd>L</kbd></div></div>
+    <div class="ki"><span>New conversation</span><div class="keys"><kbd>Cmd</kbd><kbd>Shift</kbd><kbd>N</kbd></div></div>
+    <div class="ki"><span>Mở Settings</span><div class="keys"><kbd>Cmd</kbd><kbd>,</kbd></div></div>
+    <div class="ki"><span>Accept suggestion</span><div class="keys"><kbd>Tab</kbd></div></div>
+    <div class="ki"><span>Reject suggestion</span><div class="keys"><kbd>Esc</kbd></div></div>
+    <div class="ki"><span>Accept partial word</span><div class="keys"><kbd>Cmd</kbd><kbd>→</kbd></div></div>
+    <div class="ki"><span>Trigger slash command</span><div class="keys"><kbd>/</kbd> ở đầu input</div></div>
+    <div class="ki"><span>Approve artifact</span><div class="keys">Click <strong>Proceed</strong></div></div>
+    <div class="ki"><span>Stop agent</span><div class="keys">Click <strong>Stop</strong> button</div></div>
+  </div>
+  <div class="box warn">
+    <div class="box-lbl">⚠️ Windows/Linux</div>
+    Thay <kbd>Cmd</kbd> bằng <kbd>Ctrl</kbd> trên Windows và Linux.
+  </div>
+</div>
+
+<!-- ── TIPS ── -->
+<div class="sec" id="tips">
+  <div class="stag">Best Practices</div>
+  <h2>⭐ Best Practices từ Google & Community</h2>
+
+  <div class="cgrid">
+    <div class="cc" style="--c:var(--blue)">
+      <span class="cc-ico">🏗</span>
+      <div class="cc-name">Đừng skip Artifact review</div>
+      <div class="cc-type">Artifact-first workflow</div>
+      <div class="cc-desc">Interrogate kỹ Implementation Plan trước khi cho agent code. Sai hướng phát hiện ở plan = tiết kiệm nhiều giờ undo sau này.</div>
+    </div>
+    <div class="cc" style="--c:var(--green)">
+      <span class="cc-ico">📝</span>
+      <div class="cc-name">Rules ngắn gọn, cụ thể</div>
+      <div class="cc-type">Rules best practice</div>
+      <div class="cc-desc">Rules quá dài làm loãng context. Ưu tiên rules quan trọng nhất, checkable được. "Không dùng var" tốt hơn "Viết code tốt".</div>
+    </div>
+    <div class="cc" style="--c:var(--amber)">
+      <span class="cc-ico">⚡</span>
+      <div class="cc-name">Workflow cho tasks lặp lại</div>
+      <div class="cc-type">Productivity</div>
+      <div class="cc-desc">Bất kỳ task bạn làm hơn 2 lần/tuần đều nên có workflow. /generate-tests, /review, /create-pr là bộ 3 cơ bản nhất.</div>
+    </div>
+    <div class="cc" style="--c:var(--teal)">
+      <span class="cc-ico">🎯</span>
+      <div class="cc-name">Mô tả task như kiến trúc sư</div>
+      <div class="cc-type">Prompting</div>
+      <div class="cc-desc">"Build a user auth system with JWT, refresh tokens, role-based access" tốt hơn "viết code login". Bạn là architect, agent là engineer.</div>
+    </div>
+    <div class="cc" style="--c:var(--red)">
+      <span class="cc-ico">🔒</span>
+      <div class="cc-name">Luôn dùng Review-driven</div>
+      <div class="cc-type">Security</div>
+      <div class="cc-desc">Agent-driven tiện nhưng nguy hiểm trên codebase thật. Review-driven cho bạn checkpoint approve trước mỗi hành động quan trọng.</div>
+    </div>
+    <div class="cc" style="--c:var(--blue-lt)">
+      <span class="cc-ico">🧠</span>
+      <div class="cc-name">Dùng @context reference</div>
+      <div class="cc-type">Context management</div>
+      <div class="cc-desc">@file.ts, @folder/, @README.md — reference trực tiếp thay vì paste content. Agent đọc trực tiếp từ workspace, chính xác hơn.</div>
+    </div>
+  </div>
+
+  <div class="box ok" style="margin-top:24px">
+    <div class="box-lbl">⭐ Core Philosophy</div>
+    AntiGravity không thay thế developer — nó <strong>amplify</strong>. Bạn chuyển từ "người viết code" sang "người chỉ đạo". Đầu tư vào Rules, Workflows, Skills = đầu tư vào năng suất dài hạn. Agent quality = context quality.
+  </div>
+</div>
+
+</main>
+
+<!-- ════════ SCRIPT ════════ -->
+<script>
+/* NAV */
+function tog(){document.getElementById('sb').classList.toggle('open');document.getElementById('ov').classList.toggle('v')}
+function sa(el){document.querySelectorAll('.sb-a').forEach(a=>a.classList.remove('on'));el.classList.add('on');if(window.innerWidth<=900)tog()}
+
+/* PROGRESS */
+window.addEventListener('scroll',()=>{
+  const mc=document.getElementById('mc');
+  const h=mc.scrollHeight-window.innerHeight;
+  const p=Math.max(0,Math.min(100,Math.round(-mc.getBoundingClientRect().top/h*100)));
+  document.getElementById('pct').textContent=p+'%';
+  document.getElementById('pfill').style.width=p+'%';
+});
+
+/* SCROLL SPY */
+document.querySelectorAll('[id]').forEach(s=>{
+  new IntersectionObserver(e=>{
+    if(e[0].isIntersecting)document.querySelectorAll('.sb-a').forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e[0].target.id));
+  },{rootMargin:'-20% 0px -70% 0px'}).observe(s);
+});
+
+/* COPY */
+function cp(btn,id){
+  navigator.clipboard.writeText(document.getElementById(id).innerText).then(()=>{btn.textContent='✓ Copied';btn.classList.add('ok2');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('ok2')},2000)});
+}
+
+/* ════ SANDBOX ════ */
+const sandboxResponses = {
+  auth: `📋 <strong>Artifact: Task List</strong>
+<pre>[ ] 1. Schema: users table (id, email, password_hash, created_at)
+[ ] 2. Schema: refresh_tokens table (id, user_id, token_hash, expires_at)
+[ ] 3. POST /api/v1/auth/register — validate, hash password (bcrypt rounds=12)
+[ ] 4. POST /api/v1/auth/login — verify credentials, issue JWT (15m) + refresh (7d)
+[ ] 5. POST /api/v1/auth/refresh — rotate refresh token (invalidate old)
+[ ] 6. POST /api/v1/auth/logout — revoke refresh token from DB
+[ ] 7. Middleware: verifyJWT() cho protected routes
+[ ] 8. Unit tests: auth.service.test.ts (8 cases)</pre>
+
+<strong>Implementation Plan sẵn sàng.</strong> Bạn muốn review trước khi tôi bắt đầu code không? Tôi cũng thấy Rules yêu cầu dùng Zod validation cho tất cả input — đã include vào plan.`,
+
+  review: `📊 <strong>Artifact: Review Report — payment.service.ts</strong>
+<pre>Summary: 1 critical · 2 warnings · 2 suggestions
+
+🔴 CRITICAL (payment.service.ts:47)
+   user.profile.userId truy cập không kiểm tra null
+   → Fix: const userId = user.profile?.userId ?? user.id
+
+🟡 WARNING (payment.service.ts:89)
+   Missing timeout cho external payment gateway call (có thể hang mãi)
+   → Fix: thêm AbortController với 10s timeout
+
+🟡 WARNING (payment.service.ts:120)
+   Error message leak internal stack trace ra client response
+   → Fix: log internally, trả về generic message cho client
+
+🟢 SUGGESTION: Thêm retry logic với exponential backoff cho gateway calls
+🟢 SUGGESTION: Tách PaymentGatewayAdapter ra file riêng (SRP)</pre>
+
+Fix critical issue trước — đây là potential runtime crash trong production.`,
+
+  tests: `🧪 <strong>Tạo tests cho order.service.ts...</strong>
+<pre>[Đọc src/services/order.service.ts — 5 public methods]
+
+Tạo src/services/order.service.test.ts:</pre>
+
+<pre>describe('OrderService', () => {
+  describe('createOrder', () => {
+    it('should create order with valid items', async () => {...})
+    it('should throw if items array is empty', async () => {...})
+    it('should throw if item quantity <= 0', async () => {...})
+    it('should calculate total correctly with discounts', async () => {...})
+  })
+  describe('cancelOrder', () => {
+    it('should cancel PENDING order', async () => {...})
+    it('should throw if order is COMPLETED', async () => {...})
+    it('should throw if order not found', async () => {...})
+  })
+  // ... 12 more cases
+})</pre>
+
+<strong>Artifact: Test Results</strong> — chạy <code>npx vitest run order.service</code>... <strong>15/15 passed ✅</strong>`,
+
+  e2e: `🌐 <strong>Mở Browser Subagent...</strong>
+
+<pre>[Terminal: npm run dev → Server running on localhost:3000]
+[Chrome: navigate to localhost:3000]</pre>
+
+<strong>Testing checkout flow:</strong>
+<pre>1. ✅ /products — 24 products loaded
+2. ✅ Click "Add to cart" → cart badge updated (1)
+3. ✅ /cart — 1 item, total hiển thị đúng
+4. ✅ /checkout — form address hiện ra
+5. ❌ BUG: Nhập địa chỉ → click "Continue" → form bị reset, không navigate
+
+📸 Artifact: Screenshot (bug state attached)</pre>
+
+<strong>Root cause:</strong> <code>checkout.tsx:78</code> — <code>onSubmit</code> handler thiếu <code>e.preventDefault()</code>. Form submit default behavior reload trang. Fix và re-test?`,
+
+  refactor: `♻️ <strong>Artifact: Implementation Plan — Refactor helpers.ts</strong>
+
+<pre>Phân tích src/utils/helpers.ts (247 lines):
+→ 4 concerns khác nhau trong cùng 1 file
+
+Đề xuất tách thành:</pre>
+
+<pre>src/utils/
+├── date.utils.ts    ← formatDate, parseDate, isExpired (3 fns)
+├── string.utils.ts  ← capitalize, slugify, truncate (4 fns)
+├── number.utils.ts  ← formatCurrency, roundTo, clamp (3 fns)
+└── validation.ts    ← isEmail, isPhone, isUUID (4 fns)</pre>
+
+Sẽ update tất cả imports trong 12 files dùng helpers.ts. Barrel export qua <code>src/utils/index.ts</code> để backward compatible — không cần sửa external consumers. Proceed?`,
+};
+
+function fillPrompt(el, text) {
+  document.getElementById('ag-prompt-input').value = text;
+  document.querySelectorAll('.dark-chip').forEach(c => {
+    if(c.closest('#prompt-sandbox')) c.classList.remove('on');
+  });
+  el.classList.add('on');
+}
+
+function runSandbox() {
+  const input = document.getElementById('ag-prompt-input').value.trim();
+  if (!input) return;
+  const btn = document.getElementById('ag-run-btn');
+  btn.disabled = true; btn.textContent = '⏳ Running...';
+
+  const resp = document.getElementById('ag-tw-resp');
+  const body = document.getElementById('ag-tw-body');
+  resp.classList.add('show');
+  body.innerHTML = '<span class="tw-curs"></span>';
+
+  // pick response
+  const lower = input.toLowerCase();
+  let key = 'auth';
+  if (lower.includes('review') || lower.includes('@')) key = 'review';
+  else if (lower.includes('test')) key = 'tests';
+  else if (lower.includes('browser') || lower.includes('checkout') || lower.includes('localhost')) key = 'e2e';
+  else if (lower.includes('refactor') || lower.includes('tách') || lower.includes('split')) key = 'refactor';
+  const html = sandboxResponses[key];
+
+  setTimeout(() => {
+    typewriter(body, html, () => { btn.disabled = false; btn.textContent = '▶ Run agent'; });
+  }, 500);
+}
+
+function typewriter(el, html, cb) {
+  el.innerHTML = '';
+  const tmp = document.createElement('div'); tmp.innerHTML = html;
+  const full = tmp.innerHTML;
+  let i = 0;
+  const step = Math.ceil(full.length / 90);
+  const iv = setInterval(() => {
+    i += step;
+    if (i >= full.length) {
+      el.innerHTML = full; clearInterval(iv); if(cb) cb();
+    } else {
+      el.innerHTML = full.slice(0, i) + '<span class="tw-curs"></span>';
+    }
+  }, 18);
+}
+
+/* ════ SLASH DROPDOWN ════ */
+const agSlashCmds = [
+  {cmd:'/review',         desc:'Code review: security, bugs, performance'},
+  {cmd:'/generate-tests', desc:'Tạo unit tests cho file đang focus'},
+  {cmd:'/create-pr',      desc:'Tạo GitHub PR từ staged changes'},
+  {cmd:'/idea-to-app',    desc:'Prototype web app từ một mô tả'},
+  {cmd:'/security-scan',  desc:'Quét codebase tìm vulnerabilities'},
+  {cmd:'/explain',        desc:'Giải thích code đang được chọn'},
+  {cmd:'/migrate-db',     desc:'Tạo database migration'},
+  {cmd:'/ship-feature',   desc:'Chain: tests → review → create-pr'},
+  {cmd:'/fix',            desc:'Tự động phát hiện và fix lỗi'},
+  {cmd:'/document',       desc:'Tạo documentation cho module'},
+  {cmd:'/benchmark',      desc:'Performance profiling và optimization'},
+  {cmd:'/changelog',      desc:'Tạo CHANGELOG từ git history'},
+];
+
+function onAgSlash(val) {
+  const dd = document.getElementById('ag-slash-dd');
+  if (!val.startsWith('/')) { dd.classList.remove('open'); return; }
+  const q = val.toLowerCase();
+  const matches = agSlashCmds.filter(c => c.cmd.includes(q));
+  if (!matches.length) { dd.classList.remove('open'); return; }
+  dd.innerHTML = matches.map(c =>
+    `<div class="slash-item" onclick="pickAgSlash('${c.cmd}')">
+      <span class="slash-item-cmd">${c.cmd}</span>
+      <span class="slash-item-desc">${c.desc}</span>
+    </div>`).join('');
+  dd.classList.add('open');
+}
+function pickAgSlash(cmd) {
+  document.getElementById('ag-slash-input').value = cmd + ' ';
+  document.getElementById('ag-slash-dd').classList.remove('open');
+  document.getElementById('ag-slash-input').focus();
+}
+
+/* ════ PROMPT COMPARE ════ */
+const pcmpData = {
+  p1:{
+    bad:'❌ Viết API cho user',
+    good:'✅ Implement REST API: POST /api/v1/users/register và POST /api/v1/users/login. Stack: Fastify + Prisma + PostgreSQL. Auth: JWT (15 phút) + refresh token (7 ngày) lưu trong httpOnly cookie. Validation: Zod. Response format: { data, error, meta: {requestId} }.',
+    result:'Agent tạo Implementation Plan chi tiết với files cụ thể, đặt đúng layer theo Architecture Rule, dùng đúng Zod validation pattern từ Workspace Rules. Không cần hỏi thêm gì.'
+  },
+  p2:{
+    bad:'❌ App bị lỗi null pointer fix giúp',
+    good:'✅ Bug: <code>UnhandledPromiseRejection: Cannot read properties of null (reading "profile")</code> tại <code>user.service.ts:47</code>. Xảy ra khi user chưa complete profile setup. Stack: Node.js 22, Prisma. Paste stack trace: [...].',
+    result:'Agent đọc đúng file, xác định root cause (không kiểm tra null trước khi access nested property), đề xuất optional chaining fix, kiểm tra xem pattern tương tự có ở chỗ nào khác không, và tự viết regression test.'
+  },
+  p3:{
+    bad:'❌ Viết test cho order service',
+    good:'✅ Tạo Vitest unit tests cho @src/services/order.service.ts. Cover: createOrder (valid/empty items/negative qty), cancelOrder (PENDING/COMPLETED/not found), calculateTotal (with/without discount). Test file: order.service.test.ts cạnh source. Mock: orderRepository.',
+    result:'Agent tạo đúng test cases theo spec, đặt file đúng vị trí, mock đúng dependencies, chạy tests và báo cáo coverage artifact. Không cần đi/lại hỏi.'
+  },
+  p4:{
+    bad:'❌ Refactor code cho đẹp hơn',
+    good:'✅ Refactor @src/utils/helpers.ts (247 lines, 4 concerns): tách thành date.utils.ts, string.utils.ts, number.utils.ts, validation.ts. Tạo barrel export qua index.ts để backward compatible. Update tất cả imports trong project. Không thay đổi function signatures.',
+    result:'Agent tạo Implementation Plan với chính xác danh sách files mới, barrel export pattern, và list files cần update imports. Constraint "không đổi function signatures" được tuân thủ — backward compatible hoàn toàn.'
+  }
+};
+
+let curPcmp = 'p1';
+function showPcmp(el, key) {
+  el.closest('.demo-dark').querySelectorAll('.dark-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  curPcmp = key;
+  renderPcmp(key);
+}
+function renderPcmp(key) {
+  const d = pcmpData[key];
+  document.getElementById('pcmp-output').innerHTML = `
+    <div class="pcmp">
+      <div class="pcmp-box bad">
+        <div class="pcmp-lbl bad">Prompt tệ</div>
+        <div class="pcmp-text">${d.bad}</div>
+      </div>
+      <div class="pcmp-box good">
+        <div class="pcmp-lbl good">Prompt tốt</div>
+        <div class="pcmp-text">${d.good}</div>
+      </div>
+    </div>
+    <div class="pcmp-result">
+      <div class="pcmp-result-lbl">🎯 Kết quả với prompt tốt</div>
+      <div class="pcmp-result-text">${d.result}</div>
+    </div>`;
+}
+renderPcmp('p1');
+
+</script>
+const demos = {
+  d1:[
+    {r:'u',m:'Implement user authentication với JWT + refresh tokens. Backend: Fastify + Prisma + PostgreSQL.'},
+    {r:'ai',m:'Tôi sẽ bắt đầu với <strong>Planning mode</strong>. Để tôi tạo Implementation Plan trước.\n\n<em>📋 Artifact: Task List</em>\n<pre>[ ] 1. Schema: User table với password_hash, refresh_token_hash\n[ ] 2. POST /api/v1/auth/register — hash password (bcrypt)\n[ ] 3. POST /api/v1/auth/login — verify + issue JWT + refresh token\n[ ] 4. POST /api/v1/auth/refresh — rotate refresh token\n[ ] 5. POST /api/v1/auth/logout — revoke refresh token\n[ ] 6. Middleware: verify JWT cho protected routes\n[ ] 7. Unit tests cho auth service</pre>\nBạn muốn review trước khi tôi bắt đầu implement không?'},
+    {r:'u',m:'Thêm rate limiting cho login endpoint (max 5 lần/phút/IP). Proceed.'},
+    {r:'ai',m:'Đã cập nhật plan, bắt đầu implement...\n\n<em>📄 Artifact: Implementation Plan (updated)</em>\n<pre>Files sẽ tạo:\n- prisma/schema.prisma (User model)\n- src/services/auth.service.ts\n- src/routes/auth.routes.ts\n- src/middleware/auth.middleware.ts\n- src/plugins/rate-limit.plugin.ts\n- tests/auth.service.test.ts</pre>\nThêm `@fastify/rate-limit` cho login endpoint. Tôi sẽ dùng IP + fingerprint để track attempts. Proceed với implementation...'},
+  ],
+  d2:[
+    {r:'u',m:'Có lỗi này trong production: <code>UnhandledPromiseRejection: Cannot read properties of null (reading "userId")</code> tại payment.service.ts:47'},
+    {r:'ai',m:'Để tôi đọc file đó trước.\n\n<em>[Đọc payment.service.ts...]</em>\n\nTìm thấy root cause tại dòng 47:\n<pre>const user = await userRepo.findById(payment.userId);\nconst name = user.profile.userId; // ← crash nếu profile null</pre>\n🔴 <strong>Bug:</strong> <code>user.profile</code> có thể <code>null</code> với users chưa hoàn thành profile setup.\n\n<strong>Fix:</strong>\n<pre>const profile = user.profile;\nconst name = profile?.userId ?? user.email; // fallback về email</pre>\n\nTôi cũng thấy pattern tương tự ở dòng 89 và 134 — muốn tôi fix cả 3 chỗ không?'},
+    {r:'u',m:'Fix cả 3, và viết test để prevent regression.'},
+    {r:'ai',m:'Đã fix 3 null access issues. Running tests...\n\n<em>[Terminal: npm test -- payment.service]</em>\n<em>📦 Artifact: Test Results</em>\n<pre>✓ payment.service\n  ✓ processPayment — user with profile (12ms)\n  ✓ processPayment — user without profile (8ms)  ← NEW\n  ✓ processPayment — user.profile.userId null (7ms) ← NEW\n\nTests: 3 passed, 3 new</pre>\nTất cả tests pass. Code diff sẵn sàng để review.'},
+  ],
+  d3:[
+    {r:'u',m:'/review'},
+    {r:'ai',m:'<em>[Chạy workflow: code-review.md]</em>\n<em>[Terminal: git diff --staged...]</em>\n\n<strong>📊 Review Report</strong>\n\n<strong>Summary:</strong> 1 critical, 2 warnings, 1 suggestion\n\n🔴 <strong>Critical — SQL Injection risk</strong> (src/repo/user.repo.ts:23)\n<pre>// ❌ String interpolation trong query\nconst q = `SELECT * FROM users WHERE email = \'${email}\'`;\n\n// ✅ Fix: parameterized query\nconst q = "SELECT * FROM users WHERE email = $1";\nawait db.query(q, [email]);</pre>\n\n🟡 <strong>Warning:</strong> Missing input validation trên POST /api/users\n🟡 <strong>Warning:</strong> Không có error handling khi DB connection fail\n🟢 <strong>Suggestion:</strong> Thêm index trên users.email column\n\nFix critical issue ngay — đây là security vulnerability.'},
+  ],
+  d4:[
+    {r:'u',m:'Deploy app lên localhost:3000, test luồng checkout từ đầu đến cuối.'},
+    {r:'ai',m:'<em>[Terminal: npm run dev → App running on :3000]</em>\n<em>[Mở browser subagent...]</em>\n\n<strong>Bắt đầu testing checkout flow:</strong>\n\n1. ✅ Navigate → localhost:3000/products\n2. ✅ Click "Add to cart" trên iPhone 15\n3. ✅ Navigate → /cart — hiện 1 item đúng\n4. ✅ Click "Checkout" → /checkout\n5. ❌ <strong>BUG FOUND:</strong> Sau khi điền địa chỉ và nhấn "Continue" — form reset về trống, không navigate sang bước payment\n\n<em>📸 Artifact: Screenshot (bug state)</em>\n\nTôi xem source... Lỗi ở checkout.tsx:78: missing <code>event.preventDefault()</code> trong form submit handler. Fix ngay?'},
+    {r:'u',m:'Fix và re-test.'},
+    {r:'ai',m:'Đã thêm <code>event.preventDefault()</code>. Re-testing...\n\n5. ✅ Click "Continue" → navigate sang /checkout/payment\n6. ✅ Điền test card: 4242 4242 4242 4242\n7. ✅ Click "Pay Now" → success page\n\n<em>🎬 Artifact: Walkthrough Recording (full flow)</em>\n\nToàn bộ checkout flow hoạt động đúng. Walkthrough recording đã tạo để bạn review.'},
+  ],
+};
+
+let cur='d1';
+function showDemo(el,k){el.closest('.demo').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');cur=k;document.getElementById('demo-out').style.display='none'}
+function playDemo(){
+  const out=document.getElementById('demo-out');
+  out.style.display='block';
+  let html='<div class="chat">';
+  demos[cur].forEach(b=>{
+    html+=`<div class="bbl ${b.r}">
+      <div class="bav ${b.r}">${b.r==='u'?'👤':'AG'}</div>
+      <div class="bbd">
+        <div class="bwho ${b.r}">${b.r==='u'?'YOU':'ANTIGRAVITY AGENT'}</div>
+        <div class="bmsg">${b.m.replace(/\n/g,'<br>')}</div>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  out.innerHTML=html;
+}
+setTimeout(playDemo,300);
+</script>
+</body>
+</html>
