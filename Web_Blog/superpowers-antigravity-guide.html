@@ -1,0 +1,3023 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superpowers × AntiGravity — Hướng dẫn tích hợp</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ═══════════════════ TOKENS (exact claude-guide-v2) ═══════════════════ */
+        :root {
+            --bg: #08090d;
+            --bg2: #0e1018;
+            --surface: #131520;
+            --surface2: #1a1d2e;
+            --surface3: #21253a;
+            --border: #252840;
+            --border2: #2f3350;
+            --accent: #7c6af8;
+            --accent-lt: #a99dfa;
+            --amber: #f5a623;
+            --green: #3ecf8e;
+            --red: #f06b6b;
+            --sky: #38bdf8;
+            --text: #dde1f5;
+            --muted: #6b7094;
+            --muted2: #8b90b8;
+            --nav-w: 276px;
+            --radius: 10px;
+            --font-body: 'Instrument Sans', sans-serif;
+            --font-head: 'Syne', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 15px
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.75
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 99px
+        }
+
+        /* ═══ SIDEBAR ═══ */
+        #sidebar {
+            width: var(--nav-w);
+            min-height: 100vh;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            transition: transform .3s ease;
+        }
+
+        .sb-header {
+            padding: 24px 20px 18px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(124, 106, 248, .06) 0%, transparent 100%)
+        }
+
+        .sb-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px
+        }
+
+        .sb-orb {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--accent) 0%, #a55af4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            font-family: var(--font-mono);
+            box-shadow: 0 4px 18px rgba(124, 106, 248, .35)
+        }
+
+        .sb-title {
+            font-family: var(--font-head);
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -.02em
+        }
+
+        .sb-ver {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+            background: var(--surface2);
+            padding: 3px 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border)
+        }
+
+        .sb-ver .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        .sb-progress {
+            padding: 14px 20px 10px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .sb-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 6px
+        }
+
+        .sb-progress-bar {
+            height: 3px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden
+        }
+
+        .sb-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #a55af4);
+            border-radius: 99px;
+            width: 0%;
+            transition: width .4s ease
+        }
+
+        .sb-section {
+            padding: 18px 14px 6px
+        }
+
+        .sb-section-label {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: 0 6px;
+            margin-bottom: 5px
+        }
+
+        .sb-link {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--muted2);
+            font-size: 13px;
+            transition: all .18s;
+            cursor: pointer;
+            margin-bottom: 1px;
+            position: relative
+        }
+
+        .sb-link:hover {
+            background: var(--surface);
+            color: var(--text)
+        }
+
+        .sb-link.active {
+            background: rgba(124, 106, 248, .12);
+            color: var(--accent-lt)
+        }
+
+        .sb-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 2px;
+            background: var(--accent);
+            border-radius: 1px
+        }
+
+        .sb-icon {
+            font-size: 14px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0
+        }
+
+        .sb-badge {
+            margin-left: auto;
+            font-size: 10px;
+            background: rgba(124, 106, 248, .18);
+            color: var(--accent-lt);
+            padding: 1px 7px;
+            border-radius: 99px;
+            font-family: var(--font-mono)
+        }
+
+        .sb-badge.green {
+            background: rgba(62, 207, 142, .15);
+            color: var(--green)
+        }
+
+        .sb-badge.amber {
+            background: rgba(245, 166, 35, .15);
+            color: var(--amber)
+        }
+
+        .sb-badge.sky {
+            background: rgba(56, 189, 248, .15);
+            color: var(--sky)
+        }
+
+        .sb-footer {
+            margin-top: auto;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--font-mono)
+        }
+
+        /* ═══ MAIN ═══ */
+        main {
+            margin-left: var(--nav-w);
+            flex: 1;
+            padding: 0;
+            max-width: 900px
+        }
+
+        .section {
+            padding: 60px 64px;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 20px;
+            animation: fadeUp .5s ease both
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--accent-lt);
+            font-weight: 600;
+            font-family: var(--font-mono);
+            margin-bottom: 14px
+        }
+
+        .section-tag::before {
+            content: '';
+            width: 22px;
+            height: 1px;
+            background: currentColor
+        }
+
+        h1 {
+            font-family: var(--font-head);
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -.03em;
+            margin-bottom: 20px
+        }
+
+        h1 .grad {
+            background: linear-gradient(135deg, #fff 0%, var(--accent-lt) 60%, #a55af4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        h2 {
+            font-family: var(--font-head);
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -.02em;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text)
+        }
+
+        h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 28px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        p {
+            color: #9fa3c4;
+            margin-bottom: 14px
+        }
+
+        /* ═══ CALLOUTS ═══ */
+        .callout {
+            border-left: 3px solid var(--accent);
+            padding: 14px 18px;
+            background: rgba(124, 106, 248, .07);
+            border-radius: 0 8px 8px 0;
+            margin: 18px 0;
+            font-size: 13.5px;
+            color: #bfc3e0
+        }
+
+        .callout-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--accent-lt);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--font-mono)
+        }
+
+        .callout.warn {
+            border-color: var(--amber);
+            background: rgba(245, 166, 35, .07)
+        }
+
+        .callout.warn .callout-label {
+            color: var(--amber)
+        }
+
+        .callout.good {
+            border-color: var(--green);
+            background: rgba(62, 207, 142, .07)
+        }
+
+        .callout.good .callout-label {
+            color: var(--green)
+        }
+
+        .callout.err {
+            border-color: var(--red);
+            background: rgba(240, 107, 107, .07)
+        }
+
+        .callout.err .callout-label {
+            color: var(--red)
+        }
+
+        .callout.sky {
+            border-color: var(--sky);
+            background: rgba(56, 189, 248, .07)
+        }
+
+        .callout.sky .callout-label {
+            color: var(--sky)
+        }
+
+        /* ═══ CARDS ═══ */
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 20px 0
+        }
+
+        .cards.col3 {
+            grid-template-columns: 1fr 1fr 1fr
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: border-color .2s, transform .2s, box-shadow .2s;
+            cursor: default
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(124, 106, 248, .12)
+        }
+
+        .card-ico {
+            font-size: 22px;
+            margin-bottom: 10px
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: var(--text)
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--muted2);
+            line-height: 1.55
+        }
+
+        /* ═══ TABLE ═══ */
+        .tbl-wrap {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: var(--radius);
+            border: 1px solid var(--border)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px
+        }
+
+        th {
+            text-align: left;
+            padding: 11px 16px;
+            background: var(--surface2);
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border)
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: #bbbdd6;
+            vertical-align: top
+        }
+
+        tr:last-child td {
+            border-bottom: none
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, .02)
+        }
+
+        td strong {
+            color: var(--text)
+        }
+
+        .tag-new {
+            background: rgba(62, 207, 142, .15);
+            color: var(--green);
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-family: var(--font-mono)
+        }
+
+        .tag-core {
+            background: rgba(124, 106, 248, .15);
+            color: var(--accent-lt);
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-family: var(--font-mono)
+        }
+
+        /* ═══ STEPS ═══ */
+        .steps {
+            margin: 20px 0
+        }
+
+        .step {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 24px;
+            align-items: flex-start
+        }
+
+        .step-num {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #a55af4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+            color: #fff;
+            font-family: var(--font-mono);
+            box-shadow: 0 4px 14px rgba(124, 106, 248, .3)
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 5px
+        }
+
+        .step-desc {
+            font-size: 13.5px;
+            color: var(--muted2)
+        }
+
+        /* ═══ FEAT LIST ═══ */
+        .feat-list {
+            list-style: none;
+            margin: 10px 0
+        }
+
+        .feat-list li {
+            padding: 9px 0 9px 22px;
+            position: relative;
+            font-size: 14px;
+            color: #9fa3c4;
+            border-bottom: 1px solid rgba(37, 40, 64, .6)
+        }
+
+        .feat-list li:last-child {
+            border: none
+        }
+
+        .feat-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent)
+        }
+
+        .feat-list li strong {
+            color: var(--text)
+        }
+
+        /* ═══ CODE BLOCK ═══ */
+        .code-wrap {
+            background: #07080d;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 16px 0;
+            overflow: hidden
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 6px
+        }
+
+        .code-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%
+        }
+
+        .code-dot:nth-child(1) {
+            background: #ff5f57
+        }
+
+        .code-dot:nth-child(2) {
+            background: #febc2e
+        }
+
+        .code-dot:nth-child(3) {
+            background: #28c840
+        }
+
+        .code-lang {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: .05em
+        }
+
+        .copy-btn {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--muted);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all .18s
+        }
+
+        .copy-btn:hover {
+            color: var(--text);
+            border-color: var(--accent)
+        }
+
+        .copy-btn.copied {
+            color: var(--green);
+            border-color: var(--green)
+        }
+
+        pre {
+            padding: 20px 22px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.75;
+            overflow-x: auto;
+            color: #9fa3c4
+        }
+
+        .kw {
+            color: var(--accent-lt)
+        }
+
+        .str {
+            color: var(--green)
+        }
+
+        .cmt {
+            color: var(--muted);
+            font-style: italic
+        }
+
+        .num {
+            color: var(--amber)
+        }
+
+        .fn {
+            color: #7dd3fc
+        }
+
+        .cls {
+            color: #f0abfc
+        }
+
+        .prop {
+            color: #93c5fd
+        }
+
+        /* ═══ FILE TREE ═══ */
+        .ftree {
+            background: #07080d;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.9;
+            margin: 16px 0;
+            overflow-x: auto
+        }
+
+        .ftree-head {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 8px
+        }
+
+        .fr {
+            display: flex;
+            align-items: baseline
+        }
+
+        .fp {
+            color: var(--muted);
+            white-space: pre;
+            flex-shrink: 0
+        }
+
+        .fd {
+            color: #7dd3fc;
+            font-weight: 500
+        }
+
+        .ff {
+            color: #c4c9e0
+        }
+
+        .fmd {
+            color: var(--amber)
+        }
+
+        .fcom {
+            color: var(--muted);
+            margin-left: 8px;
+            font-size: 12px
+        }
+
+        /* ═══ FLOW ═══ */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            padding: 4px 0;
+            flex-wrap: wrap
+        }
+
+        .flow-node {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--text);
+            white-space: nowrap;
+            flex-shrink: 0;
+            text-align: center;
+            transition: border-color .2s
+        }
+
+        .flow-node:hover {
+            border-color: var(--accent)
+        }
+
+        .flow-node.hl {
+            background: rgba(124, 106, 248, .12);
+            border-color: rgba(124, 106, 248, .4);
+            color: var(--accent-lt)
+        }
+
+        .flow-node.gn {
+            background: rgba(62, 207, 142, .1);
+            border-color: rgba(62, 207, 142, .35);
+            color: var(--green)
+        }
+
+        .flow-node.am {
+            background: rgba(245, 166, 35, .1);
+            border-color: rgba(245, 166, 35, .3);
+            color: var(--amber)
+        }
+
+        .flow-node.sk {
+            background: rgba(56, 189, 248, .1);
+            border-color: rgba(56, 189, 248, .3);
+            color: var(--sky)
+        }
+
+        .flow-sub {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 3px;
+            font-family: var(--font-body)
+        }
+
+        .flow-arr {
+            color: var(--border2);
+            font-size: 18px;
+            flex-shrink: 0
+        }
+
+        /* ═══ SKILL CARD ═══ */
+        .skill-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 18px 0
+        }
+
+        .skill-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+            transition: all .2s
+        }
+
+        .skill-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--c, var(--accent))
+        }
+
+        .skill-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .3)
+        }
+
+        .skill-name {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--accent-lt);
+            font-weight: 500;
+            margin-bottom: 4px
+        }
+
+        .skill-trigger {
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+            margin-bottom: 9px;
+            letter-spacing: .04em
+        }
+
+        .skill-desc {
+            font-size: 13px;
+            color: var(--muted2);
+            line-height: 1.55
+        }
+
+        .skill-auto {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            margin-top: 8px;
+            padding: 2px 7px;
+            border-radius: 99px
+        }
+
+        .skill-auto.auto {
+            background: rgba(62, 207, 142, .12);
+            color: var(--green);
+            border: 1px solid rgba(62, 207, 142, .2)
+        }
+
+        .skill-auto.manual {
+            background: rgba(245, 166, 35, .12);
+            color: var(--amber);
+            border: 1px solid rgba(245, 166, 35, .2)
+        }
+
+        /* ═══ DEMO BOX ═══ */
+        .demo-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin: 20px 0
+        }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .demo-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted2);
+            letter-spacing: .05em;
+            display: flex;
+            align-items: center;
+            gap: 7px
+        }
+
+        .demo-tag {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 99px;
+            background: rgba(124, 106, 248, .15);
+            color: var(--accent-lt);
+            border: 1px solid rgba(124, 106, 248, .2)
+        }
+
+        .demo-tag.green {
+            background: rgba(62, 207, 142, .15);
+            color: var(--green);
+            border-color: rgba(62, 207, 142, .2)
+        }
+
+        .demo-tag.sky {
+            background: rgba(56, 189, 248, .15);
+            color: var(--sky);
+            border-color: rgba(56, 189, 248, .2)
+        }
+
+        .prompt-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .prompt-chip {
+            font-size: 12.5px;
+            padding: 6px 13px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--muted2);
+            cursor: pointer;
+            transition: all .18s;
+            font-family: var(--font-body)
+        }
+
+        .prompt-chip:hover {
+            border-color: var(--accent);
+            color: var(--text);
+            background: rgba(124, 106, 248, .08)
+        }
+
+        .prompt-chip.selected {
+            border-color: var(--accent);
+            color: var(--accent-lt);
+            background: rgba(124, 106, 248, .12)
+        }
+
+        .demo-input {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-family: var(--font-body);
+            font-size: 13.5px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .18s;
+            resize: none
+        }
+
+        .demo-input:focus {
+            border-color: var(--accent)
+        }
+
+        .demo-input::placeholder {
+            color: var(--muted)
+        }
+
+        .run-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 18px;
+            background: linear-gradient(135deg, var(--accent), #a55af4);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .18s, transform .18s;
+            white-space: nowrap;
+            font-family: var(--font-body)
+        }
+
+        .run-btn:hover {
+            opacity: .9;
+            transform: scale(1.02)
+        }
+
+        .run-btn:active {
+            transform: scale(.98)
+        }
+
+        .run-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none
+        }
+
+        .demo-response {
+            border-top: 1px solid var(--border);
+            padding: 18px 20px;
+            min-height: 80px;
+            display: none
+        }
+
+        .demo-response.visible {
+            display: block
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px
+        }
+
+        .agent-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #a55af4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .response-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-lt)
+        }
+
+        .response-body {
+            font-size: 13.5px;
+            color: #bbbdd6;
+            line-height: 1.75
+        }
+
+        .response-body code {
+            font-family: var(--font-mono);
+            background: var(--surface3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--accent-lt)
+        }
+
+        .response-body .r-code {
+            background: #07080d;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            color: #9fa3c4;
+            margin: 10px 0;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.65
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 15px;
+            background: var(--accent-lt);
+            vertical-align: middle;
+            animation: blink .7s infinite;
+            margin-left: 2px
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0
+            }
+        }
+
+        /* ═══ CHAT BUBBLES ═══ */
+        .chat-history {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 16px 0
+        }
+
+        .chat-bubble {
+            display: flex;
+            gap: 12px
+        }
+
+        .cb-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 2px;
+            font-family: var(--font-mono)
+        }
+
+        .cb-avatar.user {
+            background: var(--surface3);
+            border: 1px solid var(--border)
+        }
+
+        .cb-avatar.ai {
+            background: linear-gradient(135deg, var(--accent), #a55af4);
+            color: #fff
+        }
+
+        .cb-body {
+            flex: 1
+        }
+
+        .cb-who {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 5px;
+            letter-spacing: .05em
+        }
+
+        .cb-who.ai {
+            color: var(--accent-lt)
+        }
+
+        .cb-msg {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0 10px 10px 10px;
+            padding: 12px 16px;
+            font-size: 13.5px;
+            color: #bbbdd6;
+            line-height: 1.7
+        }
+
+        .chat-bubble.user .cb-msg {
+            background: var(--surface2);
+            border-radius: 10px 0 10px 10px
+        }
+
+        .cb-msg code {
+            font-family: var(--font-mono);
+            background: var(--surface3);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--accent-lt)
+        }
+
+        .cb-msg pre {
+            background: #07080d;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: var(--green);
+            margin: 8px 0;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            line-height: 1.65;
+            white-space: pre-wrap
+        }
+
+        .cb-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            padding: 2px 7px;
+            border-radius: 99px;
+            margin-top: 8px
+        }
+
+        .cb-tag.art {
+            background: rgba(62, 207, 142, .12);
+            color: var(--green);
+            border: 1px solid rgba(62, 207, 142, .2)
+        }
+
+        /* ═══ SHORTCUT GRID ═══ */
+        .shortcut-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 18px 0
+        }
+
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--muted2);
+            transition: border-color .18s
+        }
+
+        .shortcut-item:hover {
+            border-color: var(--border2)
+        }
+
+        .keys {
+            display: flex;
+            gap: 4px
+        }
+
+        kbd {
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-bottom-width: 2px;
+            border-radius: 5px;
+            padding: 2px 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text)
+        }
+
+        /* ═══ SLASH DEMO ═══ */
+        .slash-demo {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin: 16px 0;
+            font-family: var(--font-mono);
+            font-size: 13px
+        }
+
+        .slash-demo-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .slash-input-area {
+            padding: 14px 16px
+        }
+
+        #slash-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: var(--font-mono);
+            font-size: 13.5px;
+            color: var(--text);
+            padding: 0
+        }
+
+        #slash-input::placeholder {
+            color: var(--muted)
+        }
+
+        .slash-dropdown {
+            border-top: 1px solid var(--border);
+            display: none
+        }
+
+        .slash-dropdown.open {
+            display: block
+        }
+
+        .slash-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background .12s;
+            border-bottom: 1px solid rgba(37, 40, 64, .5)
+        }
+
+        .slash-item:last-child {
+            border-bottom: none
+        }
+
+        .slash-item:hover {
+            background: rgba(124, 106, 248, .1)
+        }
+
+        .slash-item-cmd {
+            color: var(--accent-lt);
+            font-weight: 500;
+            min-width: 180px
+        }
+
+        .slash-item-desc {
+            color: var(--muted2);
+            font-size: 12px
+        }
+
+        /* ═══ HERO ═══ */
+        .hero-section {
+            padding: 72px 64px 60px;
+            border-bottom: 1px solid var(--border);
+            background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 106, 248, .12), transparent)
+        }
+
+        .hero-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 22px
+        }
+
+        .hero-chip {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 99px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted2)
+        }
+
+        .hero-stat-row {
+            display: flex;
+            gap: 24px;
+            margin-top: 30px;
+            flex-wrap: wrap
+        }
+
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px
+        }
+
+        .hero-stat-num {
+            font-family: var(--font-head);
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--text), var(--accent-lt));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .hero-stat-label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        /* ═══ MOBILE ═══ */
+        #hamburger {
+            display: none;
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 300;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text)
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 150
+        }
+
+        #overlay.visible {
+            display: block
+        }
+
+        @media(max-width:900px) {
+            #hamburger {
+                display: flex
+            }
+
+            #sidebar {
+                transform: translateX(-100%)
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+                box-shadow: 12px 0 40px rgba(0, 0, 0, .5)
+            }
+
+            main {
+                margin-left: 0
+            }
+
+            .section,
+            .hero-section {
+                padding: 50px 24px
+            }
+
+            .cards,
+            .cards.col3,
+            .skill-grid,
+            .shortcut-grid {
+                grid-template-columns: 1fr
+            }
+
+            h1 {
+                font-size: 34px
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="hamburger" onclick="toggleNav()">☰</button>
+    <div id="overlay" onclick="toggleNav()"></div>
+
+    <!-- ══════ SIDEBAR ══════ -->
+    <nav id="sidebar">
+        <div class="sb-header">
+            <div class="sb-brand">
+                <div class="sb-orb">SP</div>
+                <span class="sb-title">Superpowers Guide</span>
+            </div>
+            <div class="sb-ver">
+                <span class="dot"></span>
+                obra/superpowers · 2026
+            </div>
+        </div>
+
+        <div class="sb-progress">
+            <div class="sb-progress-label">
+                <span>Tiến trình đọc</span>
+                <span id="pct">0%</span>
+            </div>
+            <div class="sb-progress-bar">
+                <div class="sb-progress-fill" id="pfill"></div>
+            </div>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">🌟 Giới thiệu</div>
+            <a class="sb-link active" href="#intro" onclick="setActive(this)"><span class="sb-icon">🏠</span>
+                Superpowers là gì?</a>
+            <a class="sb-link" href="#why" onclick="setActive(this)"><span class="sb-icon">💡</span> Tại sao cần
+                dùng?</a>
+            <a class="sb-link" href="#how-works" onclick="setActive(this)"><span class="sb-icon">⚙️</span> Cách hoạt
+                động</a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">🚀 Cài đặt</div>
+            <a class="sb-link" href="#install-antigravity" onclick="setActive(this)"><span class="sb-icon">🔌</span> Cài
+                vào AntiGravity<span class="sb-badge green">new</span></a>
+            <a class="sb-link" href="#bootstrap" onclick="setActive(this)"><span class="sb-icon">⚡</span> Bootstrap
+                workflow</a>
+            <a class="sb-link" href="#verify" onclick="setActive(this)"><span class="sb-icon">✅</span> Xác nhận cài
+                đặt</a>
+            <a class="sb-link" href="#structure" onclick="setActive(this)"><span class="sb-icon">📁</span> Cấu trúc thư
+                mục</a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">🧩 Skills cốt lõi</div>
+            <a class="sb-link" href="#skill-brainstorm" onclick="setActive(this)"><span class="sb-icon">🧠</span>
+                brainstorming<span class="sb-badge">step 1</span></a>
+            <a class="sb-link" href="#skill-worktree" onclick="setActive(this)"><span class="sb-icon">🌿</span>
+                using-git-worktrees</a>
+            <a class="sb-link" href="#skill-plans" onclick="setActive(this)"><span class="sb-icon">📋</span>
+                writing-plans<span class="sb-badge">step 2</span></a>
+            <a class="sb-link" href="#skill-execute" onclick="setActive(this)"><span class="sb-icon">🤖</span>
+                subagent-driven<span class="sb-badge">step 3</span></a>
+            <a class="sb-link" href="#skill-tdd" onclick="setActive(this)"><span class="sb-icon">🧪</span>
+                test-driven-dev</a>
+            <a class="sb-link" href="#skill-debug" onclick="setActive(this)"><span class="sb-icon">🐛</span>
+                systematic-debugging</a>
+            <a class="sb-link" href="#skill-review" onclick="setActive(this)"><span class="sb-icon">🔍</span>
+                requesting-code-review</a>
+            <a class="sb-link" href="#all-skills" onclick="setActive(this)"><span class="sb-icon">📚</span> Tất cả
+                skills</a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">💬 Demo thực tế</div>
+            <a class="sb-link" href="#demo-workflow" onclick="setActive(this)"><span class="sb-icon">🎮</span> Full
+                workflow demo<span class="sb-badge">demo</span></a>
+            <a class="sb-link" href="#demo-sandbox" onclick="setActive(this)"><span class="sb-icon">⚡</span> Task
+                sandbox<span class="sb-badge">live</span></a>
+            <a class="sb-link" href="#demo-slash" onclick="setActive(this)"><span class="sb-icon">🔱</span> Slash
+                commands<span class="sb-badge green">live</span></a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">📚 Tham khảo</div>
+            <a class="sb-link" href="#limitations" onclick="setActive(this)"><span class="sb-icon">⚠️</span> Giới hạn
+                AntiGravity</a>
+            <a class="sb-link" href="#tips" onclick="setActive(this)"><span class="sb-icon">⭐</span> Pro tips</a>
+            <a class="sb-link" href="#troubleshoot" onclick="setActive(this)"><span class="sb-icon">🔧</span>
+                Troubleshoot</a>
+        </div>
+
+        <div class="sb-footer">
+            github.com/obra/superpowers · ⭐ 77k
+        </div>
+    </nav>
+
+    <!-- ══════ MAIN ══════ -->
+    <main id="main-content">
+
+        <!-- ── HERO ── -->
+        <div class="hero-section" id="intro">
+            <div class="section-tag">Tích hợp AntiGravity</div>
+            <h1><span class="grad">obra/superpowers<br>× AntiGravity</span></h1>
+            <p><strong>Superpowers</strong> là một agentic skills framework & phương pháp phát triển phần mềm hoàn chỉnh
+                — bộ <strong>skills có thể tái sử dụng</strong> giúp AI agent của bạn có kỷ luật: brainstorm trước khi
+                code, lập kế hoạch trước khi thực thi, TDD, tự review. Tích hợp vào AntiGravity qua thư mục <code
+                    style="font-family:var(--font-mono);background:var(--surface2);padding:2px 7px;border-radius:4px;font-size:12px;color:var(--accent-lt)">.agent/</code>.
+            </p>
+
+            <div class="callout sky">
+                <div class="callout-label">ℹ️ Trạng thái hỗ trợ AntiGravity</div>
+                Repo gốc <strong>obra/superpowers</strong> chưa có official AntiGravity support — đang trong PR #682.
+                Hiện dùng qua <strong>port community</strong> (copy .agent/ folder) hoặc bootstrap thủ công. Xem hướng
+                dẫn chi tiết trong trang này.
+            </div>
+
+            <div class="hero-chips">
+                <span class="hero-chip">77k ⭐ GitHub</span>
+                <span class="hero-chip">14+ skills</span>
+                <span class="hero-chip">Brainstorm → Plan → Execute</span>
+                <span class="hero-chip">TDD enforcement</span>
+                <span class="hero-chip">Subagent-driven</span>
+                <span class="hero-chip">Auto-trigger</span>
+                <span class="hero-chip">YAGNI + DRY</span>
+            </div>
+
+            <div class="hero-stat-row">
+                <div class="hero-stat"><span class="hero-stat-num">77k+</span><span class="hero-stat-label">GitHub
+                        Stars</span></div>
+                <div class="hero-stat"><span class="hero-stat-num">14+</span><span class="hero-stat-label">Skills</span>
+                </div>
+                <div class="hero-stat"><span class="hero-stat-num">Auto</span><span class="hero-stat-label">Trigger
+                        skills</span></div>
+                <div class="hero-stat"><span class="hero-stat-num">TDD</span><span class="hero-stat-label">Bắt
+                        buộc</span></div>
+            </div>
+        </div>
+
+        <!-- ── WHY ── -->
+        <div class="section" id="why">
+            <div class="section-tag">Vấn đề</div>
+            <h2>💡 Tại sao cần Superpowers?</h2>
+            <p>AI agent không có kỷ luật — nó sẽ nhảy thẳng vào viết code mà không suy nghĩ. Superpowers đặt ra
+                guardrails bắt buộc.</p>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">😤</div>
+                    <div class="card-title">Không có Superpowers</div>
+                    <div class="card-desc">Bạn: <em>"Build me a CLI tool"</em><br>AI: Viết code ngay lập tức<br>Bạn:
+                        Nhận ra giữa chừng không đúng ý<br>Kết quả: Undo hàng giờ công việc</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🚀</div>
+                    <div class="card-title">Có Superpowers</div>
+                    <div class="card-desc">Bạn: <em>"Build me a CLI tool"</em><br>AI: Hỏi requirements → Propose design
+                        → Bạn approve<br>AI: Lập kế hoạch chi tiết → Bạn approve<br>AI: Implement từng task + TDD</div>
+                </div>
+            </div>
+
+            <ul class="feat-list">
+                <li><strong>Brainstorm trước khi code</strong> — agent hỏi clarifying questions, propose 2-3 approaches,
+                    present design cho bạn approve từng phần</li>
+                <li><strong>Plan trước khi implement</strong> — mỗi task 2-5 phút, có file paths cụ thể, complete code,
+                    verification steps</li>
+                <li><strong>TDD bắt buộc</strong> — viết failing test TRƯỚC, xem fail, viết minimal code, xem pass,
+                    commit. Không skip được</li>
+                <li><strong>Subagent review</strong> — mỗi task có 2-stage review: spec compliance và code quality,
+                    fresh subagent mỗi lần</li>
+                <li><strong>Skills tự động trigger</strong> — agent không cần được nhắc. Thấy "let's build X" →
+                    brainstorming tự kích hoạt</li>
+                <li><strong>YAGNI + DRY</strong> — không build thứ chưa cần, không lặp code. Enforced by skills</li>
+            </ul>
+        </div>
+
+        <!-- ── HOW WORKS ── -->
+        <div class="section" id="how-works">
+            <div class="section-tag">Cơ chế</div>
+            <h2>⚙️ Cách Superpowers hoạt động</h2>
+            <p>Superpowers là tập hợp <strong>SKILL.md files</strong> — mỗi file định nghĩa khi nào kích hoạt và phải
+                làm gì. Agent đọc skill file và thực hiện <em>chính xác</em> theo hướng dẫn.</p>
+
+            <div class="flow">
+                <div class="flow-node hl">Session start<div class="flow-sub">using-superpowers</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node">Agent scan skills<div class="flow-sub">check triggers</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node am">Skill match<div class="flow-sub">read SKILL.md</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node am">Announce<div class="flow-sub">"Using [skill]"</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node gn">Execute<div class="flow-sub">follow exactly</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node gn">Next skill<div class="flow-sub">chain triggers</div>
+                </div>
+            </div>
+
+            <h3>🔑 Nguyên tắc cốt lõi</h3>
+            <ul class="feat-list">
+                <li><strong>"If there's a 1% chance a skill applies, you MUST use it"</strong> — không rationalize để bỏ
+                    qua skill</li>
+                <li><strong>Skills override default behavior</strong> nhưng user instructions (AGENTS.md, direct
+                    requests) luôn cao hơn</li>
+                <li><strong>Rigid skills</strong> (TDD, debugging): follow exactly, không adapt. <strong>Flexible
+                        skills</strong> (patterns): adapt principles to context</li>
+                <li><strong>Instructions say WHAT, not HOW</strong> — skill nói mục tiêu, không nói implementation
+                    details</li>
+                <li><strong>Context isolation</strong> — subagents chỉ nhận context cần thiết cho task đó, không phải
+                    toàn bộ session history</li>
+            </ul>
+
+            <div class="callout">
+                <div class="callout-label">💡 Điểm khác biệt với Rules thông thường</div>
+                AntiGravity Rules luôn active ngầm (passive). Superpowers Skills được <strong>invoke on-demand</strong>
+                khi trigger condition match — agent chủ động đọc và thực hiện SKILL.md file. Powerful hơn vì mỗi skill
+                có full workflow instructions, không chỉ constraints.
+            </div>
+        </div>
+
+        <!-- ── INSTALL ANTIGRAVITY ── -->
+        <div class="section" id="install-antigravity">
+            <div class="section-tag">Cài đặt · AntiGravity</div>
+            <h2>🔌 Cài Superpowers vào AntiGravity</h2>
+            <p>Có 2 phương pháp — chọn theo preference:</p>
+
+            <div class="callout warn">
+                <div class="callout-label">⚠️ Lưu ý</div>
+                obra/superpowers chưa có official AntiGravity harness (PR #682 đang in-progress). Phương pháp 1 dùng
+                community port <strong>skainguyen1412/antigravity-superpowers</strong> — gần nhất với bản gốc. Phương
+                pháp 2 dùng trực tiếp obra/superpowers với manual setup.
+            </div>
+
+            <h3>📦 Phương pháp 1 — Community Port (Khuyến nghị)</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <div class="step-title">Clone community port</div>
+                        <div class="step-desc">Port này preserve 12/14 skills gốc, chỉ thay đổi tối thiểu để chạy trên
+                            AntiGravity.</div>
+                        <div class="code-wrap" style="margin-top:10px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">Terminal</span><button class="copy-btn"
+                                    onclick="cp(this,'i1')">Copy</button>
+                            </div>
+                            <pre id="i1"><span class="cmt"># Clone port vào thư mục tạm</span>
+git clone https://github.com/skainguyen1412/antigravity-superpowers.git /tmp/sp-port
+
+<span class="cmt"># Vào project của bạn</span>
+cd /path/to/your-project
+
+<span class="cmt"># Copy .agent/ profile vào project</span>
+cp -r /tmp/sp-port/.agent .
+
+<span class="cmt"># Init git nếu chưa có (Superpowers cần git)</span>
+git init
+git add .agent
+git commit -m "Add Superpowers framework"</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <div class="step-title">Mở project trong AntiGravity</div>
+                        <div class="step-desc">AntiGravity tự động đọc <code
+                                style="font-family:var(--font-mono);background:var(--surface3);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--accent-lt)">.agent/</code>
+                            khi mở workspace. Skills được load ngay lập tức.</div>
+                        <div class="code-wrap" style="margin-top:10px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">Terminal</span><button class="copy-btn"
+                                    onclick="cp(this,'i2')">Copy</button>
+                            </div>
+                            <pre id="i2"><span class="cmt"># CLI</span>
+agy .
+
+<span class="cmt"># Hoặc: AntiGravity → File → Open Folder → chọn project</span></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>📦 Phương pháp 2 — Manual từ obra/superpowers gốc</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <div class="step-title">Clone repo gốc làm global skills</div>
+                        <div class="step-desc">Clone superpowers vào global skills directory của AntiGravity. Skills sẽ
+                            available cho mọi project.</div>
+                        <div class="code-wrap" style="margin-top:10px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">Terminal · macOS/Linux</span><button class="copy-btn"
+                                    onclick="cp(this,'i3')">Copy</button>
+                            </div>
+                            <pre id="i3"><span class="cmt"># Tạo global skills directory</span>
+mkdir -p ~/.gemini/antigravity/skills
+
+<span class="cmt"># Clone superpowers vào đó</span>
+git clone https://github.com/obra/superpowers.git \
+  ~/.gemini/antigravity/skills/superpowers
+
+<span class="cmt"># Verify: xem skills đã có</span>
+ls ~/.gemini/antigravity/skills/superpowers/skills/</pre>
+                        </div>
+                        <div class="code-wrap" style="margin-top:8px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">PowerShell · Windows</span><button class="copy-btn"
+                                    onclick="cp(this,'i3w')">Copy</button>
+                            </div>
+                            <pre id="i3w"><span class="cmt"># Windows</span>
+New-Item -ItemType Directory -Force `
+  -Path "$env:USERPROFILE\.gemini\antigravity\skills"
+
+git clone https://github.com/obra/superpowers.git `
+  "$env:USERPROFILE\.gemini\antigravity\skills\superpowers"</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <div class="step-title">Bootstrap thủ công trong Agent Manager</div>
+                        <div class="step-desc">Mở AntiGravity → Agent Manager → Gửi prompt sau để agent tự setup.</div>
+                        <div class="code-wrap" style="margin-top:10px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">Agent Manager — prompt</span><button class="copy-btn"
+                                    onclick="cp(this,'i4')">Copy</button>
+                            </div>
+                            <pre id="i4">Please read and follow the instructions in:
+~/.gemini/antigravity/skills/superpowers/skills/using-superpowers/SKILL.md
+
+Then confirm you have Superpowers loaded and list available skills.</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div>
+                        <div class="step-title">Cập nhật GEMINI.md để auto-load</div>
+                        <div class="step-desc">Thêm vào <code
+                                style="font-family:var(--font-mono);background:var(--surface3);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--accent-lt)">~/.gemini/GEMINI.md</code>
+                            để agent tự load Superpowers mỗi session.</div>
+                        <div class="code-wrap" style="margin-top:10px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">Markdown · ~/.gemini/GEMINI.md</span><button
+                                    class="copy-btn" onclick="cp(this,'i5')">Copy</button>
+                            </div>
+                            <pre id="i5"><span class="cmt"># Superpowers Auto-load</span>
+At the start of every session, read and follow:
+~/.gemini/antigravity/skills/superpowers/skills/using-superpowers/SKILL.md
+
+This gives you access to the Superpowers skill framework.
+If a skill applies to what you're doing, you MUST use it.</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── BOOTSTRAP ── -->
+        <div class="section" id="bootstrap">
+            <div class="section-tag">Bootstrap</div>
+            <h2>⚡ Bootstrap workflow trong AntiGravity</h2>
+            <p>Nếu dùng Phương pháp 1 (community port), <code
+                    style="font-family:var(--font-mono);background:var(--surface2);padding:2px 7px;border-radius:4px;font-size:12px;color:var(--accent-lt)">.agent/</code>
+                đã có sẵn workflow. Mở Agent Manager và chạy:</p>
+
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                    </div><span class="code-lang">Agent Manager · nhập và gửi</span><button class="copy-btn"
+                        onclick="cp(this,'b1')">Copy</button>
+                </div>
+                <pre id="b1">/superpowers-bootstrap</pre>
+            </div>
+
+            <p>Hoặc nếu tự setup manual, chạy lệnh này để verify:</p>
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                    </div><span class="code-lang">Terminal</span><button class="copy-btn"
+                        onclick="cp(this,'b2')">Copy</button>
+                </div>
+                <pre id="b2"><span class="cmt"># Kiểm tra .agent/rules/ và .agent/workflows/ đã có</span>
+ls .agent/rules/
+ls .agent/workflows/
+
+<span class="cmt"># Kiểm tra skills directory</span>
+ls .agent/skills/ 2>/dev/null || ls ~/.gemini/antigravity/skills/superpowers/skills/</pre>
+            </div>
+
+            <div class="callout good">
+                <div class="callout-label">✅ Kết quả sau bootstrap thành công</div>
+                Agent sẽ confirm: <em>"I've loaded the Superpowers framework. Rules: superpowers.md loaded. Workflows: 8
+                    loaded (brainstorm, write-plan, execute-plan...). Skills: 14 available. I'm ready to use Superpowers
+                    on any applicable task."</em>
+            </div>
+        </div>
+
+        <!-- ── VERIFY ── -->
+        <div class="section" id="verify">
+            <div class="section-tag">Xác nhận</div>
+            <h2>✅ Xác nhận cài đặt thành công</h2>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <div class="step-title">Test brainstorming trigger</div>
+                        <div class="step-desc">Trong Agent Manager, gõ bất kỳ task build mới. Agent phải <strong>hỏi
+                                clarifying questions</strong> thay vì code ngay.</div>
+                        <div class="code-wrap" style="margin-top:10px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">Test prompt</span>
+                            </div>
+                            <pre>Let's build a simple REST API for a todo app</pre>
+                        </div>
+                        <p style="font-size:13px;margin-top:8px">✅ Đúng: Agent hỏi "What tech stack? Any auth? CRUD only
+                            or more endpoints?"<br>❌ Sai: Agent bắt đầu viết code ngay</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <div class="step-title">Verify skills list</div>
+                        <div class="step-desc">Hỏi agent liệt kê skills để confirm đã load đủ.</div>
+                        <div class="code-wrap" style="margin-top:10px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">Test prompt</span>
+                            </div>
+                            <pre>What Superpowers skills do you have available?</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div>
+                        <div class="step-title">Test TDD enforcement</div>
+                        <div class="step-desc">Yêu cầu implement một function. Agent phải hỏi viết test trước.</div>
+                        <div class="code-wrap" style="margin-top:10px">
+                            <div class="code-header">
+                                <div class="code-dots">
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                    <div class="code-dot"></div>
+                                </div><span class="code-lang">Test prompt</span>
+                            </div>
+                            <pre>Write a function to calculate fibonacci numbers</pre>
+                        </div>
+                        <p style="font-size:13px;margin-top:8px">✅ Đúng: Agent viết failing test trước → run → xác nhận
+                            fail → mới viết implementation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── FILE STRUCTURE ── -->
+        <div class="section" id="structure">
+            <div class="section-tag">Cấu trúc</div>
+            <h2>📁 Cấu trúc thư mục</h2>
+
+            <div class="ftree">
+                <div class="ftree-head">your-project/ — sau khi cài Superpowers</div>
+
+                <div class="fr"><span class="fp">├── </span><span class="fd">.agent/</span><span class="fcom">←
+                        AntiGravity workspace config</span></div>
+                <div class="fr"><span class="fp">│ ├── </span><span class="fd">rules/</span></div>
+                <div class="fr"><span class="fp">│ │ └── </span><span class="fmd">superpowers.md</span><span
+                        class="fcom">← core rules: skills usage discipline</span></div>
+                <div class="fr"><span class="fp">│ ├── </span><span class="fd">workflows/</span><span class="fcom">←
+                        /slash command triggers</span></div>
+                <div class="fr"><span class="fp">│ │ ├── </span><span class="fmd">superpowers-brainstorm.md</span><span
+                        class="fcom">← /superpowers-brainstorm</span></div>
+                <div class="fr"><span class="fp">│ │ ├── </span><span class="fmd">superpowers-write-plan.md</span><span
+                        class="fcom">← /superpowers-write-plan</span></div>
+                <div class="fr"><span class="fp">│ │ ├── </span><span
+                        class="fmd">superpowers-execute-plan.md</span><span class="fcom">←
+                        /superpowers-execute-plan</span></div>
+                <div class="fr"><span class="fp">│ │ ├── </span><span class="fmd">superpowers-debug.md</span><span
+                        class="fcom">← /superpowers-debug</span></div>
+                <div class="fr"><span class="fp">│ │ ├── </span><span class="fmd">superpowers-review.md</span><span
+                        class="fcom">← /superpowers-review</span></div>
+                <div class="fr"><span class="fp">│ │ └── </span><span class="fmd">superpowers-finish.md</span><span
+                        class="fcom">← /superpowers-finish</span></div>
+                <div class="fr"><span class="fp">│ └── </span><span class="fd">skills/</span><span class="fcom">←
+                        (optional) local skill overrides</span></div>
+                <div class="fr" style="margin-top:8px"><span class="fp">├── </span><span class="fd">docs/</span></div>
+                <div class="fr"><span class="fp">│ ├── </span><span class="fd">superpowers/</span></div>
+                <div class="fr"><span class="fp">│ │ └── </span><span class="fd">specs/</span><span class="fcom">←
+                        design docs từ brainstorming</span></div>
+                <div class="fr"><span class="fp">│ └── </span><span class="fd">plans/</span><span class="fcom">←
+                        implementation plans từ writing-plans</span></div>
+                <div class="fr"><span class="fp">│ └── </span><span class="ff">2026-03-16-feature-name.md</span></div>
+                <div class="fr" style="margin-top:8px"><span class="fp">└── </span><span class="fd">src/</span><span
+                        class="fcom">← project source code</span></div>
+
+                <div
+                    style="margin:10px 0 6px;font-size:10px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase">
+                    ─── GLOBAL skills (phương pháp 2) ───</div>
+                <div class="fr"><span class="fp">~/.gemini/</span></div>
+                <div class="fr"><span class="fp">├── </span><span class="fmd">GEMINI.md</span><span class="fcom">←
+                        auto-load Superpowers mỗi session</span></div>
+                <div class="fr"><span class="fp">└── </span><span
+                        class="fd">antigravity/skills/superpowers/skills/</span></div>
+                <div class="fr"><span class="fp"> ├── </span><span class="fd">brainstorming/SKILL.md</span></div>
+                <div class="fr"><span class="fp"> ├── </span><span class="fd">writing-plans/SKILL.md</span></div>
+                <div class="fr"><span class="fp"> ├── </span><span
+                        class="fd">subagent-driven-development/SKILL.md</span></div>
+                <div class="fr"><span class="fp"> └── </span><span class="fd">... 11 more skills</span></div>
+            </div>
+        </div>
+
+        <!-- ── SKILL: BRAINSTORMING ── -->
+        <div class="section" id="skill-brainstorm">
+            <div class="section-tag">Skill · Step 1</div>
+            <h2>🧠 brainstorming — Không code khi chưa có design</h2>
+            <p><strong>Trigger:</strong> Bất kỳ khi nào bạn nói "let's build X", "I want to create Y", hoặc agent sắp
+                enter Plan Mode. <strong>Bắt buộc</strong> — không thể bỏ qua.</p>
+
+            <div class="flow">
+                <div class="flow-node hl">Nhận task<div class="flow-sub">"build X"</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node">Explore context<div class="flow-sub">đọc codebase</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node am">Hỏi lần lượt<div class="flow-sub">từng câu</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node am">Propose 2-3<div class="flow-sub">approaches</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node am">Present design<div class="flow-sub">từng phần</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node gn">Write spec doc<div class="flow-sub">docs/superpowers/specs/</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node sk">Spec review<div class="flow-sub">subagent review</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node gn">writing-plans<div class="flow-sub">next skill</div>
+                </div>
+            </div>
+
+            <h3>📋 Chi tiết quan trọng</h3>
+            <ul class="feat-list">
+                <li><strong>Hỏi từng câu một</strong> — không dump 5 câu cùng lúc. Prefer multiple choice khi có thể
+                </li>
+                <li><strong>Visual Companion</strong> — agent có thể offer mở browser để show mockups/diagrams khi phù
+                    hợp. Offer một lần, không spam</li>
+                <li><strong>Spec review loop</strong> — dispatch spec-document-reviewer subagent, fix issues,
+                    re-dispatch tối đa 5 lần. Sau đó mới cho bạn review</li>
+                <li><strong>Design doc được save</strong> tại <code
+                        style="font-family:var(--font-mono);background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--accent-lt)">docs/superpowers/specs/YYYY-MM-DD-topic-design.md</code>
+                    và commit</li>
+                <li><strong>Project quá lớn</strong>: Agent phân chia thành sub-projects trước, brainstorm từng phần độc
+                    lập</li>
+            </ul>
+
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Demo — Brainstorming session mẫu</div>
+                    <span class="demo-tag">example</span>
+                </div>
+                <div style="padding:14px 18px 18px">
+                    <div class="chat-history">
+                        <div class="chat-bubble user">
+                            <div class="cb-avatar user">👤</div>
+                            <div class="cb-body">
+                                <div class="cb-who">YOU</div>
+                                <div class="cb-msg">Let's build a URL shortener service</div>
+                            </div>
+                        </div>
+                        <div class="chat-bubble">
+                            <div class="cb-avatar ai">SP</div>
+                            <div class="cb-body">
+                                <div class="cb-who ai">SUPERPOWERS AGENT · brainstorming skill</div>
+                                <div class="cb-msg">Using <strong>brainstorming</strong> skill to refine this idea
+                                    before any implementation.<br><br>First, let me understand the scope. Will this be:
+                                    (a) personal use only, (b) small team, or (c) public service with many users?<span
+                                        class="cb-tag art">🧠 Brainstorming</span></div>
+                            </div>
+                        </div>
+                        <div class="chat-bubble user">
+                            <div class="cb-avatar user">👤</div>
+                            <div class="cb-body">
+                                <div class="cb-who">YOU</div>
+                                <div class="cb-msg">(b) small team, maybe 10-50 users</div>
+                            </div>
+                        </div>
+                        <div class="chat-bubble">
+                            <div class="cb-avatar ai">SP</div>
+                            <div class="cb-body">
+                                <div class="cb-who ai">SUPERPOWERS AGENT</div>
+                                <div class="cb-msg">Got it. Do you need analytics (click counts, referrers) or just
+                                    redirect functionality?</div>
+                            </div>
+                        </div>
+                        <div class="chat-bubble user">
+                            <div class="cb-avatar user">👤</div>
+                            <div class="cb-body">
+                                <div class="cb-who">YOU</div>
+                                <div class="cb-msg">Basic click counts would be nice</div>
+                            </div>
+                        </div>
+                        <div class="chat-bubble">
+                            <div class="cb-avatar ai">SP</div>
+                            <div class="cb-body">
+                                <div class="cb-who ai">SUPERPOWERS AGENT</div>
+                                <div class="cb-msg">Here are 2 approaches:<br><br><strong>A) Simple SQLite +
+                                        Node.js</strong> — Deploy anywhere, zero infra cost, perfect for 50 users. No
+                                    ops overhead.<br><br><strong>B) PostgreSQL + Redis cache</strong> — Better for
+                                    growth, fast redirects via cache, more operational complexity.<br><br>For 10-50
+                                    users, I'd recommend A. Which fits better?</div>
+                            </div>
+                        </div>
+                        <div class="chat-bubble user">
+                            <div class="cb-avatar user">👤</div>
+                            <div class="cb-body">
+                                <div class="cb-who">YOU</div>
+                                <div class="cb-msg">A, keep it simple</div>
+                            </div>
+                        </div>
+                        <div class="chat-bubble">
+                            <div class="cb-avatar ai">SP</div>
+                            <div class="cb-body">
+                                <div class="cb-who ai">SUPERPOWERS AGENT</div>
+                                <div class="cb-msg">Writing spec doc...<br><br><em>[Dispatch spec-document-reviewer
+                                        subagent...]</em><br><em>[Spec approved after 1 review]</em><br><br>Design saved
+                                    to <code>docs/superpowers/specs/2026-03-16-url-shortener-design.md</code>. Please
+                                    review before I proceed to write the implementation plan.<span class="cb-tag art">✅
+                                        Spec ready</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── SKILL: WORKTREES ── -->
+        <div class="section" id="skill-worktree">
+            <div class="section-tag">Skill · Before Implementation</div>
+            <h2>🌿 using-git-worktrees — Isolated workspace</h2>
+            <p><strong>Trigger:</strong> Sau khi design được approve, trước khi implement. Required cho cả <code
+                    style="font-family:var(--font-mono);background:var(--surface2);padding:2px 7px;border-radius:4px;font-size:12px;color:var(--accent-lt)">subagent-driven-development</code>
+                và <code
+                    style="font-family:var(--font-mono);background:var(--surface2);padding:2px 7px;border-radius:4px;font-size:12px;color:var(--accent-lt)">executing-plans</code>.
+            </p>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">🌿</div>
+                    <div class="card-title">Tạo isolated workspace</div>
+                    <div class="card-desc">Agent tạo git worktree trên branch mới — implementation xảy ra ở đây, không
+                        phải trên main. Bảo vệ codebase khỏi half-finished work.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🧪</div>
+                    <div class="card-title">Verify test baseline</div>
+                    <div class="card-desc">Chạy toàn bộ test suite trên worktree mới. Xác nhận tests pass sạch TRƯỚC khi
+                        bắt đầu implement. Catch regressions sớm nhất.</div>
+                </div>
+            </div>
+
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                    </div><span class="code-lang">Agent thực hiện tự động</span>
+                </div>
+                <pre><span class="cmt"># Agent chạy tự động sau design approval</span>
+git worktree add ../my-project-url-shortener feature/url-shortener
+cd ../my-project-url-shortener
+
+<span class="cmt"># Setup project</span>
+npm install
+
+<span class="cmt"># Verify clean baseline</span>
+npm test
+<span class="cmt"># → All 47 tests passing. Clean baseline confirmed.</span></pre>
+            </div>
+
+            <div class="callout warn">
+                <div class="callout-label">⚠️ AntiGravity limitation</div>
+                AntiGravity không hỗ trợ parallel subagent execution như Claude Code. Worktree vẫn được tạo nhưng
+                execution là sequential, không parallel. Skills adjust accordingly.
+            </div>
+        </div>
+
+        <!-- ── SKILL: WRITING-PLANS ── -->
+        <div class="section" id="skill-plans">
+            <div class="section-tag">Skill · Step 2</div>
+            <h2>📋 writing-plans — Kế hoạch đủ rõ để junior follow</h2>
+            <p><strong>Trigger:</strong> Sau khi spec document được approve. <strong>Tiêu chuẩn:</strong> Plan phải rõ
+                đến mức "một junior engineer hăng hái nhưng thiếu taste, thiếu judgment, thiếu context project" có thể
+                follow được.</p>
+
+            <h3>📐 Format một task trong plan</h3>
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                    </div><span class="code-lang">Markdown · docs/plans/2026-03-16-url-shortener.md</span><button
+                        class="copy-btn" onclick="cp(this,'p1')">Copy</button>
+                </div>
+                <pre id="p1"><span class="cmt"># URL Shortener Implementation Plan</span>
+<span class="cmt">> For Agent: REQUIRED SUB-SKILL: Use superpowers:executing-plans task-by-task</span>
+
+<span class="cmt">## Task 1: Setup database schema</span>
+<span class="cmt">**Time estimate:** 3 minutes</span>
+<span class="cmt">**File:** src/db/schema.ts</span>
+
+Create SQLite schema with:
+- urls table: id (text PK), original_url (text), short_code (text unique),
+  created_at (integer), click_count (integer default 0)
+
+```typescript
+<span class="cmt">// Complete code to write:</span>
+<span class="kw">export const</span> schema = `
+  CREATE TABLE IF NOT EXISTS urls (
+    id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(8)))),
+    original_url TEXT NOT NULL,
+    short_code TEXT UNIQUE NOT NULL,
+    created_at INTEGER DEFAULT (unixepoch()),
+    click_count INTEGER DEFAULT 0
+  );
+  CREATE INDEX IF NOT EXISTS idx_short_code ON urls(short_code);
+`;
+```
+
+<span class="cmt">**Verification steps:**</span>
+1. Run: `node -e "require('./src/db/schema')"` — no errors
+2. Run: `npm test -- --testPathPattern=schema` — passes</pre>
+            </div>
+
+            <ul class="feat-list">
+                <li>Mỗi task <strong>2-5 phút</strong> — không task nào dài hơn. Chia nhỏ nếu cần</li>
+                <li>Phải có <strong>exact file paths</strong> — không "create a file for X", phải là <code
+                        style="font-family:var(--font-mono);background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--accent-lt)">src/db/schema.ts</code>
+                </li>
+                <li>Phải có <strong>complete code</strong> hoặc ít nhất interface/signature đầy đủ</li>
+                <li>Phải có <strong>verification steps</strong> — cụ thể command chạy và expected output</li>
+                <li>Saved tại <code
+                        style="font-family:var(--font-mono);background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--accent-lt)">docs/plans/YYYY-MM-DD-feature-name.md</code>
+                    và commit</li>
+            </ul>
+        </div>
+
+        <!-- ── SKILL: SUBAGENT ── -->
+        <div class="section" id="skill-execute">
+            <div class="section-tag">Skill · Step 3</div>
+            <h2>🤖 subagent-driven-development — Execution với 2-stage review</h2>
+            <p><strong>Trigger:</strong> Khi có implementation plan và tasks phần lớn độc lập. Mỗi task = fresh subagent
+                + 2-stage review.</p>
+
+            <div class="flow">
+                <div class="flow-node hl">Đọc plan<div class="flow-sub">một lần</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node am">Task 1<div class="flow-sub">extract context</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node">Dispatch<div class="flow-sub">fresh subagent</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node gn">Implement<div class="flow-sub">+ self-review</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node sk">Spec review<div class="flow-sub">subagent #2</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node sk">Code review<div class="flow-sub">subagent #3</div>
+                </div>
+                <div class="flow-arr">→</div>
+                <div class="flow-node am">Task 2<div class="flow-sub">next</div>
+                </div>
+            </div>
+
+            <h3>🔑 2-stage review flow</h3>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">1️⃣</div>
+                    <div class="card-title">Spec Compliance Review</div>
+                    <div class="card-desc">Subagent mới kiểm tra: implementation có đúng spec không? Thiếu gì? Thừa gì
+                        không cần? Dispatch lại nếu fail.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">2️⃣</div>
+                    <div class="card-title">Code Quality Review</div>
+                    <div class="card-desc">Subagent thứ 3 kiểm tra: code clean? Test coverage? Error handling? Edge
+                        cases? Commit sau khi pass cả 2.</div>
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-label">💡 AntiGravity — executing-plans thay thế</div>
+                AntiGravity thiếu parallel subagent → dùng <strong>single-flow-task-execution</strong> (community port)
+                hoặc <strong>executing-plans</strong> (sequential). Workflow giống hệt, chỉ là sequential thay vì
+                parallel. Mỗi task vẫn có 2-stage review.
+            </div>
+
+            <div class="callout warn">
+                <div class="callout-label">⚠️ Context isolation quan trọng</div>
+                Subagent KHÔNG nhận toàn bộ session history — chỉ nhận task text (~3-5k chars). Điều này giữ context
+                window của parent agent gọn nhẹ: đọc plan 1 lần (~15k tokens) + ~2k mỗi task dispatch = tổng ~33k thay
+                vì 60k+.
+            </div>
+        </div>
+
+        <!-- ── SKILL: TDD ── -->
+        <div class="section" id="skill-tdd">
+            <div class="section-tag">Skill · Implementation</div>
+            <h2>🧪 test-driven-development — RED-GREEN-REFACTOR bắt buộc</h2>
+            <p><strong>Trigger:</strong> Khi implement bất kỳ feature hoặc fix nào. Rigid skill — follow exactly, không
+                adapt.</p>
+
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bước</th>
+                            <th>Hành động</th>
+                            <th>Xác nhận</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🔴 RED</strong></td>
+                            <td>Viết failing test trước khi có implementation</td>
+                            <td>Chạy test, xác nhận fail với đúng lý do</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🟢 GREEN</strong></td>
+                            <td>Viết <em>minimal</em> code để test pass</td>
+                            <td>Chạy test, xác nhận pass. Không thêm gì extra</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔵 REFACTOR</strong></td>
+                            <td>Clean up code, không thay đổi behavior</td>
+                            <td>Chạy test lại, xác nhận vẫn pass</td>
+                        </tr>
+                        <tr>
+                            <td><strong>💾 COMMIT</strong></td>
+                            <td>Commit sau mỗi RED-GREEN-REFACTOR cycle</td>
+                            <td>Commit message mô tả test case đã pass</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout err">
+                <div class="callout-label">❌ Không được phép</div>
+                Viết implementation trước khi có test. Viết test và implementation cùng lúc. Skip "watch it fail" step.
+                Đây là rigid skill — agent sẽ từ chối nếu bạn yêu cầu skip TDD.
+            </div>
+        </div>
+
+        <!-- ── SKILL: DEBUG ── -->
+        <div class="section" id="skill-debug">
+            <div class="section-tag">Skill · Debugging</div>
+            <h2>🐛 systematic-debugging — 4-phase root cause</h2>
+            <p><strong>Trigger:</strong> Khi gặp bug, unexpected behavior, test failure, hoặc error. Không guess —
+                follow 4 phases.</p>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">1️⃣</div>
+                    <div class="card-title">Root Cause Tracing</div>
+                    <div class="card-desc">Trace từ symptom ngược về source. Đặt câu hỏi: "Tại sao X xảy ra?" liên tục
+                        cho đến khi tìm được actual cause.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">2️⃣</div>
+                    <div class="card-title">Defense in Depth</div>
+                    <div class="card-desc">Validate assumptions. Kiểm tra những điều "hiển nhiên". Log state tại từng
+                        bước để xác nhận flow.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">3️⃣</div>
+                    <div class="card-title">Condition-based Waiting</div>
+                    <div class="card-desc">Khi có async/timing issues: wait cho condition thỏa mãn, không hardcode
+                        sleep/timeout.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">4️⃣</div>
+                    <div class="card-title">Verification</div>
+                    <div class="card-desc">Sau khi fix, chạy toàn bộ test suite. Confirm fix không tạo ra regression ở
+                        nơi khác.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── SKILL: REVIEW ── -->
+        <div class="section" id="skill-review">
+            <div class="section-tag">Skill · Quality</div>
+            <h2>🔍 requesting-code-review — Checklist-based review</h2>
+            <p><strong>Trigger:</strong> Khi cần review code changes. Dùng checklist thay vì subagent dispatch
+                (AntiGravity adaptation).</p>
+
+            <ul class="feat-list">
+                <li><strong>Correctness</strong> — Logic đúng? Edge cases handled? Error paths?</li>
+                <li><strong>Security</strong> — Injection risks? Auth/authz? Data exposure? Input validation?</li>
+                <li><strong>Performance</strong> — N+1 queries? Unnecessary computation? Memory leaks?</li>
+                <li><strong>Test coverage</strong> — Happy path, edge cases, error cases có đủ không?</li>
+                <li><strong>YAGNI compliance</strong> — Code có implement thứ gì chưa cần không?</li>
+                <li><strong>DRY compliance</strong> — Có duplicate logic không? Có thể extract không?</li>
+                <li><strong>Naming & clarity</strong> — Tên biến/function có self-documenting không?</li>
+            </ul>
+        </div>
+
+        <!-- ── ALL SKILLS ── -->
+        <div class="section" id="all-skills">
+            <div class="section-tag">Reference</div>
+            <h2>📚 Tất cả Skills</h2>
+
+            <div class="skill-grid">
+                <div class="skill-card" style="--c:var(--accent)">
+                    <div class="skill-name">brainstorming</div>
+                    <div class="skill-trigger">Trigger: "let's build X", "I want to create Y", trước Plan Mode</div>
+                    <div class="skill-desc">Refine ideas qua questions, propose approaches, present design, write spec
+                        doc.</div>
+                    <span class="skill-auto auto">⚡ Auto-trigger</span>
+                </div>
+                <div class="skill-card" style="--c:var(--green)">
+                    <div class="skill-name">using-git-worktrees</div>
+                    <div class="skill-trigger">Trigger: Trước khi bắt đầu implement, sau design approval</div>
+                    <div class="skill-desc">Tạo isolated worktree trên branch mới, setup project, verify clean test
+                        baseline.</div>
+                    <span class="skill-auto auto">⚡ Auto-trigger</span>
+                </div>
+                <div class="skill-card" style="--c:var(--sky)">
+                    <div class="skill-name">writing-plans</div>
+                    <div class="skill-trigger">Trigger: Sau khi spec được approve</div>
+                    <div class="skill-desc">Break work thành tasks 2-5 phút, exact file paths, complete code,
+                        verification steps.</div>
+                    <span class="skill-auto auto">⚡ Auto-trigger</span>
+                </div>
+                <div class="skill-card" style="--c:var(--amber)">
+                    <div class="skill-name">subagent-driven-development</div>
+                    <div class="skill-trigger">Trigger: Khi có plan và tasks độc lập</div>
+                    <div class="skill-desc">Fresh subagent mỗi task, 2-stage review (spec + code quality). ⚠️
+                        AntiGravity: sequential only.</div>
+                    <span class="skill-auto auto">⚡ Auto-trigger</span>
+                </div>
+                <div class="skill-card" style="--c:var(--red)">
+                    <div class="skill-name">test-driven-development</div>
+                    <div class="skill-trigger">Trigger: Khi implement bất kỳ feature/fix</div>
+                    <div class="skill-desc">Bắt buộc RED-GREEN-REFACTOR. Viết failing test trước. Không thể skip.</div>
+                    <span class="skill-auto auto">⚡ Auto-trigger</span>
+                </div>
+                <div class="skill-card" style="--c:#fb923c">
+                    <div class="skill-name">systematic-debugging</div>
+                    <div class="skill-trigger">Trigger: Bug, unexpected behavior, test failure</div>
+                    <div class="skill-desc">4-phase: root cause tracing, defense-in-depth, condition-based waiting,
+                        verification.</div>
+                    <span class="skill-auto auto">⚡ Auto-trigger</span>
+                </div>
+                <div class="skill-card" style="--c:var(--muted2)">
+                    <div class="skill-name">verification-before-completion</div>
+                    <div class="skill-trigger">Trigger: Trước khi claim task hoàn thành</div>
+                    <div class="skill-desc">Chạy verification commands thực tế. "It should work" không đủ — phải chạy và
+                        xem output.</div>
+                    <span class="skill-auto auto">⚡ Auto-trigger</span>
+                </div>
+                <div class="skill-card" style="--c:var(--accent-lt)">
+                    <div class="skill-name">requesting-code-review</div>
+                    <div class="skill-trigger">Trigger: Khi cần review changes</div>
+                    <div class="skill-desc">Checklist: correctness, security, performance, test coverage, YAGNI, DRY.
+                    </div>
+                    <span class="skill-auto manual">⚡ Auto-trigger</span>
+                </div>
+                <div class="skill-card" style="--c:var(--green)">
+                    <div class="skill-name">receiving-code-review</div>
+                    <div class="skill-trigger">Trigger: Khi nhận code review từ người khác</div>
+                    <div class="skill-desc">Process feedback đúng cách: acknowledge, fix, verify, không defensive.</div>
+                    <span class="skill-auto manual">📌 Manual</span>
+                </div>
+                <div class="skill-card" style="--c:var(--sky)">
+                    <div class="skill-name">dispatching-parallel-agents</div>
+                    <div class="skill-trigger">Trigger: Tasks có thể parallel</div>
+                    <div class="skill-desc">⚠️ <strong>Không hỗ trợ trên AntiGravity</strong> — dùng
+                        subagent-driven-development sequential thay thế.</div>
+                    <span class="skill-auto manual"
+                        style="background:rgba(240,107,107,.12);color:var(--red);border-color:rgba(240,107,107,.2)">❌
+                        AntiGravity N/A</span>
+                </div>
+                <div class="skill-card" style="--c:var(--amber)">
+                    <div class="skill-name">using-superpowers</div>
+                    <div class="skill-trigger">Trigger: Session start — LUÔN LUÔN</div>
+                    <div class="skill-desc">Meta-skill: dạy agent cách find và use skills. Gateway cho toàn bộ
+                        framework.</div>
+                    <span class="skill-auto auto">⚡ Session start</span>
+                </div>
+                <div class="skill-card" style="--c:var(--muted2)">
+                    <div class="skill-name">writing-skills</div>
+                    <div class="skill-trigger">Trigger: Khi tạo skill mới</div>
+                    <div class="skill-desc">TDD applied to documentation. Viết test cases, watch fail, viết skill, watch
+                        pass.</div>
+                    <span class="skill-auto manual">📌 Manual</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── DEMO: FULL WORKFLOW ── -->
+        <div class="section" id="demo-workflow">
+            <div class="section-tag">Demo · Full</div>
+            <h2>🎮 Full Workflow Demo</h2>
+            <p>Xem toàn bộ Superpowers workflow từ đầu đến cuối — từ nhận task đến code chạy được.</p>
+
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎮 Chọn scenario</div>
+                    <span class="demo-tag">interactive</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div class="prompt-chips">
+                        <div class="prompt-chip selected" onclick="selectDemo(this,'d1')">🔗 URL Shortener</div>
+                        <div class="prompt-chip" onclick="selectDemo(this,'d2')">🐛 Fix bug với TDD</div>
+                        <div class="prompt-chip" onclick="selectDemo(this,'d3')">📋 Write + Execute plan</div>
+                    </div>
+                </div>
+                <div style="padding:12px 18px 14px">
+                    <button class="run-btn" onclick="playDemo()"
+                        style="width:100%;justify-content:center;padding:10px">▶ Xem full demo</button>
+                </div>
+                <div id="demo-out" style="display:none;border-top:1px solid var(--border);padding:18px 20px"></div>
+            </div>
+        </div>
+
+        <!-- ── DEMO: SANDBOX ── -->
+        <div class="section" id="demo-sandbox">
+            <div class="section-tag">Demo · Live</div>
+            <h2>⚡ Task Sandbox — Thử ngay</h2>
+            <p>Nhập task bất kỳ để xem Superpowers agent phản ứng như thế nào.</p>
+
+            <div class="demo-box">
+                <div class="demo-header">
+                    <div class="demo-title">🎛 Agent Manager + Superpowers</div>
+                    <span class="demo-tag sky">live sandbox</span>
+                </div>
+                <div style="padding:14px 18px 0">
+                    <div
+                        style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">
+                        Chọn task mẫu hoặc tự gõ:</div>
+                    <div class="prompt-chips">
+                        <div class="prompt-chip"
+                            onclick="fillSandbox(this,'Let\'s build a REST API for a blog with posts and comments')">📝
+                            Blog API</div>
+                        <div class="prompt-chip"
+                            onclick="fillSandbox(this,'I have a bug: user authentication fails intermittently in production')">
+                            🐛 Auth bug</div>
+                        <div class="prompt-chip"
+                            onclick="fillSandbox(this,'Implement a caching layer for the database queries')">⚡ Cache
+                            layer</div>
+                        <div class="prompt-chip" onclick="fillSandbox(this,'Write a fibonacci function')">🔢 Fibonacci
+                        </div>
+                    </div>
+                </div>
+                <div style="padding:12px 18px 0;display:flex;gap:10px">
+                    <textarea class="demo-input" id="sandbox-input" rows="3"
+                        placeholder="Nhập task bất kỳ..."></textarea>
+                </div>
+                <div style="padding:8px 18px 14px;display:flex;gap:10px">
+                    <button class="run-btn" onclick="runSandbox()" id="sandbox-btn">▶ Xem response</button>
+                </div>
+                <div class="demo-response" id="sandbox-resp">
+                    <div class="response-header">
+                        <div class="agent-avatar">SP</div>
+                        <div class="response-name">Superpowers Agent · AntiGravity</div>
+                    </div>
+                    <div class="response-body" id="sandbox-body"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── DEMO: SLASH ── -->
+        <div class="section" id="demo-slash">
+            <div class="section-tag">Demo · Slash Commands</div>
+            <h2>🔱 Slash Commands — Gõ thử</h2>
+            <p>Superpowers thêm các <code
+                    style="font-family:var(--font-mono);background:var(--surface2);padding:2px 7px;border-radius:4px;font-size:12px;color:var(--accent-lt)">/superpowers-*</code>
+                slash commands vào AntiGravity Agent Manager.</p>
+
+            <div class="slash-demo">
+                <div class="slash-demo-bar">
+                    <span>🎛</span>
+                    <span>Agent Manager — Superpowers loaded ✓</span>
+                </div>
+                <div class="slash-input-area">
+                    <input id="slash-input" type="text" placeholder='Gõ "/superpowers-" để xem commands...'
+                        oninput="onSlash(this.value)" autocomplete="off">
+                </div>
+                <div class="slash-dropdown" id="slash-dd"></div>
+            </div>
+
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>Skill trigger</th>
+                            <th>Dùng khi nào</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code style="font-family:var(--font-mono)">/superpowers-brainstorm</code></td>
+                            <td>brainstorming</td>
+                            <td>Bắt đầu feature mới — khi muốn explicit trigger</td>
+                        </tr>
+                        <tr>
+                            <td><code style="font-family:var(--font-mono)">/superpowers-write-plan</code></td>
+                            <td>writing-plans</td>
+                            <td>Sau khi có spec, tạo implementation plan</td>
+                        </tr>
+                        <tr>
+                            <td><code style="font-family:var(--font-mono)">/superpowers-execute-plan</code></td>
+                            <td>executing-plans / subagent-driven</td>
+                            <td>Execute plan theo từng task có review</td>
+                        </tr>
+                        <tr>
+                            <td><code style="font-family:var(--font-mono)">/superpowers-debug</code></td>
+                            <td>systematic-debugging</td>
+                            <td>Debug bug theo 4-phase process</td>
+                        </tr>
+                        <tr>
+                            <td><code style="font-family:var(--font-mono)">/superpowers-review</code></td>
+                            <td>requesting-code-review</td>
+                            <td>Code review với checklist đầy đủ</td>
+                        </tr>
+                        <tr>
+                            <td><code style="font-family:var(--font-mono)">/superpowers-finish</code></td>
+                            <td>verification-before-completion</td>
+                            <td>Verify task thực sự done trước khi close</td>
+                        </tr>
+                        <tr>
+                            <td><code style="font-family:var(--font-mono)">/superpowers-reload</code></td>
+                            <td>using-superpowers</td>
+                            <td>Khi agent quên skills — reload framework</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout">
+                <div class="callout-label">💡 Skills tự động vs Slash commands</div>
+                Skills <strong>tự động trigger</strong> khi condition match — bạn không cần dùng slash. Slash commands
+                chỉ cần khi muốn <strong>explicit trigger</strong> hoặc agent không tự trigger đúng lúc. Nếu agent quên
+                skills giữa chừng, dùng <code
+                    style="font-family:var(--font-mono);background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--accent-lt)">/superpowers-reload</code>.
+            </div>
+        </div>
+
+        <!-- ── LIMITATIONS ── -->
+        <div class="section" id="limitations">
+            <div class="section-tag">Giới hạn</div>
+            <h2>⚠️ Giới hạn khi dùng trên AntiGravity</h2>
+
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Trên Claude Code</th>
+                            <th>Trên AntiGravity</th>
+                            <th>Workaround</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Parallel subagents</strong></td>
+                            <td>✅ Full support</td>
+                            <td>❌ Không hỗ trợ</td>
+                            <td>Sequential execution via <code
+                                    style="font-family:var(--font-mono)">single-flow-task-execution</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>dispatching-parallel-agents</strong></td>
+                            <td>✅ Native skill</td>
+                            <td>❌ N/A</td>
+                            <td>Dùng <code style="font-family:var(--font-mono)">executing-plans</code> sequential</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Official harness</strong></td>
+                            <td>✅ Built-in</td>
+                            <td>🔧 Community port</td>
+                            <td>Dùng skainguyen1412/antigravity-superpowers</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Plugin marketplace</strong></td>
+                            <td>✅ 1-click install</td>
+                            <td>❌ Không có</td>
+                            <td>Manual copy .agent/ folder</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Auto-update skills</strong></td>
+                            <td>✅ Plugin updates</td>
+                            <td>❌ Manual</td>
+                            <td><code style="font-family:var(--font-mono)">git pull</code> trong superpowers directory
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Skill isolation</strong></td>
+                            <td>✅ ~/.claude/skills</td>
+                            <td>✅ ~/.gemini/antigravity/skills</td>
+                            <td>Hoạt động tương tự</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── TIPS ── -->
+        <div class="section" id="tips">
+            <div class="section-tag">Best Practices</div>
+            <h2>⭐ Pro Tips từ community</h2>
+
+            <div class="cards col3">
+                <div class="card">
+                    <div class="card-ico">🤝</div>
+                    <div class="card-title">Đừng rush brainstorming</div>
+                    <div class="card-desc">Đây là bước đáng đầu tư nhất. Mỗi câu trả lời của bạn định hình toàn bộ
+                        implementation. 10 phút brainstorm = tiết kiệm nhiều giờ rework.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">📋</div>
+                    <div class="card-title">Review spec trước khi proceed</div>
+                    <div class="card-desc">Đọc spec doc agent tạo ra. Đây là lần cuối cùng dễ thay đổi direction. Sau
+                        khi approve → plan → execute sẽ rất tốn để undo.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🌿</div>
+                    <div class="card-title">Luôn dùng worktrees</div>
+                    <div class="card-desc">Không implement trực tiếp trên main. Worktree giúp bạn dễ abandon nếu
+                        approach sai mà không mess up codebase.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">⏱️</div>
+                    <div class="card-title">Tasks 2-5 phút</div>
+                    <div class="card-desc">Nếu task trong plan dài hơn 5 phút, agent bị drift. Chia nhỏ hơn. Nhiều small
+                        verified steps > ít large unverified steps.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🔄</div>
+                    <div class="card-title">Reload khi agent drift</div>
+                    <div class="card-desc">Trong long session, agent có thể quên skills. Gõ <code
+                            style="font-family:var(--font-mono);font-size:12px">/superpowers-reload</code> để refresh
+                        context.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">🧠</div>
+                    <div class="card-title">Đừng nói "skip TDD"</div>
+                    <div class="card-desc">TDD là rigid skill. Agent sẽ push back. Nếu cần skip (prototyping), nói rõ
+                        trong AGENTS.md — user instructions override skills.</div>
+                </div>
+            </div>
+
+            <div class="callout good">
+                <div class="callout-label">⭐ Triết lý cốt lõi</div>
+                Superpowers không làm cho agent viết code nhanh hơn — nó làm cho agent viết code <strong>đúng hơn lần
+                    đầu tiên</strong>. Đầu tư vào brainstorm và planning = tiết kiệm thời gian debug và refactor sau
+                này. <em>"An enthusiastic junior with poor taste" có thể follow → senior engineer sẽ thấy kết quả
+                    ổn.</em>
+            </div>
+        </div>
+
+        <!-- ── TROUBLESHOOT ── -->
+        <div class="section" id="troubleshoot">
+            <div class="section-tag">Debug</div>
+            <h2>🔧 Troubleshoot</h2>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-ico">❓</div>
+                    <div class="card-title">AntiGravity không thấy workflows</div>
+                    <div class="card-desc"><strong>Fix:</strong> Đảm bảo đúng path <code
+                            style="font-family:var(--font-mono);font-size:12px">.agent/workflows/*.md</code>. Restart
+                        AntiGravity để re-read .agent/ files. Dùng <code
+                            style="font-family:var(--font-mono);font-size:12px">/superpowers-reload</code>.</div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">❓</div>
+                    <div class="card-title">Agent không follow skills</div>
+                    <div class="card-desc"><strong>Fix:</strong> Kiểm tra <code
+                            style="font-family:var(--font-mono);font-size:12px">.agent/rules/superpowers.md</code> có
+                        tồn tại không. Prompt agent: <em>"You have Superpowers. Read using-superpowers skill."</em>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">❓</div>
+                    <div class="card-title">Files không được write vào artifacts/</div>
+                    <div class="card-desc"><strong>Fix:</strong> Tell agent: <em>"Please follow the
+                            superpowers-execute-plan workflow and write artifacts to disk."</em></div>
+                </div>
+                <div class="card">
+                    <div class="card-ico">❓</div>
+                    <div class="card-title">Agent bỏ qua brainstorming</div>
+                    <div class="card-desc"><strong>Fix:</strong> Explicit trigger: <em>"/superpowers-brainstorm"</em>
+                        hoặc <em>"Use brainstorming skill first."</em> Check <code
+                            style="font-family:var(--font-mono);font-size:12px">superpowers.md</code> rule có enforce
+                        không.</div>
+                </div>
+            </div>
+
+            <div class="code-wrap">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                    </div><span class="code-lang">Debug prompt — paste vào Agent Manager</span><button class="copy-btn"
+                        onclick="cp(this,'ts1')">Copy</button>
+                </div>
+                <pre id="ts1">Please reload your Superpowers framework. Read the file:
+.agent/rules/superpowers.md
+
+Then confirm:
+1. Which skills are currently loaded?
+2. What workflow rules are active?
+3. Are you ready to use Superpowers on the next task?</pre>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /* ── NAV ── */
+        function toggleNav() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('visible') }
+        function setActive(el) { document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active')); el.classList.add('active'); if (window.innerWidth <= 900) toggleNav() }
+
+        /* ── PROGRESS ── */
+        window.addEventListener('scroll', () => {
+            const mc = document.getElementById('main-content');
+            const h = mc.scrollHeight - window.innerHeight;
+            const p = Math.max(0, Math.min(100, Math.round(-mc.getBoundingClientRect().top / h * 100)));
+            document.getElementById('pct').textContent = p + '%';
+            document.getElementById('pfill').style.width = p + '%';
+        });
+
+        /* ── SCROLL SPY ── */
+        document.querySelectorAll('[id]').forEach(s => {
+            new IntersectionObserver(e => {
+                if (e[0].isIntersecting) document.querySelectorAll('.sb-link').forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e[0].target.id));
+            }, { rootMargin: '-20% 0px -70% 0px' }).observe(s);
+        });
+
+        /* ── COPY ── */
+        function cp(btn, id) {
+            navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
+                btn.textContent = '✓ Copied'; btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied') }, 2000);
+            });
+        }
+
+        /* ── TYPEWRITER ── */
+        function typeText(el, html, cb) {
+            el.innerHTML = '';
+            const tmp = document.createElement('div'); tmp.innerHTML = html;
+            const full = tmp.innerHTML;
+            let i = 0; const step = Math.ceil(full.length / 90);
+            const iv = setInterval(() => {
+                i += step;
+                if (i >= full.length) { el.innerHTML = full; clearInterval(iv); if (cb) cb(); }
+                else el.innerHTML = full.slice(0, i) + '<span class="cursor"></span>';
+            }, 14);
+        }
+
+        /* ── FULL DEMO ── */
+        const demoData = {
+            d1: [
+                { r: 'user', w: '👤', m: "Let's build a URL shortener service" },
+                { r: 'ai', w: 'SP', m: `Using <strong>brainstorming</strong> skill before any implementation.<br><br>Will this be: (a) personal use only, (b) small team ~50 users, or (c) public service? <span class="cb-tag art">🧠 brainstorming</span>` },
+                { r: 'user', w: '👤', m: '(b) small team' },
+                { r: 'ai', w: 'SP', m: 'Do you need click analytics or just redirect functionality?' },
+                { r: 'user', w: '👤', m: 'Basic click counts' },
+                { r: 'ai', w: 'SP', m: `<strong>Approach A:</strong> SQLite + Node.js — simple, zero ops, perfect for 50 users.<br><strong>Approach B:</strong> Postgres + Redis — more complex, better scalability.<br><br>For small team → A recommended. OK?` },
+                { r: 'user', w: '👤', m: 'Go with A, approved' },
+                {
+                    r: 'ai', w: 'SP', m: `Writing spec doc... dispatching spec-document-reviewer subagent...<br><br>✅ Spec approved. Saved to <code>docs/superpowers/specs/2026-03-16-url-shortener-design.md</code><br><br>Setting up worktree... <span class="cb-tag art">🌿 using-git-worktrees</span><br><pre>git worktree add ../project-url-shortener feature/url-shortener
+npm install → OK
+npm test → 12/12 passing. Clean baseline.</pre>Now invoking <strong>writing-plans</strong> skill...`},
+                { r: 'user', w: '👤', m: 'Execute the plan' },
+                { r: 'ai', w: 'SP', m: `Using <strong>executing-plans</strong> (sequential on AntiGravity).<br><br>Task 1: DB schema...<br><span class="cb-tag art">🔴 RED</span> Writing failing test first → <code>schema.test.ts</code><br><span class="cb-tag" style="background:rgba(62,207,142,.12);color:var(--green);border:1px solid rgba(62,207,142,.2)">🟢 GREEN</span> Writing minimal schema code → test passes<br>Spec review: ✅ Compliant | Code review: ✅ Pass → Committed<br><br>Task 2/5 in progress... <span class="cb-tag art">⚡ subagent-driven</span>` },
+            ],
+            d2: [
+                { r: 'user', w: '👤', m: 'I have a bug: user login fails intermittently' },
+                { r: 'ai', w: 'SP', m: `Using <strong>systematic-debugging</strong> skill. <span class="cb-tag art">🐛 debugging</span><br><br><strong>Phase 1: Root cause tracing</strong><br>What does "intermittently" mean exactly? Every 10th attempt? Under load? Specific users?` },
+                { r: 'user', w: '👤', m: 'Happens maybe 1 in 20 attempts, seems random' },
+                {
+                    r: 'ai', w: 'SP', m: `<strong>Phase 2: Defense in depth</strong><br>1 in 20 = likely a race condition. Let me check the auth flow...<br><br>Found it: <code>sessions.ts:47</code> — double-write to session store without lock.<br>Two requests can both read "no session" and both create one. Second write wins → first request gets invalid token.<br><br><strong>Phase 3: Fix</strong> — using <strong>test-driven-development</strong>:<pre>// Failing test first
+it('prevents concurrent session creation', async () => {
+  const [r1, r2] = await Promise.all([login(user), login(user)])
+  expect(r1.token).toBe(r2.token) // same token
+})</pre>🔴 Test fails → writing fix with atomic check-and-set → 🟢 Test passes → Committed`},
+            ],
+            d3: [
+                { r: 'user', w: '👤', m: 'I have the design doc approved. Write and execute the implementation plan' },
+                { r: 'ai', w: 'SP', m: `Using <strong>writing-plans</strong> skill. <span class="cb-tag art">📋 writing-plans</span><br><br>Breaking work into 2-5 min tasks with exact files and verification...<br><br>Saved: <code>docs/plans/2026-03-16-feature.md</code> — 8 tasks, ~25 minutes total.<br><br>Review plan before I start executing?` },
+                { r: 'user', w: '👤', m: 'Looks good, execute' },
+                {
+                    r: 'ai', w: 'SP', m: `Using <strong>executing-plans</strong> skill (sequential on AntiGravity). <span class="cb-tag art">🤖 executing</span><br><br>Task 1/8: [writes failing test → green → spec review ✅ → code review ✅ → commit]<br>Task 2/8: [writes failing test → green → spec review ✅ → code review ✅ → commit]<br>...<br>Task 8/8: Complete.<br><br>Running full verification... <span class="cb-tag art">✅ verification</span><br><pre>npm test → 47/47 passing
+npm run build → Success
+All acceptance criteria from spec ✓</pre>Task done. <strong>All 8 commits verified.</strong>`},
+            ],
+        };
+
+        let curDemo = 'd1';
+        function selectDemo(el, k) {
+            document.querySelectorAll('#demo-workflow .prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected'); curDemo = k;
+            document.getElementById('demo-out').style.display = 'none';
+        }
+        function playDemo() {
+            const out = document.getElementById('demo-out');
+            const data = demoData[curDemo];
+            out.style.display = 'block';
+            let html = '<div class="chat-history">';
+            data.forEach(b => {
+                html += `<div class="chat-bubble ${b.r}">
+      <div class="cb-avatar ${b.r === 'ai' ? 'ai' : 'user'}">${b.w}</div>
+      <div class="cb-body">
+        <div class="cb-who ${b.r === 'ai' ? 'ai' : ''}">${b.r === 'ai' ? 'SUPERPOWERS AGENT' : 'YOU'}</div>
+        <div class="cb-msg">${b.m}</div>
+      </div>
+    </div>`;
+            });
+            html += '</div>';
+            out.innerHTML = html;
+        }
+        playDemo();
+
+        /* ── SANDBOX ── */
+        const sandboxResp = {
+            blog: `Using <strong>brainstorming</strong> skill before any implementation.<br><br>What tech stack? (a) Node.js/Express, (b) Python/FastAPI, (c) Go? <span class="cb-tag art">🧠 brainstorming</span><br><br><em>[Awaiting your response to continue...]</em><br><br><strong>Note:</strong> In a real session, this would be an interactive back-and-forth. Agent would ask about: auth requirements, deployment target, database preference, pagination strategy, then propose 2-3 approaches before writing spec.`,
+            bug: `Using <strong>systematic-debugging</strong> skill. <span class="cb-tag art">🐛 debugging</span><br><br><strong>Phase 1: Root cause tracing</strong><br>"Fails intermittently" — classic race condition signal.<br><br>Questions:<br>1. Under what conditions? (High load? Specific users? After deploy?)<br>2. What does "fails" mean exactly? (500 error? Wrong user? Token invalid?)<br>3. Do you have logs showing the failure?<br><br><em>[Agent would trace from symptom → root cause through 4 phases. No guessing.]</em>`,
+            cache: `Using <strong>brainstorming</strong> skill. <span class="cb-tag art">🧠 brainstorming</span><br><br>Before implementing cache, let me understand the problem:<br><br>1. Which queries are slow? (All queries or specific ones?)<br>2. What's the acceptable staleness? (Read-heavy or write-heavy data?)<br>3. Distributed cache (Redis) or in-process (node-cache/LRU)?<br><br><em>[After brainstorm → spec doc → worktree → writing-plans → executing-plans with TDD on each task]</em>`,
+            fib: `Using <strong>test-driven-development</strong> skill. <span class="cb-tag art">🧪 TDD</span><br><br>Writing failing test FIRST:<div class="r-code">// fibonacci.test.ts — watch it fail
+test('fibonacci base cases', () => {
+  expect(fibonacci(0)).toBe(0);  // ← will fail, no impl yet
+  expect(fibonacci(1)).toBe(1);
+});
+test('fibonacci sequence', () => {
+  expect(fibonacci(10)).toBe(55);
+});</div>🔴 Running test... <strong>FAIL</strong> (fibonacci is not defined) — expected.<br><br>Now writing minimal implementation to make tests pass...<div class="r-code">export function fibonacci(n: number): number {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}</div>🟢 Running test... <strong>PASS</strong> → Committed. Refactor: add memoization? <span class="cb-tag art">✅ RED-GREEN done</span>`,
+        };
+
+        function fillSandbox(el, text) {
+            document.getElementById('sandbox-input').value = text;
+            document.querySelectorAll('#demo-sandbox .prompt-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+        function runSandbox() {
+            const input = document.getElementById('sandbox-input').value.trim();
+            if (!input) return;
+            const btn = document.getElementById('sandbox-btn');
+            btn.disabled = true; btn.textContent = '⏳ Running...';
+            const resp = document.getElementById('sandbox-resp');
+            const body = document.getElementById('sandbox-body');
+            resp.classList.add('visible');
+            body.innerHTML = '<span class="cursor"></span>';
+            const lower = input.toLowerCase();
+            let key = 'blog';
+            if (lower.includes('bug') || lower.includes('fail') || lower.includes('debug')) key = 'bug';
+            else if (lower.includes('cache') || lower.includes('cach')) key = 'cache';
+            else if (lower.includes('fibonacci') || lower.includes('function') || lower.includes('write a')) key = 'fib';
+            setTimeout(() => typeText(body, sandboxResp[key], () => { btn.disabled = false; btn.textContent = '▶ Xem response' }), 400);
+        }
+
+        /* ── SLASH ── */
+        const slashItems = [
+            { cmd: '/superpowers-brainstorm', desc: 'Brainstorm và design feature mới' },
+            { cmd: '/superpowers-write-plan', desc: 'Tạo implementation plan từ spec' },
+            { cmd: '/superpowers-execute-plan', desc: 'Execute plan task-by-task với review' },
+            { cmd: '/superpowers-debug', desc: 'Debug theo 4-phase systematic process' },
+            { cmd: '/superpowers-review', desc: 'Code review với full checklist' },
+            { cmd: '/superpowers-finish', desc: 'Verify completion trước khi close task' },
+            { cmd: '/superpowers-reload', desc: 'Reload Superpowers framework' },
+            { cmd: '/superpowers-bootstrap', desc: 'Bootstrap Superpowers vào project' },
+        ];
+        function onSlash(val) {
+            const dd = document.getElementById('slash-dd');
+            if (!val.startsWith('/')) { dd.classList.remove('open'); return }
+            const q = val.toLowerCase();
+            const m = slashItems.filter(c => c.cmd.includes(q));
+            if (!m.length) { dd.classList.remove('open'); return }
+            dd.innerHTML = m.map(c => `<div class="slash-item" onclick="pickSlash('${c.cmd}')"><span class="slash-item-cmd">${c.cmd}</span><span class="slash-item-desc">${c.desc}</span></div>`).join('');
+            dd.classList.add('open');
+        }
+        function pickSlash(cmd) {
+            document.getElementById('slash-input').value = cmd + ' ';
+            document.getElementById('slash-dd').classList.remove('open');
+            document.getElementById('slash-input').focus();
+        }
+    </script>
+</body>
+
+</html>
