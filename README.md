@@ -1,5 +1,4 @@
 Dưới đây là hướng dẫn chi tiết để sử dụng **Claude Code** - công cụ AI coding của Anthropic chạy trực tiếp trong terminal.
-
 # 1. Yêu cầu & cài đặt
 - **Yêu cầu**:
     - Node.js phiên bản 18 trở lên (hoặc dùng bản cài đặt native)
