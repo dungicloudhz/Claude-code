@@ -254,7 +254,7 @@ Rule là những ràng buộc Claude phải tuân theo. Không phải gợi ý -
 ## Skill - Kỹ năng chuyên biệt
 Skill là `playbook` cho Claude về cách xử lý một tác vụ cụ thể. Khác với rules (cấm/cho phép), skill là **hướng dẫn chi tiết cách làm tốt nhất**.
 - Ví dụ: `.ai/skills/jpa-query.md`
-```markdown
+```java
 # Skill: JPA Query Optimization
 
 ## Khi nào áp dụng
@@ -272,7 +272,7 @@ Nếu entity có @OneToMany hoặc @ManyToMany:
 ### 2. Ưu tiên Projection cho read queries
 Thay vì load toàn bộ entity, dùng DTO projection:
 
-```java
+// java
 // Thay vì:
 List<Order> findByUserId(Long userId);
 
@@ -280,20 +280,17 @@ List<Order> findByUserId(Long userId);
 @Query("SELECT new com.app.dto.OrderSummary(o.id, o.status, o.total) " +
        "FROM Order o WHERE o.userId = :userId")
 List<OrderSummary> findSummaryByUserId(@Param("userId") Long userId);
-```
 
 ### 3. Pagination bắt buộc cho list queries
 Không bao giờ trả về List không giới hạn — luôn dùng Pageable:
 
-```java
+// java
 Page<OrderSummary> findByUserId(Long userId, Pageable pageable);
-```
 
 ### 4. Index hints trong @Query
 Với query phức tạp, comment index đang dùng:
-```java
+//java
 @Query(value = "/* INDEX(orders idx_user_status) */ ...")
-```
 
 ## Anti-patterns cần tránh
 - findAll() không có filter/pagination
@@ -302,6 +299,421 @@ Với query phức tạp, comment index đang dùng:
 - JPQL với string concatenation — luôn dùng @Param
 ```
 - Ví dụ: `.ai/skills/react-patterns.md`
-```markdown
+```javascript
+// Skill: React Component Patterns
 
+// Data Fetching Pattern (React Query)
+// typescript
+// hooks/useOrders.ts
+export function useOrders(filters: OrderFilters) {
+  return useQuery({
+    queryKey: ['orders', filters],
+    queryFn: () => ordersApi.getAll(filters),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    select: (data) => data.items,   // transform ngay trong query
+  });
+}
+
+// Component sử dụng
+export function OrderList() {
+  const { data, isLoading, error } = useOrders({ status: 'ACTIVE' });
+  
+  if (isLoading) return <OrderListSkeleton />;
+  if (error) return <ErrorState error={error} />;
+  return <OrderGrid orders={data} />;
+}
+// 
+
+// Form Pattern (React Hook Form + Zod)
+// typescript
+const schema = z.object({
+  amount: z.number().positive().max(1_000_000),
+  note: z.string().max(500).optional(),
+});
+
+export function OrderForm({ onSuccess }: Props) {
+  const { register, handleSubmit, formState } = useForm({
+    resolver: zodResolver(schema),
+  });
+  const mutation = usePlaceOrder();
+  
+  return (
+    <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
+      ...
+    </form>
+  );
+}
+```
+
+## TOOL - CÔNG CỤ THỰC THI
+**Tools là functions Claude có thể gọi để tương tác với hệ thống thực. Định nghĩa qua MCP (Model Context Protocol) hoặc trong system prompt.**
+- **Database Tools**: `Query PostgreSQL, xem schema, explain query plan, kiểm tra index usage`.
+- **Git Tools**: `Read file, list changes, crate branch, commit, xem diff, blame`.
+- **Search Tools**: `Tìm kiesm trong codebase, grep pattern, tìm usages của function/class`.
+- **Test Tools**: `Chạy unit test, xem coverage report, run specific test class`.
+
+**Ví dụ**: `.ai/tools/db-tools.json` (MCP format)
+```json
+{
+  "tools": [
+    {
+      "name": "query_database",
+      "description": "Chạy SELECT query trên PostgreSQL database của project. Chỉ SELECT — không INSERT/UPDATE/DELETE.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sql": {
+            "type": "string",
+            "description": "SQL SELECT query. Không được chứa DDL hoặc DML."
+          },
+          "limit": {
+            "type": "number",
+            "default": 20,
+            "description": "Số rows tối đa trả về"
+          }
+        },
+        "required": ["sql"]
+      }
+    },
+    {
+      "name": "get_table_schema",
+      "description": "Lấy schema (columns, types, constraints) của một bảng",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table_name": { "type": "string" }
+        },
+        "required": ["table_name"]
+      }
+    },
+    {
+      "name": "explain_query",
+      "description": "Chạy EXPLAIN ANALYZE để xem query execution plan",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "sql": { "type": "string" }
+        },
+        "required": ["sql"]
+      }
+    }
+  ]
+}
+```
+
+## AGENTS - CHUYÊN GIA AI
+**Mỗi Agent là một Claude instance được cấu hình cho một domain cụ thể - có system prompt riêng, tools riêng, và rules riêng.**
+- **Ví dụ** : `.ai/agents/backend-agent.md`
+```markdown
+# Backend Agent — System Prompt
+
+## Vai trò
+Bạn là Senior Java Backend Developer với 10 năm kinh nghiệm Spring Boot.
+Bạn làm việc trên project MB Ageas Life — insurance platform, microservices.
+
+## Stack hiện tại
+- Java 21 (records, sealed interfaces, pattern matching)
+- Spring Boot 3.4 (Spring Security 6, Spring Data JPA 3)
+- Hibernate 6 / PostgreSQL 16
+- Kafka (confluent platform)
+- AWS EKS deployment, GitLab CI/CD
+- Liquibase migration
+
+## Context dự án
+- Package root: com.mbal.digital_platform
+- Services: declaration-service, rider-service, ul-gen4
+- API prefix: /api/v1/
+- Auth: JWT Bearer token, roles: AGENT, ADMIN, CUSTOMER
+- DB: mbal_db, schema: dps (digital platform schema)
+
+## Tools có thể dùng
+- query_database: đọc data để hiểu structure
+- get_table_schema: xem schema trước khi viết JPA entity
+- explain_query: debug slow queries
+
+## Khi nhận yêu cầu implement feature
+1. Hỏi rõ business requirement nếu chưa rõ
+2. Kiểm tra schema liên quan bằng get_table_schema tool
+3. Thiết kế domain model trước (entities, value objects)
+4. Implement theo thứ tự: domain → application → adapter
+5. Viết test song song với code
+6. Kiểm tra không vi phạm Rules
+
+## Output format
+- Luôn trả lời bằng tiếng Việt
+- Code phải compile được ngay, đầy đủ import
+- Giải thích quyết định thiết kế quan trọng
+- Đánh dấu TODO nếu cần thêm logic
+```
+- **Ví dụ**: `.ai/agents/qa-agent.md`
+```markdown
+# QA Agent — System Prompt
+
+## Vai trò
+Bạn là QA Engineer kiêm Test Architect. Nhiệm vụ: đảm bảo code quality,
+viết comprehensive tests, và tìm bugs trước khi code vào production.
+
+## Test Stack
+- JUnit 5 + Mockito (unit tests)
+- Spring Boot Test + TestContainers (integration tests)
+- Wiremock (mock external services)
+- Frontend: Jest + React Testing Library + Playwright (E2E)
+
+## Chiến lược test
+- Unit test: domain và application layer (no Spring context)
+- Integration test: adapter layer (real DB via TestContainers)
+- Contract test: API contracts với Pact
+- E2E: happy paths và critical error paths
+
+## Khi review code
+Kiểm tra theo thứ tự:
+1. Test coverage — thiếu case nào?
+2. Security vulnerabilities (SQL injection, XSS, IDOR)
+3. Performance issues (N+1, missing index, unbounded queries)
+4. Error handling — edge cases chưa được handle
+5. Code conventions theo .ai/rules/
+
+## Output
+- Báo lỗi theo mức độ: 🔴 Critical, 🟡 Warning, 🟢 Suggestion
+- Luôn kèm code fix cho mỗi issue tìm được
+- Đề xuất thêm test cases còn thiếu
+```
+
+## WORKFLOW - QUY TRÌNH TỰ ĐỘNG
+Workflow định nghĩa chuỗi bước Claude cần thực hiệ cho một tác vụ phức tạp. Biến coogn việc lặp đi lặp lại thành quy trình nhất quán.
+
+- Ví dụ: `.ai/workflows/feature-dev.md`
+```markdown
+# Workflow: Feature Development
+
+## Trigger
+Khi nhận yêu cầu: "Implement feature X" hoặc "Thêm API endpoint Y"
+
+## Bước 1: Phân tích yêu cầu (Analysis)
+[ ] Xác nhận business requirement với user
+[ ] Identify affected services/modules
+[ ] List entities và tables liên quan
+[ ] Xác định API contract (endpoint, request, response schema)
+[ ] Estimate complexity: S/M/L
+
+## Bước 2: Database design
+[ ] Kiểm tra schema hiện tại (dùng get_table_schema tool)
+[ ] Thiết kế migration Liquibase nếu cần thay đổi schema
+[ ] Review index strategy cho query patterns mới
+
+## Bước 3: Backend implementation
+[ ] Domain model: Entity/ValueObject mới hoặc cập nhật
+[ ] Port interface: UseCase (in) + Repository (out)
+[ ] Use case implementation
+[ ] Repository adapter (JPA)
+[ ] REST Controller với proper validation
+[ ] Exception handling tại ControllerAdvice
+
+## Bước 4: Tests
+[ ] Unit tests cho domain logic (không cần Spring context)
+[ ] Use case tests với mocked ports
+[ ] Integration test cho Repository với TestContainers
+[ ] Controller test với MockMvc
+
+## Bước 5: Frontend implementation
+[ ] TypeScript types/interfaces
+[ ] API function trong feature/api/
+[ ] React Query hook
+[ ] UI Components
+[ ] Form với validation nếu cần
+
+## Bước 6: Review checklist
+[ ] Không vi phạm Rules (check .ai/rules/)
+[ ] Performance: không có N+1 query
+[ ] Security: proper auth/authz
+[ ] Error cases được handle
+[ ] Docs: Javadoc + Swagger annotation
+
+## Output format
+Sau mỗi bước, report: ✅ Done / ⏳ In progress / ❌ Blocked + reason
+```
+- **Ví dụ**: `.ai/workflows/bug-fix.md`
+```markdown
+# Workflow: Bug Fix
+
+## Trigger
+Khi nhận error log, stack trace, hoặc mô tả bug
+
+## Bước 1: Reproduce & Understand
+[ ] Xác định chính xác điều kiện gây ra bug
+[ ] Trace stack từ trên xuống, xác định root cause
+[ ] Query DB nếu cần verify data state (dùng query_database tool)
+
+## Bước 2: Fix
+[ ] Implement fix tối thiểu nhất (surgical fix)
+[ ] Không refactor code khác trong cùng PR — tách thành PR riêng
+[ ] Đảm bảo fix không break existing behavior
+
+## Bước 3: Test
+[ ] Viết failing test reproduce bug TRƯỚC KHI fix
+[ ] Verify test pass SAU KHI fix
+[ ] Kiểm tra regression: run related tests
+
+## Bước 4: Document
+[ ] Comment trong code giải thích tại sao fix như vậy
+[ ] Update .ai/memory/known-issues.md
+[ ] Nếu là systemic issue: tạo entry trong tech-debt.md
+
+## Template comment trong code
+//java
+// FIX(2026-01-15): [Mô tả bug]
+// Root cause: [Nguyên nhân]
+// Solution: [Giải thích fix]
+// Related ticket: #JIRA-123
+```
+
+## MEMORY - BỘ NHỚ DỰ ÁN
+**Memory là nơi lưu trữ kiến thức accumalated (tích lũy) về dự án - để Claude "nhớ" quyết định đã làm, lỗi đã gặp, và context quan trọng mà không cần giải thích lại mỗi lần.**
+- **Ví dụ**: `.ai/memory/decisions.md`
+```markdown
+# Architectural Decisions Log
+
+## [ADR-001] Dùng Hexagonal Architecture
+**Date:** 2025-11-01 | **Status:** Accepted
+**Decision:** Áp dụng Hexagonal Architecture cho tất cả services
+**Reason:** Team hay nhầm lẫn giữa domain logic và infrastructure code.
+Hexagonal tạo boundary rõ ràng, test dễ hơn (domain không cần Spring context).
+**Consequence:** Thêm boilerplate (port interfaces), nhưng đáng.
+
+---
+
+## [ADR-002] Không dùng Lombok
+**Date:** 2025-11-15 | **Status:** Accepted
+**Decision:** Loại bỏ Lombok khỏi toàn bộ project
+**Reason:** Java 21 records thay thế được @Data/@Value.
+Lombok gây friction với IDE và annotation processing.
+**Rule:** DTO = records, Entity = handwritten getters nếu cần.
+
+---
+
+## [ADR-003] Kafka event naming convention
+**Date:** 2025-12-01 | **Status:** Accepted
+**Decision:** Topic format: {domain}.{entity}.{event} (lowercase, dot-separated)
+**Examples:** 
+  - payment.order.placed
+  - notification.email.sent
+  - declaration.form.submitted
+**Reason:** Nhất quán, dễ filter, dễ wildcard subscription.
+
+---
+
+## [ADR-004] Response wrapper ApiResponse<T>
+**Date:** 2026-01-10 | **Status:** Accepted
+**Decision:** Mọi API response wrap trong:
+// json
+{ "success": true, "data": {...}, "timestamp": "...", "requestId": "..." }
+```
+**Reason:** Frontend cần consistent error handling, request tracing.
+- **Ví dụ**: `.ai/memory/known-issues.md`
+```markdown
+# Known Issues & Workarounds
+
+## [ISSUE-001] Hibernate 5: IN clause với Enum Collection
+**Symptom:** SQLGrammarException khi dùng `WHERE status IN :statuses`
+  với `List<StatusEnum>` parameter.
+**Root cause:** Hibernate 5 không bind đúng Enum collection.
+**Workaround:** Convert sang List<String> trước khi truyền vào query:
+//java
+List<String> statusNames = statuses.stream()
+    .map(Enum::name).collect(toList());
+//
+**Status:** Fixed in Hibernate 6 (Spring Boot 3.x). Còn tồn tại ở declaration-service (Spring Boot 2.7).
+
+---
+
+## [ISSUE-002] Liquibase timeout trên EKS cold start
+**Symptom:** Pod crash với "Liquibase lock timeout" khi deploy mới.
+**Root cause:** Previous pod chết giữa chừng, không release Liquibase lock.
+**Workaround:** Manual fix: `UPDATE databasechangeloglock SET LOCKED=0`
+**Prevention:** `spring.liquibase.lock-wait-time=10m` trong application.yml
+
+---
+
+## [ISSUE-003] @Transactional không hoạt động trên private method
+**Context:** Hay gặp khi self-invocation trong Service class.
+**Root cause:** Spring AOP proxy không intercept private hoặc self-call.
+**Fix:** Extract sang method public hoặc sang class khác.
+**Note:** Claude sẽ cảnh báo về pattern này khi review code.
+```
+
+## CONTEXT - CLAUDE.MD CHUẨN
+CLAUDE.md là file Claude đọc đầu tiên khi mở project. Đây là "bản đồ" dự án - phải ngắn gọn, có cấu trúc, và liên kết đến các file chi tiết hơn.
+
+### NGUYÊN TẮC VIẾT CLAUDE.MD
+- CLAUDE.md không nên quá dài (tối đa 200-300 dòng). Đây là index - cung cấp context cần thiết ngay và **link đến chi tiết** trong thư mục **.ai/.Claude** đọc file này đầu tiên mỗi conversation.
+### CLAUDE.md - Template hoàn chỉnh
+```markdown
+# CLAUDE.md — MB Ageas Life Digital Platform
+> Last updated: 2026-01-15 | Stack: Java 21 + Spring Boot 3.4 + React 19
+
+## 🎯 Dự án là gì?
+Platform bán bảo hiểm nhân thọ trực tuyến cho MB Ageas Life.
+Kiến trúc microservices, deploy trên AWS EKS, 500k+ users.
+
+**Services chính:**
+- `declaration-service` — form khai báo sức khỏe của khách hàng
+- `rider-service` — quản lý rider (quyền lợi bổ sung)
+- `ul-gen4` — sản phẩm bảo hiểm liên kết đầu tư thế hệ 4
+- `notification-service` — email/SMS/push notification
+
+## 📂 Đọc thêm chi tiết
+- Coding rules: `.ai/rules/backend.md` và `.ai/rules/frontend.md`
+- Skills: `.ai/skills/` (jpa-query.md, api-design.md, react-patterns.md)
+- Agents: `.ai/agents/` (backend-agent.md, frontend-agent.md, qa-agent.md)
+- Workflows: `.ai/workflows/` (feature-dev.md, bug-fix.md)
+- Known issues: `.ai/memory/known-issues.md` ← đọc trước khi debug
+- Decisions: `.ai/memory/decisions.md` ← tại sao code lại như vậy
+
+## 🏗️ Kiến trúc Backend
+**Pattern:** Hexagonal Architecture + DDD
+///
+domain/          ← No framework, pure Java
+application/     ← Use cases (orchestration)
+adapter/in/      ← REST controllers, Kafka consumers
+adapter/out/     ← JPA repositories, Kafka producers
+config/          ← Spring configuration
+///
+
+## ⚡ Quick Reference
+
+**Package root:** `com.mbal.digital_platform`
+**API prefix:** `/api/v1/`
+**DB schema:** `dps` (digital platform schema)
+**Auth:** JWT Bearer, header: `Authorization: Bearer {token}`
+**Roles:** AGENT, ADMIN, CUSTOMER, SYSTEM
+
+**Kafka topics (format: domain.entity.event):**
+- `payment.order.placed`
+- `declaration.form.submitted`
+- `notification.email.requested`
+
+## ⚠️ QUAN TRỌNG — Đọc trước khi code
+1. Xem `.ai/memory/known-issues.md` để biết bugs đã biết và workarounds
+2. KHÔNG dùng Lombok — dùng Java records cho DTOs
+3. KHÔNG trả về Entity từ Controller — luôn dùng DTO
+4. Mọi query có Collection parameter: xem ISSUE-001 trong known-issues.md
+5. Response format: luôn wrap trong `ApiResponse<T>`
+
+## 🚀 Chạy local
+///bash
+# Start dependencies
+docker-compose up -d postgres kafka redis
+
+# Run service
+./mvnw spring-boot:run -pl declaration-service -Dspring.profiles.active=local
+
+# Frontend
+cd frontend && npm run dev
+///
+
+## 🤝 Khi nào dùng Agent nào?
+- **Backend questions** → Đọc `.ai/agents/backend-agent.md`
+- **Frontend questions** → Đọc `.ai/agents/frontend-agent.md`
+- **Code review / bugs** → Đọc `.ai/agents/qa-agent.md`
+- **New feature** → Follow `.ai/workflows/feature-dev.md`
 ```
