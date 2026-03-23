@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw 🦞 — Hướng dẫn toàn tập · AI Agent cá nhân</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --acc:#ffd060;--acc-d:#c89820;--acc-dim:rgba(255,208,96,.11);--acc-glow:rgba(255,208,96,.24);
+  --green:#40d88e;--green-dim:rgba(64,216,142,.10);
+  --blue:#5ba8ff;--blue-dim:rgba(91,168,255,.10);
+  --purple:#a07af4;--purple-dim:rgba(160,122,244,.10);
+  --yellow:#ffd060;--yellow-dim:rgba(255,208,96,.10);
+  --teal:#30d8c0;--teal-dim:rgba(48,216,192,.10);
+  --orange:#ff8c50;--orange-dim:rgba(255,140,80,.10);
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);--pink-glow:rgba(255,101,132,.22);
+  --sky:#38bdf8;--sky-dim:rgba(56,189,248,.10);
+  /* OpenClaw brand: lobster red-orange */
+  --oc:#ff6b35;--oc-dim:rgba(255,107,53,.13);--oc-glow:rgba(255,107,53,.30);
+  --oc2:#ff8c50;--oc2-dim:rgba(255,140,80,.12);
+  /* sections */
+  --ins:#5ba8ff;--ins-dim:rgba(91,168,255,.12);--ins-glow:rgba(91,168,255,.28);
+  --ch:#40d88e;--ch-dim:rgba(64,216,142,.12);--ch-glow:rgba(64,216,142,.28);
+  --sk:#a07af4;--sk-dim:rgba(160,122,244,.12);--sk-glow:rgba(160,122,244,.28);
+  --au:#ffd060;--au-dim:rgba(255,208,96,.12);--au-glow:rgba(255,208,96,.28);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;width:268px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:44px;height:44px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--oc),var(--oc2));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 26px var(--oc-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}
+.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--oc),var(--ins),var(--ch),var(--sk),var(--au));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-oc{background:var(--oc-dim);color:var(--oc)}
+.ngh-ins{background:var(--ins-dim);color:var(--ins)}
+.ngh-ch{background:var(--ch-dim);color:var(--ch)}
+.ngh-sk{background:var(--sk-dim);color:var(--sk)}
+.ngh-au{background:var(--au-dim);color:var(--au)}
+.ngh-other{background:rgba(255,255,255,.05);color:var(--muted)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(255,208,96,.07);border-left-color:var(--acc)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;background:var(--acc-dim);color:var(--acc)}
+
+/* MAIN */
+.main{margin-left:268px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 75% 22%,rgba(255,107,53,.12) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 55% at 10% 82%,rgba(91,168,255,.07) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 50% at 50% 50%,rgba(64,216,142,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:520px;height:520px;background:radial-gradient(circle,rgba(255,107,53,.10) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--oc-dim);border:1px solid rgba(255,107,53,.38);color:var(--oc);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--oc);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:52px;font-weight:900;letter-spacing:-2.5px;line-height:1.04;margin-bottom:18px}
+.h-oc{color:var(--oc)}.h-ins{color:var(--ins)}.h-ch{color:var(--ch)}.h-sk{color:var(--sk)}.h-au{color:var(--au)}.h-acc{color:var(--acc)}
+.h-grad{background:linear-gradient(135deg,var(--oc) 0%,var(--oc2) 50%,var(--au) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:580px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-oc{background:var(--oc-dim);color:var(--oc)}.chip-ins{background:var(--ins-dim);color:var(--ins)}
+.chip-ch{background:var(--ch-dim);color:var(--ch)}.chip-sk{background:var(--sk-dim);color:var(--sk)}
+.chip-au{background:var(--au-dim);color:var(--au)}.chip-t{background:var(--teal-dim);color:var(--teal)}
+.chip-p{background:var(--pink-dim);color:var(--pink)}.chip-s{background:var(--sky-dim);color:var(--sky)}
+
+/* CAT BANNERS */
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-oc{background:var(--oc-dim);border:1px solid rgba(255,107,53,.30)}.cb-oc::before{background:linear-gradient(90deg,var(--oc),var(--oc2))}
+.cb-ins{background:var(--ins-dim);border:1px solid rgba(91,168,255,.30)}.cb-ins::before{background:linear-gradient(90deg,var(--ins),var(--sky))}
+.cb-ch{background:var(--ch-dim);border:1px solid rgba(64,216,142,.30)}.cb-ch::before{background:linear-gradient(90deg,var(--ch),var(--teal))}
+.cb-sk{background:var(--sk-dim);border:1px solid rgba(160,122,244,.30)}.cb-sk::before{background:linear-gradient(90deg,var(--sk),var(--pink))}
+.cb-au{background:var(--au-dim);border:1px solid rgba(255,208,96,.30)}.cb-au::before{background:linear-gradient(90deg,var(--au),var(--orange))}
+.cb-icon{font-size:38px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-oc .cb-badge{background:var(--oc-dim);color:var(--oc)}
+.cb-ins .cb-badge{background:var(--ins-dim);color:var(--ins)}
+.cb-ch .cb-badge{background:var(--ch-dim);color:var(--ch)}
+.cb-sk .cb-badge{background:var(--sk-dim);color:var(--sk)}
+.cb-au .cb-badge{background:var(--au-dim);color:var(--au)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+/* CONTENT */
+.content{padding:56px 64px;max-width:1020px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-oc{color:var(--oc);background:var(--oc-dim);border:1px solid var(--oc-glow)}
+.st-ins{color:var(--ins);background:var(--ins-dim);border:1px solid var(--ins-glow)}
+.st-ch{color:var(--ch);background:var(--ch-dim);border:1px solid var(--ch-glow)}
+.st-sk{color:var(--sk);background:var(--sk-dim);border:1px solid var(--sk-glow)}
+.st-au{color:var(--au);background:var(--au-dim);border:1px solid var(--au-glow)}
+.st-y{color:var(--yellow);background:var(--yellow-dim);border:1px solid rgba(255,208,96,.24)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--acc);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:5px}.sub strong{color:var(--text)}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--acc);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* CODE BLOCKS */
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px;flex-shrink:0}
+.ct-oc{background:var(--oc-dim);color:var(--oc)}.ct-ins{background:var(--ins-dim);color:var(--ins)}
+.ct-ch{background:var(--ch-dim);color:var(--ch)}.ct-sk{background:var(--sk-dim);color:var(--sk)}
+.ct-au{background:var(--au-dim);color:var(--au)}.ct-y{background:var(--yellow-dim);color:var(--yellow)}
+.ct-g{background:var(--green-dim);color:var(--green)}.ct-t{background:var(--teal-dim);color:var(--teal)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.72;white-space:pre;color:#8899bb}
+/* syntax */
+.kw{color:#c792ea}.tp{color:#ffcb6b}.fn{color:#82aaff}.st-s{color:#c3e88d}
+.cm{color:#546e7a;font-style:italic}.nm{color:#f78c6c}.an{color:#ff6584}
+.pr{color:#89ddff}.vr{color:#eeffff}.cl{color:#ffcb6b}
+.c-r{color:#ff6584}.c-b{color:#5ba8ff}.c-g{color:#40d88e}
+.c-t{color:#30d8c0}.c-y{color:#ffd060}.c-o{color:#ff8c50}.c-p{color:#a07af4}.c-s{color:#38bdf8}
+/* shell prompt */
+.sh-prompt{color:var(--ch);font-weight:700;user-select:none}
+.sh-cmd{color:var(--text)}
+.sh-arg{color:var(--sky)}
+.sh-str{color:var(--green)}
+.sh-flag{color:var(--au)}
+.sh-cmt{color:#546e7a;font-style:italic}
+/* yaml */
+.yk{color:var(--blue)}.yv{color:var(--green)}.yc{color:#546e7a;font-style:italic}
+/* chat bubble */
+.chat{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.bubble{padding:11px 16px;border-radius:12px;font-size:13px;line-height:1.6;max-width:85%}
+.bubble-user{background:var(--ins-dim);border:1px solid rgba(91,168,255,.25);color:var(--text);align-self:flex-end;border-bottom-right-radius:4px}
+.bubble-bot{background:var(--s2);border:1px solid var(--border2);color:var(--muted);align-self:flex-start;border-bottom-left-radius:4px}
+.bubble-label{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.lbl-user{color:var(--ins)}.lbl-bot{color:var(--oc)}
+
+/* INFO BOXES */
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:var(--green-dim);border:1px solid rgba(64,216,142,.2);color:#30a870}
+.i-warn{background:var(--yellow-dim);border:1px solid rgba(255,208,96,.2);color:#b09030}
+.i-tip{background:var(--blue-dim);border:1px solid rgba(91,168,255,.2);color:#3878d0}
+.i-note{background:var(--purple-dim);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+.i-err{background:var(--pink-dim);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+
+/* RW BOX */
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-oc::before{background:var(--oc)}.rw-ins::before{background:var(--ins)}
+.rw-ch::before{background:var(--ch)}.rw-sk::before{background:var(--sk)}
+.rw-au::before{background:var(--au)}.rw-y::before{background:var(--yellow)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-oc .rw-label{color:var(--oc)}.rw-ins .rw-label{color:var(--ins)}
+.rw-ch .rw-label{color:var(--ch)}.rw-sk .rw-label{color:var(--sk)}
+.rw-au .rw-label{color:var(--au)}.rw-y .rw-label{color:var(--yellow)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--teal)}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--acc);background:var(--acc-dim);border:2px solid var(--acc-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}
+.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* CHEAT SHEET */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-oc{color:var(--oc)}.h4-ins{color:var(--ins)}.h4-ch{color:var(--ch)}.h4-sk{color:var(--sk)}.h4-au{color:var(--au)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted)}.cv{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--teal)}
+
+/* PLATFORM PILLS */
+.platforms{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.plat{display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border2);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted)}
+.plat-icon{font-size:14px}
+
+/* ARCH DIAGRAM */
+.arch{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0;margin:18px 0}
+.arch-box{background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;text-align:center}
+.arch-title{font-size:12px;font-weight:700;margin-bottom:3px}
+.arch-desc{font-size:11px;color:var(--muted)}
+.arch-arrow{text-align:center;color:var(--muted);font-size:20px;padding:0 8px}
+
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(255,208,96,.1);color:var(--yellow);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid{grid-template-columns:1fr}.arch{grid-template-columns:1fr;gap:8px}.arch-arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">🦞</div>
+      <div class="logo-text"><h2>OpenClaw Guide</h2><p>AI Agent cá nhân · Thực chiến 2026</p></div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-sect-label">Tổng quan</div>
+    <a href="#s0" class="nav-link active"><span class="ico">🗺️</span> OpenClaw là gì? <span class="nav-badge">START</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-ins">🔵 Cài đặt — 3 sections</div>
+    <a href="#s1" class="nav-link"><span class="ico">⚙️</span> Yêu cầu hệ thống</a>
+    <a href="#s2" class="nav-link"><span class="ico">📦</span> Cài đặt &amp; Onboarding</a>
+    <a href="#s3" class="nav-link"><span class="ico">🔑</span> Cấu hình AI Model</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-ch">🟢 Channels — 3 sections</div>
+    <a href="#s4" class="nav-link"><span class="ico">💬</span> Telegram Setup</a>
+    <a href="#s5" class="nav-link"><span class="ico">📱</span> WhatsApp &amp; Discord</a>
+    <a href="#s6" class="nav-link"><span class="ico">🌐</span> WebChat &amp; WebUI</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-sk">🟣 Skills &amp; Tools — 4 sections</div>
+    <a href="#s7"  class="nav-link"><span class="ico">🛠️</span> Tools cơ bản</a>
+    <a href="#s8"  class="nav-link"><span class="ico">📚</span> Skills &amp; ClawHub</a>
+    <a href="#s9"  class="nav-link"><span class="ico">✏️</span> Tự tạo Skill</a>
+    <a href="#s10" class="nav-link"><span class="ico">🔌</span> Plugins</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-au">🟡 Automation — 3 sections</div>
+    <a href="#s11" class="nav-link"><span class="ico">⏰</span> Cron Jobs &amp; Scheduler</a>
+    <a href="#s12" class="nav-link"><span class="ico">📋</span> Standing Orders</a>
+    <a href="#s13" class="nav-link"><span class="ico">🚀</span> Use Cases thực tế</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-oc">🦞 Nâng cao — 2 sections</div>
+    <a href="#s14" class="nav-link"><span class="ico">🔒</span> Bảo mật &amp; Sandbox</a>
+    <a href="#s15" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> OpenClaw 🦞 · AI Agent cá nhân · Mã nguồn mở · 2026</div>
+  <h1><span class="h-grad">OpenClaw</span> 🦞<br><span class="h-acc">Hướng dẫn</span><br><span class="h-ins">Toàn tập</span></h1>
+  <p class="hero-desc">OpenClaw là AI agent cá nhân mã nguồn mở — chạy trên thiết bị của bạn, trả lời qua ứng dụng nhắn tin bạn đã dùng. Từ cài đặt 5 phút đến automation 24/7 với Telegram, WhatsApp, Discord và hơn 20 nền tảng khác.</p>
+  <div class="hero-chips">
+    <span class="chip chip-oc">🦞 Self-hosted</span>
+    <span class="chip chip-ins">🔵 Telegram / WA</span>
+    <span class="chip chip-ch">🟢 Skills &amp; Tools</span>
+    <span class="chip chip-sk">🟣 Automation</span>
+    <span class="chip chip-au">⏰ Cron Jobs</span>
+    <span class="chip chip-t">🔒 Bảo mật</span>
+    <span class="chip chip-p">🤖 Multi-Agent</span>
+    <span class="chip chip-s">☁️ Cloud / Local</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ════ S0 — OVERVIEW ════ -->
+<div class="section" id="s0">
+  <div class="sec-head">
+    <span class="sec-tag st-oc">OVERVIEW</span>
+    <div><h2 class="sec-title">OpenClaw là gì &amp; Tại sao dùng?</h2>
+    <p class="sec-sub">Kiến trúc, khái niệm cốt lõi, so sánh với ChatGPT / Claude</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">OpenClaw — AI Agent cá nhân chạy trên thiết bị của bạn</div>
+    <p>OpenClaw (trước đây là ClawdBot, MoltBot) là một <strong>personal AI agent mã nguồn mở</strong> bạn tự host. Không giống ChatGPT hay Claude.ai — bạn chat với nó qua WhatsApp, Telegram, Discord, SMS... nơi bạn đang dùng hàng ngày. Nó nhớ bạn, tự động hoá tác vụ, và có thể thực thi lệnh thật sự trên máy tính.</p>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">📱</div><div class="card-title" style="color:var(--ch)">Sống trong ứng dụng của bạn</div><div class="card-desc">Không cần mở thêm app. Chat qua WhatsApp, Telegram, Discord, iMessage... nơi bạn đang nhắn tin mỗi ngày.</div></div>
+      <div class="card"><div class="card-icon">🧠</div><div class="card-title" style="color:var(--sk)">Nhớ &amp; Tự cải thiện</div><div class="card-desc">Lưu memory lâu dài về bạn, sở thích, dự án. Càng dùng càng hiểu bạn hơn và chủ động hơn.</div></div>
+      <div class="card"><div class="card-icon">⚡</div><div class="card-title" style="color:var(--au)">Thực thi tác vụ thật</div><div class="card-desc">Chạy lệnh shell, duyệt web, đọc/ghi file, gọi API, gửi email — không chỉ trả lời text.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Kiến trúc — Gateway + Channels + Agent</div>
+    <div class="arch">
+      <div class="arch-box" style="border-color:rgba(91,168,255,.3)">
+        <div class="arch-title" style="color:var(--ins)">📱 Channels</div>
+        <div class="arch-desc">Telegram · WhatsApp<br>Discord · iMessage<br>Slack · Signal · SMS</div>
+      </div>
+      <div class="arch-arrow">⟺</div>
+      <div class="arch-box" style="border-color:rgba(255,107,53,.3)">
+        <div class="arch-title" style="color:var(--oc)">🦞 Gateway</div>
+        <div class="arch-desc">Control plane<br>Port :18789<br>Quản lý tất cả</div>
+      </div>
+      <div class="arch-arrow">⟺</div>
+      <div class="arch-box" style="border-color:rgba(160,122,244,.3)">
+        <div class="arch-title" style="color:var(--sk)">🤖 AI Agent</div>
+        <div class="arch-desc">Claude · GPT · Gemini<br>Ollama (local)<br>OpenRouter</div>
+      </div>
+    </div>
+    <div class="info i-tip">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">Gateway là trung tâm điều phối.</strong> Nó nhận tin nhắn từ mọi channel, chuyển đến AI model, nhận phản hồi, và trả về đúng channel. Bạn chỉ cần chạy 1 Gateway để quản lý nhiều channel và nhiều AI models.</div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">So sánh với Claude / ChatGPT</div>
+    <table class="tbl">
+      <thead><tr><th></th><th>OpenClaw 🦞</th><th>Claude.ai / ChatGPT</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Nơi chat</strong></td><td>WhatsApp, Telegram, Discord... (ứng dụng của bạn)</td><td>Mở website hoặc app riêng</td></tr>
+        <tr><td><strong>Memory</strong></td><td>✅ Lâu dài, nhớ qua nhiều ngày/tuần</td><td>⚠️ Giới hạn theo session</td></tr>
+        <tr><td><strong>Thực thi lệnh</strong></td><td>✅ Chạy shell, cron, file, web</td><td>⚠️ Hạn chế, không có shell</td></tr>
+        <tr><td><strong>Tự động hoá</strong></td><td>✅ Cron 24/7, webhook, standing orders</td><td>❌ Không tự chạy background</td></tr>
+        <tr><td><strong>AI Model</strong></td><td>Bạn chọn: Claude, GPT, Gemini, Ollama local</td><td>Cố định theo platform</td></tr>
+        <tr><td><strong>Chi phí</strong></td><td>Trả tiền cho AI provider, Gateway miễn phí</td><td>Subscription theo platform</td></tr>
+        <tr><td><strong>Privacy</strong></td><td>✅ Self-hosted, data ở máy bạn</td><td>Data đến server của họ</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Nền tảng hỗ trợ — 20+ channels</div>
+    <div class="platforms">
+      <div class="plat"><span class="plat-icon">💬</span> Telegram</div>
+      <div class="plat"><span class="plat-icon">📱</span> WhatsApp</div>
+      <div class="plat"><span class="plat-icon">🎮</span> Discord</div>
+      <div class="plat"><span class="plat-icon">💬</span> iMessage</div>
+      <div class="plat"><span class="plat-icon">💼</span> Slack</div>
+      <div class="plat"><span class="plat-icon">📡</span> Signal</div>
+      <div class="plat"><span class="plat-icon">📧</span> SMS</div>
+      <div class="plat"><span class="plat-icon">🐦</span> Mattermost</div>
+      <div class="plat"><span class="plat-icon">🌐</span> Matrix</div>
+      <div class="plat"><span class="plat-icon">💬</span> LINE</div>
+      <div class="plat"><span class="plat-icon">🌐</span> WebChat</div>
+      <div class="plat"><span class="plat-icon">📞</span> IRC</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ INSTALL BANNER ════ -->
+<div class="cat-banner cb-ins">
+  <div class="cb-icon">⚙️</div>
+  <div>
+    <div class="cb-badge">CÀI ĐẶT</div>
+    <div class="cb-title">Phần 1 — Cài đặt &amp; Onboarding</div>
+    <div class="cb-sub">Yêu cầu hệ thống · Cài đặt nhanh · Cấu hình AI model · Gateway status</div>
+  </div>
+</div>
+
+<!-- ════ S1 — YÊU CẦU ════ -->
+<div class="section" id="s1">
+  <div class="sec-head">
+    <span class="sec-tag st-ins">CÀI ĐẶT</span>
+    <div><h2 class="sec-title">Yêu cầu hệ thống</h2>
+    <p class="sec-sub">Node.js, OS, API key, phần cứng tối thiểu</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Những thứ bạn cần trước khi cài</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">🟢</div><div class="card-title" style="color:var(--ch)">Node.js</div><div class="card-desc">Node 24 (khuyên dùng) hoặc Node 22.16+. Kiểm tra: <code>node --version</code></div></div>
+      <div class="card"><div class="card-icon">🔑</div><div class="card-title" style="color:var(--au)">API Key</div><div class="card-desc">Key từ Anthropic, OpenAI, Google AI, hoặc OpenRouter. Onboarding sẽ hướng dẫn.</div></div>
+      <div class="card"><div class="card-icon">💻</div><div class="card-title" style="color:var(--ins)">OS</div><div class="card-desc">macOS, Linux, Windows (WSL2 khuyên dùng), Docker. Hỗ trợ tất cả.</div></div>
+      <div class="card"><div class="card-icon">🌐</div><div class="card-title" style="color:var(--sk)">Internet</div><div class="card-desc">Kết nối để gọi AI API. Dùng Ollama nếu muốn hoàn toàn offline.</div></div>
+    </div>
+    <div class="info i-tip">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">Windows users:</strong> Dùng WSL2 để có trải nghiệm tốt nhất. Native Windows cũng được hỗ trợ nhưng WSL2 ổn định hơn, đặc biệt cho WhatsApp và Telegram channels. Xem hướng dẫn Windows trên docs.openclaw.ai.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S2 — CÀI ĐẶT ════ -->
+<div class="section" id="s2">
+  <div class="sec-head">
+    <span class="sec-tag st-ins">CÀI ĐẶT</span>
+    <div><h2 class="sec-title">Cài đặt &amp; Onboarding — 5 phút</h2>
+    <p class="sec-sub">Từ zero đến có AI agent chạy trong &lt;5 phút</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Bước 1 — Cài đặt OpenClaw Gateway</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Terminal — cài đặt OpenClaw</span><span class="cb-tag ct-ins">INSTALL</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt"># macOS / Linux — cách nhanh nhất</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">curl</span> <span class="sh-arg">-fsSL https://openclaw.ai/install.sh</span> <span class="sh-cmd">| bash</span>
+
+<span class="sh-cmt"># Windows PowerShell</span>
+<span class="sh-prompt">></span> <span class="sh-cmd">iwr</span> <span class="sh-arg">-useb https://openclaw.ai/install.ps1</span> <span class="sh-cmd">| iex</span>
+
+<span class="sh-cmt"># Hoặc dùng npm (nếu đã có Node)</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">npm install</span> <span class="sh-flag">-g</span> <span class="sh-arg">openclaw@latest</span>
+<span class="sh-cmt"># hoặc pnpm:</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">pnpm add</span> <span class="sh-flag">-g</span> <span class="sh-arg">openclaw@latest</span>
+
+<span class="sh-cmt"># Docker (isolate hoàn toàn)</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">docker run</span> <span class="sh-flag">-d</span> <span class="sh-flag">--name</span> <span class="sh-arg">openclaw</span> \
+    <span class="sh-flag">-p</span> <span class="sh-arg">18789:18789</span> \
+    <span class="sh-flag">-v</span> <span class="sh-arg">~/.openclaw:/home/node/.openclaw</span> \
+    <span class="sh-arg">openclaw/openclaw:latest</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Bước 2 — Chạy Onboarding Wizard</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Terminal — onboarding + verify + dashboard</span><span class="cb-tag ct-ins">ONBOARD</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt"># Chạy wizard cấu hình (2 phút) — install daemon tự khởi động cùng OS</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw onboard</span> <span class="sh-flag">--install-daemon</span>
+
+<span class="sh-cmt"># Wizard sẽ hỏi bạn:</span>
+<span class="sh-cmt">#   1. Chọn AI provider (Anthropic, OpenAI, Google, Ollama...)</span>
+<span class="sh-cmt">#   2. Nhập API key</span>
+<span class="sh-cmt">#   3. Chọn model (claude-opus-4-6, gpt-4o...)</span>
+<span class="sh-cmt">#   4. Cấu hình workspace directory</span>
+
+<span class="sh-cmt"># Kiểm tra Gateway đang chạy (port 18789)</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw gateway status</span>
+<span class="c-g">✓ Gateway listening on port 18789</span>
+<span class="c-g">✓ Agent: claude-sonnet-4-6 (Anthropic)</span>
+<span class="c-g">✓ Workspace: ~/.openclaw/workspace</span>
+
+<span class="sh-cmt"># Mở Control UI trong browser</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw dashboard</span>
+<span class="c-g">✓ Opening http://localhost:18789/dashboard</span>
+
+<span class="sh-cmt"># Gửi tin nhắn test từ terminal</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw chat</span> <span class="sh-str">"Xin chào! Bạn là ai?"</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cấu trúc thư mục sau cài đặt</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">~/.openclaw/ — cấu trúc workspace</span><span class="cb-tag ct-y">STRUCTURE</span></div>
+      <div class="cb-body"><pre><span class="c-t">~/.openclaw/</span>
+├── <span class="c-y">openclaw.json</span>        <span class="cm"># File cấu hình chính</span>
+├── <span class="c-t">workspace/</span>            <span class="cm"># Workspace mặc định của agent</span>
+│   ├── <span class="c-t">skills/</span>           <span class="cm"># Custom skills của bạn</span>
+│   ├── <span class="c-t">TOOLS.md</span>          <span class="cm"># Ghi lại cấu hình tools</span>
+│   └── <span class="c-g">memory.md</span>         <span class="cm"># Memory của agent</span>
+├── <span class="c-t">skills/</span>               <span class="cm"># Shared skills (tất cả agents)</span>
+├── <span class="c-t">cron/</span>
+│   └── <span class="c-g">jobs.json</span>         <span class="cm"># Cron jobs đã tạo</span>
+└── <span class="c-t">logs/</span>                 <span class="cm"># Gateway logs</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S3 — MODEL CONFIG ════ -->
+<div class="section" id="s3">
+  <div class="sec-head">
+    <span class="sec-tag st-ins">CÀI ĐẶT</span>
+    <div><h2 class="sec-title">Cấu hình AI Model</h2>
+    <p class="sec-sub">openclaw.json — chọn model, provider, cấu hình tools</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">openclaw.json — File cấu hình chính</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">~/.openclaw/openclaw.json — cấu hình đầy đủ</span><span class="cb-tag ct-ins">CONFIG</span></div>
+      <div class="cb-body"><pre>{
+  <span class="c-b">"model"</span>: {
+    <span class="c-b">"provider"</span>: <span class="st-s">"anthropic"</span>,          <span class="cm">// anthropic | openai | google | ollama</span>
+    <span class="c-b">"name"</span>:     <span class="st-s">"claude-sonnet-4-6"</span>    <span class="cm">// tên model cụ thể</span>
+  },
+
+  <span class="c-b">"auth"</span>: {
+    <span class="c-b">"type"</span>: <span class="st-s">"token"</span>,
+    <span class="c-b">"token"</span>: <span class="st-s">"your-secret-token-123"</span>   <span class="cm">// ai có token này mới chat được</span>
+  },
+
+  <span class="c-b">"tools"</span>: {
+    <span class="c-b">"allow"</span>: [<span class="st-s">"group:fs"</span>, <span class="st-s">"browser"</span>, <span class="st-s">"web_search"</span>, <span class="st-s">"exec"</span>],
+    <span class="c-b">"deny"</span>:  []                        <span class="cm">// deny luôn thắng allow</span>
+  },
+
+  <span class="c-b">"workspace"</span>: <span class="st-s">"~/.openclaw/workspace"</span>,
+
+  <span class="cm">// Ollama — dùng AI hoàn toàn offline</span>
+  <span class="c-b">"providers"</span>: {
+    <span class="c-b">"ollama"</span>: {
+      <span class="c-b">"baseUrl"</span>: <span class="st-s">"http://localhost:11434"</span>,
+      <span class="c-b">"model"</span>:   <span class="st-s">"llama3.3:70b"</span>
+    }
+  }
+}</pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Các model provider được hỗ trợ</div>
+    <table class="tbl">
+      <thead><tr><th>Provider</th><th>Model ví dụ</th><th>API Key</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--ch)">Anthropic</strong></td><td><code>claude-opus-4-6</code>, <code>claude-sonnet-4-6</code></td><td>anthropic.com</td><td>✅ Tốt nhất cho agent tasks phức tạp</td></tr>
+        <tr><td><strong style="color:var(--ins)">OpenAI</strong></td><td><code>gpt-4o</code>, <code>o3</code></td><td>platform.openai.com</td><td>Phổ biến, nhiều tài liệu</td></tr>
+        <tr><td><strong style="color:var(--au)">Google</strong></td><td><code>gemini-2.0-flash</code></td><td>aistudio.google.com</td><td>Context window lớn</td></tr>
+        <tr><td><strong style="color:var(--sk)">OpenRouter</strong></td><td>200+ models</td><td>openrouter.ai</td><td>Một key dùng nhiều model</td></tr>
+        <tr><td><strong style="color:var(--teal)">Ollama</strong></td><td><code>llama3.3</code>, <code>qwen2.5</code></td><td>Không cần</td><td>✅ Hoàn toàn offline, free</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ CHANNELS BANNER ════ -->
+<div class="cat-banner cb-ch">
+  <div class="cb-icon">💬</div>
+  <div>
+    <div class="cb-badge">CHANNELS</div>
+    <div class="cb-title">Phần 2 — Kết nối Messaging Channels</div>
+    <div class="cb-sub">Telegram · WhatsApp · Discord · iMessage · WebChat</div>
+  </div>
+</div>
+
+<!-- ════ S4 — TELEGRAM ════ -->
+<div class="section" id="s4">
+  <div class="sec-head">
+    <span class="sec-tag st-ch">CHANNEL</span>
+    <div><h2 class="sec-title">Telegram — Channel dễ setup nhất</h2>
+    <p class="sec-sub">BotFather, bot token, kết nối với Gateway, group chat</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tạo Telegram Bot trong 2 phút</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Mở Telegram, tìm @BotFather</h4><p>Nhắn <code>/newbot</code> → đặt tên bot → nhận <strong>Bot Token</strong> dạng <code>7823456789:AAH_xxxxx</code>. Lưu token này lại.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Thêm Telegram channel vào OpenClaw</h4>
+          <div class="cblock" style="margin-top:8px">
+            <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Kết nối Telegram Bot</span><span class="cb-tag ct-ch">TELEGRAM</span></div>
+            <div class="cb-body"><pre><span class="sh-cmt"># Qua CLI</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw channel add telegram</span> \
+    <span class="sh-flag">--token</span> <span class="sh-str">"7823456789:AAH_xxxxxxxxxxxxxxx"</span>
+
+<span class="sh-cmt"># Hoặc thêm vào openclaw.json:</span>
+<span class="c-b">"channels"</span>: {
+  <span class="c-b">"telegram"</span>: {
+    <span class="c-b">"enabled"</span>: <span class="kw">true</span>,
+    <span class="c-b">"token"</span>:   <span class="st-s">"7823456789:AAH_xxxxxxxxxxxxxxx"</span>
+  }
+}</pre></div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B"><h4>Restart Gateway &amp; Chat!</h4><p>Chạy <code>openclaw gateway restart</code> → tìm bot trên Telegram → nhắn <code>/start</code> → nhập auth token khi được hỏi → chat thoải mái!</p></div>
+      </div>
+    </div>
+    <div class="sub-title">Ví dụ cuộc trò chuyện thực tế</div>
+    <div class="chat">
+      <div><div class="bubble-label lbl-user">Bạn (Telegram)</div><div class="bubble bubble-user">Tóm tắt 5 email mới nhất của tôi và nói xem có gì urgent không</div></div>
+      <div><div class="bubble-label lbl-bot">🦞 OpenClaw</div><div class="bubble bubble-bot">Đã đọc 5 email mới nhất:<br><br>🚨 <strong style="color:var(--text)">Urgent</strong>: Email từ CEO (10:23) yêu cầu báo cáo Q1 trước 3PM hôm nay.<br>📋 3 email newsletter thông thường — không urgent<br>✅ 1 email confirm đặt hàng<br><br>Muốn tôi soạn báo cáo Q1 không?</div></div>
+      <div><div class="bubble-label lbl-user">Bạn</div><div class="bubble bubble-user">Có, soạn báo cáo Q1 từ file spreadsheet trong folder /reports</div></div>
+      <div><div class="bubble-label lbl-bot">🦞 OpenClaw</div><div class="bubble bubble-bot">Đang đọc files trong /reports... 📂<br>Tìm thấy Q1_2026_data.xlsx — đang phân tích...<br><br>✅ Đã soạn xong báo cáo Q1. File đã lưu tại /reports/Q1_Report_draft.docx<br>Revenue: +23% YoY | Highlight: APAC market tăng mạnh nhất.<br><br>Muốn tôi gửi thẳng cho CEO không?</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S5 — WHATSAPP & DISCORD ════ -->
+<div class="section" id="s5">
+  <div class="sec-head">
+    <span class="sec-tag st-ch">CHANNEL</span>
+    <div><h2 class="sec-title">WhatsApp &amp; Discord</h2>
+    <p class="sec-sub">WhatsApp Web linking, Discord bot token, group mention activation</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">WhatsApp — Dùng WhatsApp Web (Baileys)</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Kết nối WhatsApp — quét QR code</span><span class="cb-tag ct-ch">WHATSAPP</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt"># Thêm WhatsApp channel</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw channel add whatsapp</span>
+
+<span class="sh-cmt"># Gateway hiển thị QR code trong terminal
+# Mở WhatsApp → Settings → Linked Devices → Link a Device
+# Quét QR code → Done!</span>
+
+<span class="sh-cmt"># Config trong openclaw.json</span>
+<span class="c-b">"channels"</span>: {
+  <span class="c-b">"whatsapp"</span>: {
+    <span class="c-b">"enabled"</span>: <span class="kw">true</span>
+    <span class="cm">// Sau khi quét QR, session được lưu tự động</span>
+  }
+}</pre></div>
+    </div>
+    <div class="info i-warn">
+      <span class="info-ico">⚠️</span>
+      <div><strong style="color:var(--text)">WhatsApp chạy song song với điện thoại.</strong> Bot dùng WhatsApp Web protocol — phone vẫn hoạt động bình thường. Nếu mất kết nối, chạy lại <code>openclaw channel connect whatsapp</code> để quét QR mới. Không dùng tài khoản WhatsApp Business chính thức (khác protocol).</div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Discord — Tạo Bot trên Discord Developer Portal</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Discord Bot Token + kết nối OpenClaw</span><span class="cb-tag ct-ch">DISCORD</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt"># 1. Tạo app tại discord.com/developers/applications
+# 2. Bot section → Reset Token → copy token
+# 3. OAuth2 → Bot permissions: Send Messages, Read History
+# 4. Invite bot vào server của bạn</span>
+
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw channel add discord</span> \
+    <span class="sh-flag">--token</span> <span class="sh-str">"MTIzNDU2Nzg5.XXXXXX.xxxxxxxxxxxxxxxxxxxxxxx"</span>
+
+<span class="sh-cmt"># Trong group Discord: mention bot để kích hoạt</span>
+<span class="sh-cmt"># @YourBot Tóm tắt channel này trong 24h qua</span>
+
+<span class="sh-cmt"># Hoặc chat riêng với bot (DM) — luôn active không cần mention</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S6 — WEBCHAT ════ -->
+<div class="section" id="s6">
+  <div class="sec-head">
+    <span class="sec-tag st-ch">CHANNEL</span>
+    <div><h2 class="sec-title">WebChat &amp; Control UI</h2>
+    <p class="sec-sub">Giao diện web tích hợp, control panel, Canvas</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">WebChat — Browser interface built-in</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Truy cập WebChat và Control UI</span><span class="cb-tag ct-ch">WEBCHAT</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt"># Mở Control UI (dashboard + chat)</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw dashboard</span>
+<span class="c-g"># → http://localhost:18789/dashboard</span>
+
+<span class="sh-cmt"># Direct chat URL</span>
+<span class="c-g"># → http://localhost:18789/chat</span>
+
+<span class="sh-cmt"># Remote access — expose qua ngrok/cloudflare tunnel</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">ngrok http</span> <span class="sh-arg">18789</span>
+<span class="c-g"># → https://abc123.ngrok.io (public URL)</span>
+
+<span class="sh-cmt"># Thêm auth để bảo mật khi public</span>
+<span class="c-b">"server"</span>: {
+  <span class="c-b">"host"</span>: <span class="st-s">"0.0.0.0"</span>,        <span class="cm">// 0.0.0.0 = nhận từ mọi IP</span>
+  <span class="c-b">"port"</span>: <span class="nm">18789</span>
+},
+<span class="c-b">"auth"</span>: {
+  <span class="c-b">"type"</span>:  <span class="st-s">"token"</span>,
+  <span class="c-b">"token"</span>: <span class="st-s">"my-secret-token"</span>  <span class="cm">// phải nhập khi mở WebChat</span>
+}</pre></div>
+    </div>
+    <div class="rw-box rw-ch">
+      <div class="rw-label">💬 WebChat · Real-world tip</div>
+      <div class="rw-title">Canvas — Live rendering trong WebChat</div>
+      <div class="rw-body">WebChat hỗ trợ <strong style="color:var(--text)">Canvas</strong> — agent có thể render HTML, biểu đồ, code preview trực tiếp trong chat. Hỏi agent: <em>"Vẽ biểu đồ doanh thu Q1 từ data trong /reports/q1.csv"</em> → Canvas hiển thị chart ngay trong browser. Rất hữu ích khi làm việc với dữ liệu.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ SKILLS BANNER ════ -->
+<div class="cat-banner cb-sk">
+  <div class="cb-icon">🛠️</div>
+  <div>
+    <div class="cb-badge">SKILLS &amp; TOOLS</div>
+    <div class="cb-title">Phần 3 — Tools, Skills &amp; Plugins</div>
+    <div class="cb-sub">Built-in tools · ClawHub · Tự tạo Skill · Plugin system</div>
+  </div>
+</div>
+
+<!-- ════ S7 — TOOLS ════ -->
+<div class="section" id="s7">
+  <div class="sec-head">
+    <span class="sec-tag st-sk">TOOLS</span>
+    <div><h2 class="sec-title">Built-in Tools — Agent có thể làm gì</h2>
+    <p class="sec-sub">exec, browser, web_search, file I/O, cron, image — tool đầy đủ</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Bảng Tools Built-in</div>
+    <table class="tbl">
+      <thead><tr><th>Tool</th><th>Làm gì</th><th>Ví dụ lệnh chat</th></tr></thead>
+      <tbody>
+        <tr><td><code>exec</code></td><td>Chạy lệnh shell, script</td><td><em>"Chạy git pull và cho tôi biết kết quả"</em></td></tr>
+        <tr><td><code>browser</code></td><td>Điều khiển Chrome: navigate, click, screenshot</td><td><em>"Vào vnexpress.net và tóm tắt 5 tin đầu"</em></td></tr>
+        <tr><td><code>web_search</code></td><td>Tìm kiếm web, fetch nội dung trang</td><td><em>"Tìm giá iPhone 16 Pro Max hiện tại"</em></td></tr>
+        <tr><td><code>read/write/edit</code></td><td>Đọc/ghi/sửa file trong workspace</td><td><em>"Đọc file requirements.txt và giải thích"</em></td></tr>
+        <tr><td><code>apply_patch</code></td><td>Áp dụng code patch nhiều hunk</td><td><em>"Apply patch này vào codebase"</em></td></tr>
+        <tr><td><code>message</code></td><td>Gửi message sang channel khác</td><td>Agent tự gửi kết quả về Telegram</td></tr>
+        <tr><td><code>cron</code></td><td>Tạo/quản lý scheduled jobs</td><td><em>"Nhắc tôi lúc 8h sáng hàng ngày"</em></td></tr>
+        <tr><td><code>image</code></td><td>Phân tích hoặc generate hình ảnh</td><td><em>"Phân tích biểu đồ trong ảnh này"</em></td></tr>
+        <tr><td><code>canvas</code></td><td>Render content trong WebChat</td><td>Hiển thị chart, HTML preview</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Kiểm soát Tool với Allow/Deny Lists</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">openclaw.json — kiểm soát tool permissions</span><span class="cb-tag ct-sk">TOOLS CONFIG</span></div>
+      <div class="cb-body"><pre><span class="c-b">"tools"</span>: {
+  <span class="cm">// Profile đặt base allowlist</span>
+  <span class="c-b">"profile"</span>: <span class="st-s">"full"</span>,      <span class="cm">// full | coding | messaging | minimal</span>
+
+  <span class="cm">// Cho phép thêm các tool/group</span>
+  <span class="c-b">"allow"</span>: [
+    <span class="st-s">"group:fs"</span>,           <span class="cm">// read, write, edit, apply_patch</span>
+    <span class="st-s">"group:web"</span>,          <span class="cm">// web_search, web_fetch</span>
+    <span class="st-s">"group:runtime"</span>,      <span class="cm">// exec, bash, process</span>
+    <span class="st-s">"browser"</span>,            <span class="cm">// Chrome automation</span>
+    <span class="st-s">"image"</span>               <span class="cm">// image analysis/generation</span>
+  ],
+
+  <span class="cm">// Cấm — deny luôn thắng allow</span>
+  <span class="c-b">"deny"</span>: [
+    <span class="st-s">"exec"</span>                <span class="cm">// cấm chạy shell (an toàn hơn)</span>
+  ],
+
+  <span class="cm">// Hạn chế theo provider cụ thể</span>
+  <span class="c-b">"byProvider"</span>: {
+    <span class="c-b">"google"</span>: { <span class="c-b">"profile"</span>: <span class="st-s">"minimal"</span> }
+  }
+}
+
+<span class="cm">// Tool Groups có sẵn:</span>
+<span class="cm">// group:runtime   → exec, bash, process</span>
+<span class="cm">// group:fs        → read, write, edit, apply_patch</span>
+<span class="cm">// group:sessions  → sessions_list, sessions_history, sessions_send</span>
+<span class="cm">// group:memory    → memory_search, memory_get</span>
+<span class="cm">// group:web       → web_search, web_fetch</span>
+<span class="cm">// group:ui        → browser, canvas</span>
+<span class="cm">// group:messaging → message</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S8 — SKILLS & CLAWHUB ════ -->
+<div class="section" id="s8">
+  <div class="sec-head">
+    <span class="sec-tag st-sk">SKILLS</span>
+    <div><h2 class="sec-title">Skills &amp; ClawHub</h2>
+    <p class="sec-sub">Skills là gì, cài từ ClawHub, quản lý skills</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Skills — Dạy agent cách dùng tool hiệu quả hơn</div>
+    <p><strong>Skills</strong> là file <code>SKILL.md</code> được inject vào system prompt, dạy agent <em>khi nào và cách nào</em> dùng tools. Tools = "có thể làm gì", Skills = "làm như thế nào". Ví dụ: skill "morning-brief" dạy agent cách tổng hợp email + calendar + news vào 1 báo cáo sáng.</p>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">📚</div><div class="card-title" style="color:var(--sk)">Bundled Skills</div><div class="card-desc">Tích hợp sẵn khi cài OpenClaw. Skills cơ bản như morning-brief, code-review, summarize.</div></div>
+      <div class="card"><div class="card-icon">🌐</div><div class="card-title" style="color:var(--ch)">ClawHub Skills</div><div class="card-desc">1700+ skills từ community tại clawhub.com. Cài bằng lệnh <code>clawhub install</code>.</div></div>
+      <div class="card"><div class="card-icon">✏️</div><div class="card-title" style="color:var(--au)">Custom Skills</div><div class="card-desc">Tự viết SKILL.md cho workflow riêng. Đặt trong workspace/skills/ là xong.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cài Skills từ ClawHub</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">clawhub — install, update, list skills</span><span class="cb-tag ct-sk">CLAWHUB</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt"># Cài 1 skill cụ thể (vào workspace/skills/)</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">clawhub install</span> <span class="sh-arg">morning-brief</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">clawhub install</span> <span class="sh-arg">github-assistant</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">clawhub install</span> <span class="sh-arg">google-calendar</span>
+
+<span class="sh-cmt"># Tìm kiếm skills theo từ khoá</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">clawhub search</span> <span class="sh-arg">email</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">clawhub search</span> <span class="sh-arg">productivity</span>
+
+<span class="sh-cmt"># Xem skills đã cài</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">clawhub list</span>
+
+<span class="sh-cmt"># Update tất cả skills</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">clawhub update</span> <span class="sh-flag">--all</span>
+
+<span class="sh-cmt"># Sync — scan + publish changes</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">clawhub sync</span> <span class="sh-flag">--all</span>
+
+<span class="sh-cmt"># Toggle skill trong config</span>
+<span class="c-b">"skills"</span>: {
+  <span class="c-b">"entries"</span>: {
+    <span class="c-b">"morning-brief"</span>: { <span class="c-b">"enabled"</span>: <span class="kw">true</span> },
+    <span class="c-b">"github-assistant"</span>: {
+      <span class="c-b">"enabled"</span>: <span class="kw">true</span>,
+      <span class="c-b">"apiKey"</span>: <span class="st-s">"ghp_xxx"</span>  <span class="cm">// skill cần GitHub token</span>
+    }
+  }
+}</pre></div>
+    </div>
+    <div class="rw-box rw-sk">
+      <div class="rw-label">🟣 Skills · Popular trên ClawHub</div>
+      <div class="rw-title">1700+ Skills community — từ cơ bản đến nâng cao</div>
+      <div class="rw-body">
+        <strong style="color:var(--text)">Productivity:</strong> morning-brief, email-manager, calendar-sync, todoist-integration<br>
+        <strong style="color:var(--text)">Dev:</strong> github-assistant, code-review, bug-tracker, jira-integration<br>
+        <strong style="color:var(--text)">Content:</strong> youtube-summarizer, reddit-digest, arxiv-reader, blog-writer<br>
+        <strong style="color:var(--text)">Finance:</strong> crypto-tracker, earnings-monitor, invoice-processor<br>
+        <strong style="color:var(--text)">Home:</strong> smart-home, family-calendar, grocery-manager
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S9 — TỰ TẠO SKILL ════ -->
+<div class="section" id="s9">
+  <div class="sec-head">
+    <span class="sec-tag st-sk">SKILLS</span>
+    <div><h2 class="sec-title">Tự Tạo Custom Skill</h2>
+    <p class="sec-sub">SKILL.md format, frontmatter, ví dụ skill thực tế</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cấu trúc SKILL.md — Format chuẩn</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">workspace/skills/daily-standup/SKILL.md — Ví dụ skill tự viết</span><span class="cb-tag ct-sk">SKILL.MD</span></div>
+      <div class="cb-body"><pre><span class="cm">---</span>
+<span class="yk">name</span>: <span class="yv">daily-standup</span>
+<span class="yk">description</span>: <span class="yv">Tự động gửi daily standup report mỗi sáng</span>
+<span class="yk">metadata</span>: <span class="yv">{"openclaw": {"emoji": "📋", "requires": {"env": ["JIRA_TOKEN"]}}}</span>
+<span class="cm">---</span>
+
+<span class="cm"># Daily Standup Skill</span>
+
+Khi người dùng yêu cầu "daily standup" hoặc "báo cáo sáng":
+
+<span class="cm">## Quy trình:</span>
+1. Dùng `web_fetch` để lấy Jira tickets assigned cho user hôm nay
+2. Dùng `read` để đọc file notes từ hôm qua tại `{baseDir}/yesterday.md`
+3. Dùng `web_search` để check breaking news liên quan đến dự án
+4. Tổng hợp thành format standup:
+
+```
+✅ Hôm qua làm gì?
+🎯 Hôm nay plan gì?
+🚫 Có blocker gì không?
+```
+
+5. Gửi qua `message` đến channel Slack team nếu user yêu cầu
+
+<span class="cm">## Lưu ý:</span>
+- Luôn hỏi user có muốn gửi cho team không (không tự gửi)
+- Format ngắn gọn &lt; 200 chữ
+- Highlight item urgent bằng 🚨</pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Ví dụ skill thực tế — Theo dõi giá cổ phiếu</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">workspace/skills/stock-tracker/SKILL.md</span><span class="cb-tag ct-au">EXAMPLE</span></div>
+      <div class="cb-body"><pre><span class="cm">---</span>
+<span class="yk">name</span>: <span class="yv">stock-tracker</span>
+<span class="yk">description</span>: <span class="yv">Theo dõi giá cổ phiếu và cảnh báo khi biến động mạnh</span>
+<span class="yk">metadata</span>: <span class="yv">{"openclaw": {"emoji": "📈", "requires": {"bins": ["curl"]}}}</span>
+<span class="cm">---</span>
+
+<span class="cm"># Stock Tracker Skill</span>
+
+Khi user hỏi về giá cổ phiếu hoặc yêu cầu theo dõi:
+
+1. Dùng `web_fetch` gọi API để lấy giá: `https://query1.finance.yahoo.com/v8/finance/chart/{TICKER}`
+2. Parse JSON response để lấy: current price, change%, volume
+3. So sánh với giá user đặt alert (lưu trong `{baseDir}/watchlist.json`)
+4. Nếu biến động > 5%: gửi alert với emoji 📈/📉
+
+Watchlist format trong watchlist.json:
+```json
+[
+  {"ticker": "VIC", "alert_threshold": 5, "buy_price": 45000},
+  {"ticker": "VNM", "alert_threshold": 3, "buy_price": 72000}
+]
+```
+
+Khi user nói "thêm VIC vào watchlist với alert 5%" → cập nhật watchlist.json.
+Khi user nói "xem watchlist" → fetch giá hiện tại cho tất cả và so sánh với buy_price.</pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S10 — PLUGINS ════ -->
+<div class="section" id="s10">
+  <div class="sec-head">
+    <span class="sec-tag st-sk">PLUGINS</span>
+    <div><h2 class="sec-title">Plugins — Mở rộng khả năng</h2>
+    <p class="sec-sub">Cài plugin, cấu hình, plugin phổ biến</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cài và quản lý Plugins</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Cài plugin từ npm + cấu hình</span><span class="cb-tag ct-sk">PLUGIN</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt"># Cài plugin từ npm</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">npm install</span> <span class="sh-flag">-g</span> <span class="sh-arg">@openclaw/plugin-google-workspace</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">npm install</span> <span class="sh-flag">-g</span> <span class="sh-arg">@openclaw/plugin-notion</span>
+
+<span class="sh-cmt"># Thêm plugin vào config</span>
+<span class="c-b">"plugins"</span>: [
+  {
+    <span class="c-b">"name"</span>:    <span class="st-s">"@openclaw/plugin-google-workspace"</span>,
+    <span class="c-b">"enabled"</span>: <span class="kw">true</span>,
+    <span class="c-b">"config"</span>:  {
+      <span class="c-b">"clientId"</span>:     <span class="st-s">"xxx.apps.googleusercontent.com"</span>,
+      <span class="c-b">"clientSecret"</span>: <span class="st-s">"GOCSPX-xxx"</span>
+    }
+  },
+  {
+    <span class="c-b">"name"</span>:    <span class="st-s">"@openclaw/plugin-lobster"</span>,  <span class="cm">// workflow runtime</span>
+    <span class="c-b">"enabled"</span>: <span class="kw">true</span>
+  }
+]</pre></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-icon">📧</div><div class="card-title" style="color:var(--ch)">Google Workspace</div><div class="card-desc">Gmail, Google Calendar, Google Docs, Sheets, Drive. Đọc/gửi email, tạo events, edit docs.</div></div>
+      <div class="card"><div class="card-icon">📝</div><div class="card-title" style="color:var(--sk)">Notion</div><div class="card-desc">Đọc/ghi Notion pages và databases. Sync tasks, notes tự động.</div></div>
+      <div class="card"><div class="card-icon">🦞</div><div class="card-title" style="color:var(--oc)">Lobster</div><div class="card-desc">Typed workflow runtime với resumable approvals. Chạy workflow phức tạp nhiều bước.</div></div>
+      <div class="card"><div class="card-icon">📊</div><div class="card-title" style="color:var(--au)">OpenProse</div><div class="card-desc">Markdown-first workflow orchestration. Tạo và quản lý long-form content.</div></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ AUTOMATION BANNER ════ -->
+<div class="cat-banner cb-au">
+  <div class="cb-icon">⏰</div>
+  <div>
+    <div class="cb-badge">AUTOMATION</div>
+    <div class="cb-title">Phần 4 — Automation 24/7</div>
+    <div class="cb-sub">Cron Jobs · Standing Orders · Webhooks · Use Cases thực tế</div>
+  </div>
+</div>
+
+<!-- ════ S11 — CRON JOBS ════ -->
+<div class="section" id="s11">
+  <div class="sec-head">
+    <span class="sec-tag st-au">AUTOMATION</span>
+    <div><h2 class="sec-title">Cron Jobs &amp; Scheduler</h2>
+    <p class="sec-sub">Tạo lịch tự động, one-shot reminder, recurring jobs, gửi kết quả về channel</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Cách hoạt động — 3 thành phần</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">📅</div><div class="card-title" style="color:var(--au)">Schedule</div><div class="card-desc">Khi nào chạy: <code>at</code> (một lần), <code>every</code> (định kỳ ms), <code>cron</code> (cron expression 5-6 field).</div></div>
+      <div class="card"><div class="card-icon">💬</div><div class="card-title" style="color:var(--au)">Payload</div><div class="card-desc">Làm gì: <code>systemEvent</code> (inject vào main session) hoặc <code>agentTurn</code> (isolated session riêng).</div></div>
+      <div class="card"><div class="card-icon">📤</div><div class="card-title" style="color:var(--au)">Delivery</div><div class="card-desc">Kết quả đi đâu: <code>announce</code> (gửi về channel), <code>webhook</code> (POST đến URL), <code>none</code>.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Ví dụ thực tế — Các lệnh Cron hay dùng</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">openclaw cron add — các pattern phổ biến</span><span class="cb-tag ct-au">CRON</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt"># ── One-shot Reminder ──────────────────────────────────────────</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw cron add</span> \
+    <span class="sh-flag">--name</span>   <span class="sh-str">"Meeting reminder"</span> \
+    <span class="sh-flag">--at</span>     <span class="sh-str">"2026-03-25T09:00:00+07:00"</span> \
+    <span class="sh-flag">--session</span> <span class="sh-arg">main</span> \
+    <span class="sh-flag">--system-event</span> <span class="sh-str">"Nhắc user: họp team lúc 9h sáng hôm nay!"</span> \
+    <span class="sh-flag">--wake</span>   <span class="sh-arg">now</span>
+
+<span class="sh-cmt"># ── Daily morning brief lúc 7:30 sáng (gửi về Telegram) ────────</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw cron add</span> \
+    <span class="sh-flag">--name</span>    <span class="sh-str">"Morning Brief"</span> \
+    <span class="sh-flag">--cron</span>    <span class="sh-str">"30 7 * * *"</span> \
+    <span class="sh-flag">--tz</span>      <span class="sh-str">"Asia/Ho_Chi_Minh"</span> \
+    <span class="sh-flag">--session</span> <span class="sh-arg">isolated</span> \
+    <span class="sh-flag">--message</span> <span class="sh-str">"Tạo morning brief: thời tiết HN, 3 tin tức AI hot nhất, calendar hôm nay, priority tasks"</span> \
+    <span class="sh-flag">--announce</span> \
+    <span class="sh-flag">--channel</span> <span class="sh-arg">telegram</span>
+
+<span class="sh-cmt"># ── Check GitHub issues mỗi 4 tiếng ───────────────────────────</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw cron add</span> \
+    <span class="sh-flag">--name</span>    <span class="sh-str">"GitHub Issues Check"</span> \
+    <span class="sh-flag">--every</span>   <span class="sh-arg">14400000</span> \        <span class="sh-cmt"># 4h = 4*60*60*1000 ms</span>
+    <span class="sh-flag">--session</span> <span class="sh-arg">isolated</span> \
+    <span class="sh-flag">--message</span> <span class="sh-str">"Check GitHub: có PR nào chờ review không? Tóm tắt và gửi về Telegram"</span> \
+    <span class="sh-flag">--announce</span>
+
+<span class="sh-cmt"># ── Xem danh sách cron jobs ────────────────────────────────────</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw cron list</span>
+
+<span class="sh-cmt"># ── Run ngay một job để test ───────────────────────────────────</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw cron run</span> <span class="sh-arg">&lt;job-id&gt;</span>
+
+<span class="sh-cmt"># ── Xem lịch sử chạy của job ──────────────────────────────────</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw cron runs</span> <span class="sh-flag">--id</span> <span class="sh-arg">&lt;job-id&gt;</span>
+
+<span class="sh-cmt"># ── Xóa job ───────────────────────────────────────────────────</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">openclaw cron remove</span> <span class="sh-arg">&lt;job-id&gt;</span></pre></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Tạo Cron bằng Chat — Cách đơn giản nhất</div>
+    <div class="chat">
+      <div><div class="bubble-label lbl-user">Bạn (Telegram)</div><div class="bubble bubble-user">Cứ 8h sáng mỗi ngày, tóm tắt email chưa đọc và gửi cho tôi qua đây</div></div>
+      <div><div class="bubble-label lbl-bot">🦞 OpenClaw</div><div class="bubble bubble-bot">Đã tạo cron job:<br>⏰ Chạy lúc 08:00 mỗi ngày (Asia/Ho_Chi_Minh)<br>📧 Tóm tắt unread emails → gửi về Telegram<br>🆔 Job ID: <code>cron_abc123</code><br><br>Muốn tôi chạy thử ngay bây giờ không?</div></div>
+      <div><div class="bubble-label lbl-user">Bạn</div><div class="bubble bubble-user">Chạy thử đi</div></div>
+      <div><div class="bubble-label lbl-bot">🦞 OpenClaw</div><div class="bubble bubble-bot">📧 <strong style="color:var(--text)">Email tóm tắt — 23/3/2026</strong><br><br>🔴 Urgent (2): CEO meeting request, Client complaint<br>🟡 Action needed (5): 3 PRs review, 2 invoices<br>📋 FYI (12): newsletters, notifications<br><br>Xem chi tiết email nào?</div></div>
+    </div>
+    <div class="info i-ok">
+      <span class="info-ico">✅</span>
+      <div><strong style="color:var(--text)">Cron job được lưu persistent.</strong> Jobs lưu tại <code>~/.openclaw/cron/jobs.json</code> — restart Gateway không mất jobs. Chỉnh sửa file khi Gateway đã dừng, hoặc dùng CLI/chat để thay đổi an toàn.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S12 — STANDING ORDERS ════ -->
+<div class="section" id="s12">
+  <div class="sec-head">
+    <span class="sec-tag st-au">AUTOMATION</span>
+    <div><h2 class="sec-title">Standing Orders — Rules luôn áp dụng</h2>
+    <p class="sec-sub">Quy tắc tự động không cần nhắc lại, heartbeat, hooks</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Standing Orders — Dạy agent hành vi mặc định</div>
+    <p>Standing Orders là những <strong>quy tắc cố định</strong> được inject vào mọi session. Agent tự động làm mà không cần bạn nhắc. Lưu trong <code>workspace/STANDING_ORDERS.md</code>.</p>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">workspace/STANDING_ORDERS.md — Ví dụ thực tế</span><span class="cb-tag ct-au">STANDING ORDERS</span></div>
+      <div class="cb-body"><pre><span class="cm"># Standing Orders — Quy tắc cố định</span>
+
+<span class="cm">## Ngôn ngữ và phong cách</span>
+- Luôn trả lời bằng tiếng Việt, trừ khi tôi dùng tiếng Anh
+- Ngắn gọn, dùng emoji để dễ đọc trên mobile
+- Dùng bullet points, không viết đoạn văn dài
+
+<span class="cm">## Quyết định tự động — KHÔNG hỏi lại khi:</span>
+- Tóm tắt nội dung: tự làm luôn
+- Tìm kiếm web: tự tìm không cần xác nhận
+- Đọc files trong workspace: tự đọc
+
+<span class="cm">## LUÔN hỏi xác nhận trước khi:</span>
+- Gửi email hoặc tin nhắn thay tôi
+- Xóa bất kỳ file hoặc dữ liệu nào
+- Đặt lịch hoặc mua thứ gì
+
+<span class="cm">## Preferences cá nhân</span>
+- Tôi ở Hà Nội, timezone Asia/Ho_Chi_Minh
+- Ngày làm việc: Thứ 2 - Thứ 6
+- Ưu tiên news: AI, tech, thị trường VN
+- Stack: Java Spring Boot, PostgreSQL, AWS EKS</pre></div>
+    </div>
+    <div class="rw-box rw-au">
+      <div class="rw-label">⏰ Automation · Tip</div>
+      <div class="rw-title">Heartbeat — Agent chủ động liên hệ bạn</div>
+      <div class="rw-body">OpenClaw có <strong style="color:var(--text)">heartbeat</strong> — agent tự chạy định kỳ để kiểm tra sự kiện và chủ động thông báo nếu cần. Ví dụ: tự báo khi có email urgent, khi server down, khi giá cổ phiếu vượt ngưỡng — không cần bạn hỏi trước.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S13 — USE CASES ════ -->
+<div class="section" id="s13">
+  <div class="sec-head">
+    <span class="sec-tag st-au">USE CASES</span>
+    <div><h2 class="sec-title">Use Cases Thực Tế — Mọi người dùng OpenClaw như thế nào</h2>
+    <p class="sec-sub">Email automation, dev workflow, content, morning brief, CRM</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Top Use Cases từ community</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-icon">🌅</div>
+        <div class="card-title" style="color:var(--au)">Morning Brief tự động</div>
+        <div class="card-desc">
+          <strong style="color:var(--text)">8h sáng mỗi ngày:</strong> Thời tiết HN → tin tức AI/tech → calendar hôm nay → priority tasks từ Jira → tổng hợp gửi Telegram. Không cần mở bất kỳ app nào.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📧</div>
+        <div class="card-title" style="color:var(--ch)">Email Manager</div>
+        <div class="card-desc">
+          <strong style="color:var(--text)">Mỗi 2 tiếng:</strong> Check email mới, phân loại urgent/action/fyi, tóm tắt và gửi về Telegram. Nếu cần reply → soạn draft và chờ approve trước khi gửi.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💻</div>
+        <div class="card-title" style="color:var(--ins)">Dev Workflow</div>
+        <div class="card-desc">
+          <strong style="color:var(--text)">Review PRs:</strong> Mỗi 4h check GitHub/GitLab PR mới. Đọc code, comment review, tóm tắt gửi về Slack team. Còn check build failures và alert ngay.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <div class="card-title" style="color:var(--sk)">Business Intelligence</div>
+        <div class="card-desc">
+          <strong style="color:var(--text)">Daily report:</strong> Pull data từ PostgreSQL, tính KPIs, tạo chart, gửi PDF report qua email cho management. Không cần BI tool riêng.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📹</div>
+        <div class="card-title" style="color:var(--oc)">Content Pipeline</div>
+        <div class="card-desc">
+          <strong style="color:var(--text)">YouTube automation:</strong> Monitor channels, tóm tắt video mới, trích quotes hay, tạo Twitter thread. Tất cả tự động mỗi ngày.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏠</div>
+        <div class="card-title" style="color:var(--teal)">Family Assistant</div>
+        <div class="card-desc">
+          <strong style="color:var(--text)">Gia đình:</strong> Tổng hợp lịch cả gia đình, nhắc uống thuốc, grocery list, quản lý chi tiêu. Accessible từ mọi thành viên qua WhatsApp group.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Spring Boot — Tích hợp OpenClaw vào ứng dụng Java</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">OpenClawService.java — Gọi OpenClaw từ Spring Boot</span><span class="cb-tag ct-ins">SPRING BOOT</span></div>
+      <div class="cb-body"><pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">OpenClawService</span> {
+
+    <span class="kw">private final</span> <span class="cl">WebClient</span> <span class="vr">webClient</span>;
+
+    <span class="kw">public</span> <span class="fn">OpenClawService</span>(<span class="cl">WebClient</span>.<span class="cl">Builder</span> <span class="vr">builder</span>) {
+        <span class="kw">this</span>.<span class="vr">webClient</span> = <span class="vr">builder</span>
+            .<span class="fn">baseUrl</span>(<span class="st-s">"http://localhost:18789"</span>) <span class="cm">// Gateway URL</span>
+            .<span class="fn">defaultHeader</span>(<span class="st-s">"Authorization"</span>, <span class="st-s">"Bearer your-token"</span>)
+            .<span class="fn">build</span>();
+    }
+
+    <span class="cm">// Gửi message đến agent, nhận phản hồi</span>
+    <span class="kw">public</span> <span class="cl">Mono</span>&lt;<span class="tp">String</span>&gt; <span class="fn">askAgent</span>(<span class="tp">String</span> <span class="vr">message</span>) {
+        <span class="kw">return</span> <span class="vr">webClient</span>.<span class="fn">post</span>()
+            .<span class="fn">uri</span>(<span class="st-s">"/api/v1/chat"</span>)
+            .<span class="fn">bodyValue</span>(<span class="cl">Map</span>.<span class="fn">of</span>(<span class="st-s">"message"</span>, <span class="vr">message</span>, <span class="st-s">"session"</span>, <span class="st-s">"main"</span>))
+            .<span class="fn">retrieve</span>()
+            .<span class="fn">bodyToMono</span>(<span class="cl">ChatResponse</span>.<span class="kw">class</span>)
+            .<span class="fn">map</span>(<span class="cl">ChatResponse</span>::<span class="fn">getText</span>);
+    }
+
+    <span class="cm">// Tạo cron job từ Java code</span>
+    <span class="kw">public</span> <span class="cl">Mono</span>&lt;<span class="tp">String</span>&gt; <span class="fn">scheduleDailyReport</span>(<span class="tp">String</span> <span class="vr">userId</span>) {
+        <span class="kw">var</span> <span class="vr">cronRequest</span> = <span class="cl">Map</span>.<span class="fn">of</span>(
+            <span class="st-s">"name"</span>,    <span class="st-s">"Daily Report - "</span> + <span class="vr">userId</span>,
+            <span class="st-s">"cron"</span>,    <span class="st-s">"0 8 * * *"</span>,
+            <span class="st-s">"tz"</span>,      <span class="st-s">"Asia/Ho_Chi_Minh"</span>,
+            <span class="st-s">"session"</span>, <span class="st-s">"isolated"</span>,
+            <span class="st-s">"message"</span>, <span class="st-s">"Tạo daily report cho user "</span> + <span class="vr">userId</span>
+        );
+        <span class="kw">return</span> <span class="vr">webClient</span>.<span class="fn">post</span>()
+            .<span class="fn">uri</span>(<span class="st-s">"/api/v1/cron"</span>)
+            .<span class="fn">bodyValue</span>(<span class="vr">cronRequest</span>)
+            .<span class="fn">retrieve</span>()
+            .<span class="fn">bodyToMono</span>(<span class="cl">String</span>.<span class="kw">class</span>);
+    }
+
+    <span class="cm">// Streaming response (SSE)</span>
+    <span class="an">@GetMapping</span>(<span class="st-s">"/stream-ai"</span>)
+    <span class="kw">public</span> <span class="cl">SseEmitter</span> <span class="fn">streamFromOpenClaw</span>(<span class="tp">String</span> <span class="vr">prompt</span>) {
+        <span class="cl">SseEmitter</span> <span class="vr">emitter</span> = <span class="kw">new</span> <span class="cl">SseEmitter</span>(<span class="nm">30_000L</span>);
+        <span class="vr">webClient</span>.<span class="fn">post</span>().<span class="fn">uri</span>(<span class="st-s">"/api/v1/chat/stream"</span>)
+            .<span class="fn">bodyValue</span>(<span class="cl">Map</span>.<span class="fn">of</span>(<span class="st-s">"message"</span>, <span class="vr">prompt</span>))
+            .<span class="fn">retrieve</span>()
+            .<span class="fn">bodyToFlux</span>(<span class="cl">String</span>.<span class="kw">class</span>)
+            .<span class="fn">subscribe</span>(<span class="vr">emitter</span>::<span class="fn">send</span>, <span class="vr">emitter</span>::<span class="fn">completeWithError</span>, <span class="vr">emitter</span>::<span class="fn">complete</span>);
+        <span class="kw">return</span> <span class="vr">emitter</span>;
+    }
+}</pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ S14 — SECURITY ════ -->
+<div class="section" id="s14">
+  <div class="sec-head">
+    <span class="sec-tag st-oc">ADVANCED</span>
+    <div><h2 class="sec-title">Bảo mật &amp; Docker Sandbox</h2>
+    <p class="sec-sub">Auth token, pairing, sandbox, không expose Gateway ra internet</p></div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Các lớp bảo mật của OpenClaw</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">🔑</div><div class="card-title" style="color:var(--oc)">Auth Token</div><div class="card-desc">Gateway yêu cầu token khi kết nối. Chỉ ai có token mới chat được.</div></div>
+      <div class="card"><div class="card-icon">🤝</div><div class="card-title" style="color:var(--ch)">Pairing</div><div class="card-desc">Thiết bị phải được "pair" với Gateway. Không pair = không nhận lệnh.</div></div>
+      <div class="card"><div class="card-icon">📦</div><div class="card-title" style="color:var(--ins)">Sandbox</div><div class="card-desc">Docker sandbox isolate agent khỏi host OS. Tool exec chạy trong container riêng.</div></div>
+      <div class="card"><div class="card-icon">🚫</div><div class="card-title" style="color:var(--sk)">Tool Deny List</div><div class="card-desc">Cấm tools nguy hiểm qua deny list. Deny luôn thắng allow.</div></div>
+    </div>
+  </div>
+  <div class="sub">
+    <div class="sub-title">Docker Sandbox — Chạy agent an toàn</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">openclaw.json — Docker sandbox config</span><span class="cb-tag ct-oc">SECURITY</span></div>
+      <div class="cb-body"><pre>{
+  <span class="c-b">"agents"</span>: {
+    <span class="c-b">"defaults"</span>: {
+      <span class="c-b">"sandbox"</span>: {
+        <span class="c-b">"enabled"</span>: <span class="kw">true</span>,
+        <span class="c-b">"docker"</span>: {
+          <span class="c-b">"image"</span>: <span class="st-s">"openclaw/sandbox:latest"</span>,
+          <span class="cm">// Chạy 1 lần khi tạo container — cài tools cần thiết</span>
+          <span class="c-b">"setupCommand"</span>: <span class="st-s">"apt-get update && apt-get install -y curl jq"</span>,
+          <span class="cm">// Giới hạn tài nguyên</span>
+          <span class="c-b">"memory"</span>: <span class="st-s">"512m"</span>,
+          <span class="c-b">"cpus"</span>:   <span class="st-s">"1.0"</span>,
+          <span class="cm">// Mount workspace vào container (read-write)</span>
+          <span class="c-b">"mounts"</span>: [
+            <span class="st-s">"~/.openclaw/workspace:/workspace:rw"</span>
+          ]
+        }
+      }
+    }
+  }
+}
+
+<span class="cm">// ── Best practices bảo mật ────────────────────────────────────
+// ❌ KHÔNG expose port 18789 trực tiếp ra internet
+// ✅ Dùng reverse proxy (nginx) với HTTPS
+// ✅ Đặt auth token mạnh (random UUID)
+// ✅ Bật sandbox cho exec tool
+// ✅ Review skill code trước khi cài từ ClawHub
+// ✅ Không hardcode API key trong skills — dùng env vars</span></pre></div>
+    </div>
+    <div class="info i-err">
+      <span class="info-ico">🚨</span>
+      <div><strong style="color:var(--text)">KHÔNG expose Gateway trực tiếp ra Internet!</strong> Port 18789 chỉ nên accessible từ localhost hoặc qua reverse proxy có auth. Khi deploy trên VPS, dùng nginx + SSL + auth trước Gateway. Nếu dùng Telegram/Discord, bot kết nối ra ngoài — không cần port forwarding.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S15 — CHEAT SHEET ════ -->
+<div class="section" id="s15">
+  <div class="sec-head">
+    <span class="sec-tag st-y">RECAP</span>
+    <div><h2 class="sec-title">Cheat Sheet — OpenClaw toàn tập</h2>
+    <p class="sec-sub">CLI commands, config keys, cron expressions, troubleshooting</p></div>
+  </div>
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4 class="h4-ins">🔵 CLI — Gateway</h4>
+      <div class="cheat-row"><span class="ck">Cài + setup</span><span class="cv">openclaw onboard</span></div>
+      <div class="cheat-row"><span class="ck">Xem status</span><span class="cv">openclaw gateway status</span></div>
+      <div class="cheat-row"><span class="ck">Restart</span><span class="cv">openclaw gateway restart</span></div>
+      <div class="cheat-row"><span class="ck">Open UI</span><span class="cv">openclaw dashboard</span></div>
+      <div class="cheat-row"><span class="ck">Chat terminal</span><span class="cv">openclaw chat "message"</span></div>
+      <div class="cheat-row"><span class="ck">Update</span><span class="cv">npm update -g openclaw</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-ch">🟢 CLI — Channels</h4>
+      <div class="cheat-row"><span class="ck">Thêm Telegram</span><span class="cv">openclaw channel add telegram</span></div>
+      <div class="cheat-row"><span class="ck">Thêm WhatsApp</span><span class="cv">openclaw channel add whatsapp</span></div>
+      <div class="cheat-row"><span class="ck">Thêm Discord</span><span class="cv">openclaw channel add discord</span></div>
+      <div class="cheat-row"><span class="ck">Xem channels</span><span class="cv">openclaw channel list</span></div>
+      <div class="cheat-row"><span class="ck">Reconnect WA</span><span class="cv">openclaw channel connect whatsapp</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-sk">🟣 CLI — Skills</h4>
+      <div class="cheat-row"><span class="ck">Tìm skill</span><span class="cv">clawhub search keyword</span></div>
+      <div class="cheat-row"><span class="ck">Cài skill</span><span class="cv">clawhub install skill-name</span></div>
+      <div class="cheat-row"><span class="ck">Xem đã cài</span><span class="cv">clawhub list</span></div>
+      <div class="cheat-row"><span class="ck">Update all</span><span class="cv">clawhub update --all</span></div>
+      <div class="cheat-row"><span class="ck">Xóa skill</span><span class="cv">clawhub remove skill-name</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-au">🟡 CLI — Cron</h4>
+      <div class="cheat-row"><span class="ck">Thêm job</span><span class="cv">openclaw cron add --name</span></div>
+      <div class="cheat-row"><span class="ck">Xem jobs</span><span class="cv">openclaw cron list</span></div>
+      <div class="cheat-row"><span class="ck">Chạy ngay</span><span class="cv">openclaw cron run &lt;id&gt;</span></div>
+      <div class="cheat-row"><span class="ck">Lịch sử</span><span class="cv">openclaw cron runs --id</span></div>
+      <div class="cheat-row"><span class="ck">Xóa job</span><span class="cv">openclaw cron remove &lt;id&gt;</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-ins">🔵 Cron Expressions</h4>
+      <div class="cheat-row"><span class="ck">Mỗi ngày 7:30</span><span class="cv">30 7 * * *</span></div>
+      <div class="cheat-row"><span class="ck">Thứ 2-6, 9h</span><span class="cv">0 9 * * 1-5</span></div>
+      <div class="cheat-row"><span class="ck">Mỗi 4 tiếng</span><span class="cv">0 */4 * * *</span></div>
+      <div class="cheat-row"><span class="ck">Đầu tháng 8h</span><span class="cv">0 8 1 * *</span></div>
+      <div class="cheat-row"><span class="ck">Mỗi 30 phút</span><span class="cv">*/30 * * * *</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-oc">🦞 Tool Groups</h4>
+      <div class="cheat-row"><span class="ck">Shell commands</span><span class="cv">group:runtime</span></div>
+      <div class="cheat-row"><span class="ck">File I/O</span><span class="cv">group:fs</span></div>
+      <div class="cheat-row"><span class="ck">Web</span><span class="cv">group:web</span></div>
+      <div class="cheat-row"><span class="ck">Browser + Canvas</span><span class="cv">group:ui</span></div>
+      <div class="cheat-row"><span class="ck">Sessions</span><span class="cv">group:sessions</span></div>
+      <div class="cheat-row"><span class="ck">Memory</span><span class="cv">group:memory</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-sk">🟣 Config Keys</h4>
+      <div class="cheat-row"><span class="ck">AI model</span><span class="cv">model.name</span></div>
+      <div class="cheat-row"><span class="ck">AI provider</span><span class="cv">model.provider</span></div>
+      <div class="cheat-row"><span class="ck">Auth token</span><span class="cv">auth.token</span></div>
+      <div class="cheat-row"><span class="ck">Workspace dir</span><span class="cv">workspace</span></div>
+      <div class="cheat-row"><span class="ck">Tool allow</span><span class="cv">tools.allow[]</span></div>
+      <div class="cheat-row"><span class="ck">Sandbox</span><span class="cv">agents.defaults.sandbox</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-ch">🟢 Troubleshooting</h4>
+      <div class="cheat-row"><span class="ck">Gateway không start</span><span class="cv">openclaw gateway logs</span></div>
+      <div class="cheat-row"><span class="ck">Port đang dùng</span><span class="cv">lsof -i :18789</span></div>
+      <div class="cheat-row"><span class="ck">Reset config</span><span class="cv">openclaw onboard --reset</span></div>
+      <div class="cheat-row"><span class="ck">Check/fix issues</span><span class="cv">openclaw doctor --fix</span></div>
+      <div class="cheat-row"><span class="ck">WA mất kết nối</span><span class="cv">openclaw channel connect wa</span></div>
+      <div class="cheat-row"><span class="ck">Xem version</span><span class="cv">openclaw --version</span></div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px">
+      <strong style="color:var(--text)">Tài nguyên chính thức:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://docs.openclaw.ai" style="color:var(--acc)">docs.openclaw.ai</a> — Tài liệu chính thức &nbsp;·&nbsp;
+        <a href="https://github.com/openclaw/openclaw" style="color:var(--acc)">GitHub openclaw/openclaw</a> — Source code &nbsp;·&nbsp;
+        <a href="https://clawhub.com" style="color:var(--acc)">clawhub.com</a> — Skills marketplace &nbsp;·&nbsp;
+        <a href="https://discord.com/invite/clawd" style="color:var(--acc)">Discord community</a> — Hỏi đáp &nbsp;·&nbsp;
+        <a href="https://ollama.com/blog/openclaw-tutorial" style="color:var(--acc)">Ollama Tutorial</a> — Dùng AI offline
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="footer">
+  <span>🦞 OpenClaw · AI Agent cá nhân · Self-hosted · Mã nguồn mở · 2026</span>
+  <span style="margin-left:auto;color:var(--faint)">Cài đặt ×3 · Channels ×3 · Skills ×4 · Automation ×3 · Advanced ×2</span>
+</div>
+</div><!-- /main -->
+
+<script>
+window.addEventListener('scroll',()=>{
+  const el=document.documentElement;
+  document.getElementById('pbar').style.width=(el.scrollTop/(el.scrollHeight-el.clientHeight)*100)+'%';
+});
+const sections=document.querySelectorAll('.section[id]');
+const links=document.querySelectorAll('.nav-link');
+sections.forEach(s=>new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove('active'));
+      const a=document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if(a)a.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -70% 0px'}).observe(s));
+</script>
+</body>
+</html>
