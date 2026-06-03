@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenAI Codex CLI · Hướng dẫn chi tiết · Skills · MCP · Plugins · Remote</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080810; --s1: #0e0e1c; --s2: #131326; --s3: #18182e; --s4: #1e1e38;
+      --border: #222240; --border2: #2c2c50; --text: #e6e6f2; --muted: #666698;
+      --faint: #363660;
+      --green: #40d88e; --green-dim: rgba(64,216,142,.10);
+      --blue: #5ba8ff; --blue-dim: rgba(91,168,255,.10);
+      --purple: #a07af4; --purple-dim: rgba(160,122,244,.10);
+      --yellow: #ffd060; --yellow-dim: rgba(255,208,96,.10);
+      --teal: #30d8c0; --teal-dim: rgba(48,216,192,.10);
+      --orange: #ff8c50; --orange-dim: rgba(255,140,80,.10);
+      --pink: #ff6584; --pink-dim: rgba(255,101,132,.11); --pink-glow: rgba(255,101,132,.22);
+      --sky: #38bdf8; --sky-dim: rgba(56,189,248,.10);
+      /* Codex accent = OpenAI green */
+      --cx:  #10a37f; --cx-dim: rgba(16,163,127,.13); --cx-glow: rgba(16,163,127,.30); --cx2: #34d399;
+      --oc: #3b82f6; --oc-dim: rgba(59,130,246,.13); --oc-glow: rgba(59,130,246,.30);
+      --ins: #40d88e; --ins-dim: rgba(64,216,142,.12); --ins-glow: rgba(64,216,142,.28);
+      --ch: #ffd060; --ch-dim: rgba(255,208,96,.12); --ch-glow: rgba(255,208,96,.28);
+      --sk: #a07af4; --sk-dim: rgba(160,122,244,.12); --sk-glow: rgba(160,122,244,.28);
+      --au: #ff8c50; --au-dim: rgba(255,140,80,.12); --au-glow: rgba(255,140,80,.28);
+      --code-bg: #05050e;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;left:0;top:0;width:272px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+    .sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+    .sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+    .logo-icon{width:44px;height:44px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--cx),#0d7a60);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 26px var(--cx-glow)}
+    .logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}
+    .logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+    .prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+    .prog-bar{height:100%;background:linear-gradient(90deg,var(--cx),var(--ins),var(--ch),var(--sk),var(--au));width:0%;transition:width .4s;border-radius:2px}
+    .nav-section{padding:8px 0 4px}
+    .nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+    .nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+    .ngh-cx{background:var(--cx-dim);color:var(--cx)}
+    .ngh-oc{background:var(--oc-dim);color:var(--oc)}
+    .ngh-ins{background:var(--ins-dim);color:var(--ins)}
+    .ngh-ch{background:var(--ch-dim);color:var(--ch)}
+    .ngh-sk{background:var(--sk-dim);color:var(--sk)}
+    .ngh-au{background:var(--au-dim);color:var(--au)}
+    .ngh-p{background:var(--pink-dim);color:var(--pink)}
+    .ngh-t{background:var(--teal-dim);color:var(--teal)}
+    .nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+    .nav-link:hover,.nav-link.active{color:var(--text);background:rgba(16,163,127,.07);border-left-color:var(--cx)}
+    .nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+
+    /* ── MAIN ── */
+    .main{margin-left:272px;min-height:100vh}
+    .hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);background:radial-gradient(ellipse 65% 55% at 75% 22%,rgba(16,163,127,.12) 0%,transparent 60%),radial-gradient(ellipse 50% 55% at 5% 85%,rgba(52,211,153,.07) 0%,transparent 55%),radial-gradient(ellipse 40% 50% at 50% 50%,rgba(160,122,244,.04) 0%,transparent 60%),var(--bg)}
+    .hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+    .hero-glow{position:absolute;right:-90px;top:-90px;width:520px;height:520px;background:radial-gradient(circle,rgba(16,163,127,.09) 0%,transparent 65%);pointer-events:none}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--cx-dim);border:1px solid rgba(16,163,127,.38);color:var(--cx2);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+    .hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--cx);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+    .hero h1{font-size:46px;font-weight:900;letter-spacing:-2.5px;line-height:1.05;margin-bottom:18px}
+    .h-cx{color:var(--cx2)}
+    .h-oc{color:var(--oc)}.h-ins{color:var(--ins)}.h-ch{color:var(--ch)}.h-sk{color:var(--sk)}.h-au{color:var(--au)}
+    .h-grad{background:linear-gradient(135deg,var(--cx) 0%,var(--cx2) 50%,var(--teal) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-desc{font-size:16px;color:var(--muted);max-width:640px;line-height:1.72;margin-bottom:30px}
+    .hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+    .chip-cx{background:var(--cx-dim);color:var(--cx2)}
+    .chip-oc{background:var(--oc-dim);color:var(--oc)}
+    .chip-ins{background:var(--ins-dim);color:var(--ins)}
+    .chip-ch{background:var(--ch-dim);color:var(--ch)}
+    .chip-sk{background:var(--sk-dim);color:var(--sk)}
+    .chip-au{background:var(--au-dim);color:var(--au)}
+    .chip-t{background:var(--teal-dim);color:var(--teal)}
+    .chip-p{background:var(--pink-dim);color:var(--pink)}
+    .chip-s{background:var(--sky-dim);color:var(--sky)}
+
+    /* ── CONTENT ── */
+    .content{padding:56px 64px;max-width:1060px}
+    .section{margin-bottom:80px}
+    .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+    .sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+    .st-cx{color:var(--cx2);background:var(--cx-dim);border:1px solid var(--cx-glow)}
+    .st-oc{color:var(--oc);background:var(--oc-dim);border:1px solid var(--oc-glow)}
+    .st-ins{color:var(--ins);background:var(--ins-dim);border:1px solid var(--ins-glow)}
+    .st-ch{color:var(--ch);background:var(--ch-dim);border:1px solid var(--ch-glow)}
+    .st-sk{color:var(--sk);background:var(--sk-dim);border:1px solid var(--sk-glow)}
+    .st-au{color:var(--au);background:var(--au-dim);border:1px solid var(--au-glow)}
+    .st-t{color:var(--teal);background:var(--teal-dim);border:1px solid rgba(48,216,192,.24)}
+    .st-p{color:var(--pink);background:var(--pink-dim);border:1px solid var(--pink-glow)}
+    .st-y{color:var(--yellow);background:var(--yellow-dim);border:1px solid rgba(255,208,96,.24)}
+    .sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+    .sec-sub{font-size:13px;color:var(--muted)}
+    .sub{margin-bottom:38px}
+    .sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+    .sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--cx);border-radius:2px;flex-shrink:0}
+    .sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+    .sub ul,.sub ol{padding-left:22px}
+    .sub li{margin-bottom:6px}
+    .sub strong{color:var(--text)}
+
+    /* ── CAT BANNER ── */
+    .cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:32px;position:relative;overflow:hidden}
+    .cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .cb-cx{background:var(--cx-dim);border:1px solid rgba(16,163,127,.30)}.cb-cx::before{background:linear-gradient(90deg,var(--cx),var(--cx2))}
+    .cb-oc{background:var(--oc-dim);border:1px solid rgba(59,130,246,.30)}.cb-oc::before{background:linear-gradient(90deg,var(--oc),#60a5fa)}
+    .cb-ins{background:var(--ins-dim);border:1px solid rgba(64,216,142,.30)}.cb-ins::before{background:linear-gradient(90deg,var(--ins),var(--teal))}
+    .cb-ch{background:var(--ch-dim);border:1px solid rgba(255,208,96,.30)}.cb-ch::before{background:linear-gradient(90deg,var(--ch),var(--orange))}
+    .cb-sk{background:var(--sk-dim);border:1px solid rgba(160,122,244,.30)}.cb-sk::before{background:linear-gradient(90deg,var(--sk),var(--pink))}
+    .cb-au{background:var(--au-dim);border:1px solid rgba(255,140,80,.30)}.cb-au::before{background:linear-gradient(90deg,var(--au),var(--yellow))}
+    .cb-t{background:var(--teal-dim);border:1px solid rgba(48,216,192,.30)}.cb-t::before{background:linear-gradient(90deg,var(--teal),var(--sky))}
+    .cb-p{background:var(--pink-dim);border:1px solid rgba(255,101,132,.30)}.cb-p::before{background:linear-gradient(90deg,var(--pink),var(--au))}
+    .cb-icon{font-size:36px;flex-shrink:0}
+    .cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+    .cb-cx .cb-badge{background:var(--cx-dim);color:var(--cx2)}
+    .cb-oc .cb-badge{background:var(--oc-dim);color:var(--oc)}
+    .cb-ins .cb-badge{background:var(--ins-dim);color:var(--ins)}
+    .cb-ch .cb-badge{background:var(--ch-dim);color:var(--ch)}
+    .cb-sk .cb-badge{background:var(--sk-dim);color:var(--sk)}
+    .cb-au .cb-badge{background:var(--au-dim);color:var(--au)}
+    .cb-t .cb-badge{background:var(--teal-dim);color:var(--teal)}
+    .cb-p .cb-badge{background:var(--pink-dim);color:var(--pink)}
+    .cb-title{font-size:19px;font-weight:800;letter-spacing:-.5px}
+    .cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+    /* ── GRIDS ── */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:14px 0}
+    .card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+    .card:hover{border-color:var(--cx);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+    .card-icon{font-size:24px;margin-bottom:8px}
+    .card-title{font-size:13px;font-weight:700;margin-bottom:4px}
+    .card-desc{font-size:12px;color:var(--muted);line-height:1.58}
+
+    /* ── CODE BLOCKS ── */
+    .cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+    .cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+    .cb-dots{display:flex;gap:5px}
+    .cbd{width:10px;height:10px;border-radius:50%}
+    .cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+    .cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px;flex-shrink:0}
+    .ct-cx{background:var(--cx-dim);color:var(--cx2)}
+    .ct-oc{background:var(--oc-dim);color:var(--oc)}
+    .ct-ins{background:var(--ins-dim);color:var(--ins)}
+    .ct-ch{background:var(--ch-dim);color:var(--ch)}
+    .ct-sk{background:var(--sk-dim);color:var(--sk)}
+    .ct-au{background:var(--au-dim);color:var(--au)}
+    .ct-t{background:var(--teal-dim);color:var(--teal)}
+    .ct-p{background:var(--pink-dim);color:var(--pink)}
+    .ct-y{background:var(--yellow-dim);color:var(--yellow)}
+    .cb-body{padding:18px 20px;overflow-x:auto}
+    .cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.74;white-space:pre;color:#8899bb}
+    .kw{color:#c792ea}.tp{color:#ffcb6b}.fn{color:#82aaff}.st-s{color:#c3e88d}.cm{color:#546e7a;font-style:italic}
+    .nm{color:#f78c6c}.an{color:#ff6584}.pr{color:#89ddff}.vr{color:#eeffff}
+    .c-r{color:#ff6584}.c-b{color:#5ba8ff}.c-g{color:#40d88e}.c-t{color:#30d8c0}.c-y{color:#ffd060}
+    .c-o{color:#ff8c50}.c-p{color:#a07af4}.c-s{color:#38bdf8}.c-w{color:#eeffff}.c-m{color:#666698}
+    .c-cx{color:#34d399}
+
+    /* ── INFO BOXES ── */
+    .info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.62}
+    .info-ico{font-size:16px;flex-shrink:0;margin-top:2px}
+    .i-ok{background:rgba(64,216,142,.08);border:1px solid rgba(64,216,142,.2);color:#30a870}
+    .i-warn{background:rgba(255,208,96,.08);border:1px solid rgba(255,208,96,.2);color:#b09030}
+    .i-tip{background:rgba(91,168,255,.08);border:1px solid rgba(91,168,255,.2);color:#3878d0}
+    .i-note{background:rgba(160,122,244,.08);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+    .i-err{background:rgba(255,101,132,.08);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+    .i-cx{background:var(--cx-dim);border:1px solid rgba(16,163,127,.2);color:var(--cx2)}
+    .i-t{background:var(--teal-dim);border:1px solid rgba(48,216,192,.2);color:#22a89a}
+
+    /* ── RW BOXES ── */
+    .rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:12px 0;position:relative;overflow:hidden}
+    .rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+    .rw-cx::before{background:var(--cx)}.rw-oc::before{background:var(--oc)}.rw-ins::before{background:var(--ins)}
+    .rw-ch::before{background:var(--ch)}.rw-sk::before{background:var(--sk)}
+    .rw-au::before{background:var(--au)}.rw-y::before{background:var(--yellow)}
+    .rw-t::before{background:var(--teal)}.rw-p::before{background:var(--pink)}
+    .rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+    .rw-cx .rw-label{color:var(--cx2)}.rw-oc .rw-label{color:var(--oc)}.rw-ins .rw-label{color:var(--ins)}
+    .rw-ch .rw-label{color:var(--ch)}.rw-sk .rw-label{color:var(--sk)}.rw-au .rw-label{color:var(--au)}
+    .rw-y .rw-label{color:var(--yellow)}.rw-t .rw-label{color:var(--teal)}.rw-p .rw-label{color:var(--pink)}
+    .rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+    .rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+    /* ── TABLE ── */
+    .tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+    .tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+    .tbl td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top}
+    .tbl tr:last-child td{border-bottom:none}
+    .tbl tr:hover td{background:var(--s2)}
+    .tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:1px 6px;border-radius:4px;background:var(--s3);color:var(--teal)}
+
+    /* ── FLOW ── */
+    .flow{display:flex;flex-direction:column;gap:0;margin:14px 0}
+    .flow-step{display:flex;gap:16px;position:relative}
+    .flow-step:not(:last-child)::after{content:'';position:absolute;left:19px;top:40px;bottom:-8px;width:2px;background:var(--border2)}
+    .flow-num{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;z-index:1;margin-top:2px}
+    .fn-cx{background:var(--cx-dim);color:var(--cx2);border:2px solid var(--cx)}
+    .fn-oc{background:var(--oc-dim);color:var(--oc);border:2px solid var(--oc)}
+    .fn-ins{background:var(--ins-dim);color:var(--ins);border:2px solid var(--ins)}
+    .fn-ch{background:var(--ch-dim);color:var(--ch);border:2px solid var(--ch)}
+    .fn-sk{background:var(--sk-dim);color:var(--sk);border:2px solid var(--sk)}
+    .fn-au{background:var(--au-dim);color:var(--au);border:2px solid var(--au)}
+    .fn-t{background:var(--teal-dim);color:var(--teal);border:2px solid var(--teal)}
+    .fn-p{background:var(--pink-dim);color:var(--pink);border:2px solid var(--pink)}
+    .flow-body{padding:4px 0 28px;flex:1}
+    .flow-title{font-size:14px;font-weight:700;margin-bottom:4px}
+    .flow-desc{font-size:13px;color:var(--muted);line-height:1.65}
+
+    /* ── CHEAT GRID ── */
+    .cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+    .cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px}
+    .cheat-card h4{font-size:12px;font-weight:800;margin-bottom:12px;letter-spacing:-.2px}
+    .h4-cx{color:var(--cx2)}.h4-oc{color:var(--oc)}.h4-ins{color:var(--ins)}.h4-ch{color:var(--ch)}
+    .h4-sk{color:var(--sk)}.h4-au{color:var(--au)}.h4-t{color:var(--teal)}.h4-p{color:var(--pink)}
+    .cheat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:11.5px;gap:8px}
+    .cheat-row:last-child{border-bottom:none}
+    .ck{font-family:'JetBrains Mono',monospace;color:var(--teal);flex-shrink:0}
+    .cv{color:var(--muted);text-align:right;font-size:11px}
+
+    /* ── KW PILLS ── */
+    .kw-grid{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+    .kw-pill{padding:4px 12px;border-radius:100px;font-size:11.5px;font-weight:700}
+    .kwp-cx{background:var(--cx-dim);color:var(--cx2)}.kwp-oc{background:var(--oc-dim);color:var(--oc)}
+    .kwp-ins{background:var(--ins-dim);color:var(--ins)}.kwp-ch{background:var(--ch-dim);color:var(--ch)}
+    .kwp-sk{background:var(--sk-dim);color:var(--sk)}.kwp-au{background:var(--au-dim);color:var(--au)}
+    .kwp-t{background:var(--teal-dim);color:var(--teal)}.kwp-p{background:var(--pink-dim);color:var(--pink)}
+
+    /* ── PLUGIN CARDS ── */
+    .plugin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+    .plugin-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all .2s;position:relative;overflow:hidden}
+    .plugin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+    .plugin-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+    .pc-cx::before{background:var(--cx)}.pc-cx:hover{border-color:var(--cx)}
+    .pc-oc::before{background:var(--oc)}.pc-oc:hover{border-color:var(--oc)}
+    .pc-ins::before{background:var(--ins)}.pc-ins:hover{border-color:var(--ins)}
+    .pc-ch::before{background:var(--ch)}.pc-ch:hover{border-color:var(--ch)}
+    .pc-sk::before{background:var(--sk)}.pc-sk:hover{border-color:var(--sk)}
+    .pc-au::before{background:var(--au)}.pc-au:hover{border-color:var(--au)}
+    .pc-t::before{background:var(--teal)}.pc-t:hover{border-color:var(--teal)}
+    .pc-p::before{background:var(--pink)}.pc-p:hover{border-color:var(--pink)}
+    .pc-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .pc-icon{font-size:26px}
+    .pc-name{font-size:13.5px;font-weight:800}
+    .pc-badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:4px}
+    .pbd-cx{background:var(--cx-dim);color:var(--cx2)}.pbd-oc{background:var(--oc-dim);color:var(--oc)}
+    .pbd-ins{background:var(--ins-dim);color:var(--ins)}.pbd-ch{background:var(--ch-dim);color:var(--ch)}
+    .pbd-sk{background:var(--sk-dim);color:var(--sk)}.pbd-au{background:var(--au-dim);color:var(--au)}
+    .pbd-t{background:var(--teal-dim);color:var(--teal)}.pbd-p{background:var(--pink-dim);color:var(--pink)}
+    .pc-desc{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:10px}
+    .pc-features{display:flex;flex-wrap:wrap;gap:5px}
+    .pc-feat{font-size:10.5px;padding:2px 8px;border-radius:4px;background:var(--s3);color:var(--muted)}
+
+    /* ── MCP GRID ── */
+    .mcp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+    .mcp-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px;display:flex;align-items:flex-start;gap:10px;transition:all .18s}
+    .mcp-card:hover{border-color:var(--border2);background:var(--s3)}
+    .mcp-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+    .mcp-name{font-size:12.5px;font-weight:700;margin-bottom:2px}
+    .mcp-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+    /* ── MODE BADGE ── */
+    .mode-badge{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:5px}
+    .mb-cx{background:var(--cx-dim);color:var(--cx2);border:1px solid rgba(16,163,127,.3)}
+    .mb-ch{background:var(--ch-dim);color:var(--ch);border:1px solid rgba(255,208,96,.3)}
+    .mb-au{background:var(--au-dim);color:var(--au);border:1px solid rgba(255,140,80,.3)}
+    .mb-p{background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,101,132,.3)}
+
+    /* ── SCENARIO ── */
+    .scenario{background:var(--s2);border:1px solid var(--border2);border-radius:14px;padding:20px 24px;margin:14px 0}
+    .scenario-title{font-size:13px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .scenario-steps{display:flex;flex-direction:column;gap:7px}
+    .sc-step{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--muted)}
+    .sc-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px}
+
+    /* ── FOOTER ── */
+    .footer{padding:16px 64px;border-top:1px solid var(--border);font-size:11.5px;color:var(--faint);display:flex;align-items:center;gap:8px}
+
+    code{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:1px 6px;border-radius:4px;background:var(--s3);color:var(--teal)}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <h2>OpenAI Codex CLI</h2>
+        <p>Hướng dẫn toàn diện 2026</p>
+      </div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
+  </div>
+
+  <div class="nav-section" aria-label="Page navigation">
+    <div class="nav-sect-label">🔄 Chuyển trang</div>
+    <a href="Claude-architecture-guide.html" class="nav-link"><span class="ico">📐</span> Arch Guide</a>
+    <a href="claude-guide.html" class="nav-link"><span class="ico">📖</span> Claude Guide</a>
+    <a href="claude-cowork-guide.html" class="nav-link"><span class="ico">🤖</span> Cowork Guide</a>
+    <a href="open-clawbot-guide.html" class="nav-link"><span class="ico">🦞</span> OpenClaw Guide</a>
+    <a href="codex-cli-guide.html" class="nav-link active"><span class="ico">💻</span> Codex CLI Guide</a>
+    <a href="antigravity-guide.html" class="nav-link"><span class="ico">🚀</span> AntiGravity</a>
+    <a href="superpowers-antigravity-guide.html" class="nav-link"><span class="ico">⚡</span> Superpowers AG</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-sect-label">Nội dung</div>
+
+    <div class="nav-group-hdr ngh-cx">🏠 Tổng quan</div>
+    <a href="#s1" class="nav-link"><span class="ico">🧠</span>Codex CLI là gì?</a>
+    <a href="#s2" class="nav-link"><span class="ico">⚙️</span>Cài đặt & Cấu hình</a>
+
+    <div class="nav-group-hdr ngh-ins">🔐 Sandbox & Approval</div>
+    <a href="#s3" class="nav-link"><span class="ico">🛡️</span>Approval Modes</a>
+    <a href="#s4" class="nav-link"><span class="ico">📦</span>Sandbox Modes</a>
+
+    <div class="nav-group-hdr ngh-ch">🚀 Tính năng nâng cao</div>
+    <a href="#s5" class="nav-link"><span class="ico">📡</span>Remote Control</a>
+    <a href="#s6" class="nav-link"><span class="ico">🤖</span>Multi-Agent</a>
+    <a href="#s7" class="nav-link"><span class="ico">🖥️</span>Computer Use & Browser</a>
+
+    <div class="nav-group-hdr ngh-sk">🧩 Mở rộng</div>
+    <a href="#s8" class="nav-link"><span class="ico">📖</span>Skills & AGENTS.md</a>
+    <a href="#s9" class="nav-link"><span class="ico">🔌</span>Plugins</a>
+    <a href="#s10" class="nav-link"><span class="ico">🔗</span>MCP Servers</a>
+
+    <div class="nav-group-hdr ngh-au">💡 Thực chiến</div>
+    <a href="#s11" class="nav-link"><span class="ico">⚡</span>Use Cases thực tế</a>
+    <a href="#s12" class="nav-link"><span class="ico">📋</span>Cheat Sheet</a>
+  </div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-eyebrow"><span class="pulse"></span>OpenAI · Codex CLI · Terminal-First AI Agent · 2026</div>
+    <h1>OpenAI <span class="h-grad">Codex CLI</span><br>Hướng dẫn chi tiết</h1>
+    <p class="hero-desc">Từ cài đặt đến production — Approval Modes, Sandbox, Remote Control, Multi-Agent, Skills, Plugins và MCP Servers. 4 triệu developer dùng mỗi tuần. Đây là mọi thứ bạn cần biết.</p>
+    <div class="hero-chips">
+      <span class="chip chip-cx">macOS · Windows · Linux</span>
+      <span class="chip chip-oc">ChatGPT Plus / Pro</span>
+      <span class="chip chip-ins">Open Source Apache-2.0</span>
+      <span class="chip chip-ch">Rust · 80MB RAM</span>
+      <span class="chip chip-sk">Skills · AGENTS.md</span>
+      <span class="chip chip-t">MCP · Plugins</span>
+      <span class="chip chip-au">Remote Control</span>
+      <span class="chip chip-p">Multi-Agent</span>
+      <span class="chip chip-s">Computer Use</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ S1: TỔNG QUAN ══ -->
+    <div class="section" id="s1">
+      <div class="sec-head">
+        <span class="sec-tag st-cx">OVERVIEW</span>
+        <div>
+          <h2 class="sec-title">Codex CLI là gì?</h2>
+          <p class="sec-sub">Terminal-first coding agent — đọc repo, edit file, chạy test, commit code — hoàn toàn khác với Codex API cũ (2021)</p>
+        </div>
+      </div>
+
+      <div class="cat-banner cb-cx">
+        <div class="cb-icon">⚡</div>
+        <div>
+          <div class="cb-badge">CODEX CLI</div>
+          <div class="cb-title">AI Agent ngay trong terminal của bạn</div>
+          <div class="cb-sub">Codex CLI (ra mắt 16/04/2025) là agentic coding assistant viết bằng <strong>Rust</strong>, chạy trong terminal, tự đọc codebase, đề xuất thay đổi nhiều file, chạy test và commit — có sandbox cô lập và quy trình approval kiểm soát từng bước. ~4 triệu người dùng mỗi tuần (04/2026).</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Codex CLI vs Codex API cũ — Không liên quan!</div>
+        <div class="info i-warn">
+          <span class="info-ico">⚠️</span>
+          <div><strong style="color:var(--text)">Đừng nhầm lẫn:</strong> Codex API (2021) là GPT-3 fine-tune dùng cho Copilot đời đầu, đã bị tắt năm 2023. <strong>Codex CLI (2025)</strong> là sản phẩm hoàn toàn mới — terminal agent viết bằng Rust, open-source Apache-2.0, không liên quan gì đến Codex cũ.</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Codex CLI vs Claude Code — Điểm khác biệt cốt lõi</div>
+        <table class="tbl">
+          <thead><tr><th>Tiêu chí</th><th>OpenAI Codex CLI</th><th>Claude Code (Anthropic)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Ngôn ngữ code</strong></td><td style="color:var(--cx2)">Rust (~80MB RAM, 240+ tok/s)</td><td style="color:var(--oc)">Node.js</td></tr>
+            <tr><td><strong>Model</strong></td><td style="color:var(--cx2)">GPT-5.5 / codex-1 (o3-based)</td><td style="color:var(--oc)">Claude Sonnet/Opus</td></tr>
+            <tr><td><strong>Context Window</strong></td><td style="color:var(--cx2)">200K tokens</td><td style="color:var(--oc)">1M tokens (Claude 3.7+)</td></tr>
+            <tr><td><strong>Token hiệu quả</strong></td><td style="color:var(--ins)">3–4x ít token hơn / task</td><td style="color:var(--muted)">Nhiều token hơn, reasoning sâu hơn</td></tr>
+            <tr><td><strong>Terminal-Bench 2.0</strong></td><td style="color:var(--ins)">77.3%</td><td style="color:var(--muted)">65.4%</td></tr>
+            <tr><td><strong>SWE-bench Verified</strong></td><td style="color:var(--muted)">Thấp hơn</td><td style="color:var(--ins)">80.8%</td></tr>
+            <tr><td><strong>Open Source</strong></td><td style="color:var(--ins)">✓ Apache-2.0</td><td style="color:var(--pink)">✗ Closed source</td></tr>
+            <tr><td><strong>MCP Config</strong></td><td style="color:var(--cx2)">TOML</td><td style="color:var(--oc)">JSON</td></tr>
+            <tr><td><strong>Best for</strong></td><td style="color:var(--cx2)">Batch refactor, CI/CD, terminal work</td><td style="color:var(--oc)">Kiến trúc phức tạp, reasoning sâu</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Các surface của Codex (không chỉ CLI)</div>
+        <div class="grid-4">
+          <div class="card" style="border-color:rgba(16,163,127,.35)">
+            <div class="card-icon">💻</div>
+            <div class="card-title" style="color:var(--cx2)">Codex CLI</div>
+            <div class="card-desc">Terminal TUI. Chính focus của guide này. macOS, Windows, Linux.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🖥️</div>
+            <div class="card-title" style="color:var(--ins)">Desktop App</div>
+            <div class="card-desc">GUI wrapper. macOS và Windows. Cùng model, thêm interface đồ họa.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🌐</div>
+            <div class="card-title" style="color:var(--ch)">ChatGPT Web</div>
+            <div class="card-desc">Codex Cloud — delegate task qua chat.openai.com. Không cần cài local.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔧</div>
+            <div class="card-title" style="color:var(--sk)">IDE Extensions</div>
+            <div class="card-desc">VS Code, JetBrains, Xcode. Tích hợp trực tiếp vào editor.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info i-cx">
+        <span class="info-ico">💡</span>
+        <div><strong style="color:var(--text)">Mô hình pricing:</strong> Codex CLI là open-source miễn phí. Nhưng AI inference cần OpenAI account. <strong>ChatGPT Plus ($20/tháng)</strong> cho phép dùng không tốn thêm phí API. Nếu dùng API key trực tiếp, trả theo token sử dụng (GPT-5.5 / codex-1 rates).</div>
+      </div>
+    </div>
+
+    <!-- ══ S2: CÀI ĐẶT ══ -->
+    <div class="section" id="s2">
+      <div class="sec-head">
+        <span class="sec-tag st-oc">SETUP</span>
+        <div>
+          <h2 class="sec-title">Cài đặt & Cấu hình cơ bản</h2>
+          <p class="sec-sub">Từ zero đến session đầu tiên trong 5 phút</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cài đặt nhanh</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Terminal — Cài đặt Codex CLI</span>
+            <span class="cb-tag ct-cx">INSTALL</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Cài qua npm (cách phổ biến nhất)</span>
+<span class="c-cx">npm install -g @openai/codex</span>
+
+<span class="cm"># Hoặc dùng npx (không cần cài global)</span>
+<span class="c-cx">npx @openai/codex</span>
+
+<span class="cm"># Verify cài đặt</span>
+<span class="c-cx">codex --version</span>
+
+<span class="cm"># Đăng nhập OpenAI account</span>
+<span class="c-cx">codex login</span>
+
+<span class="cm"># Kiểm tra môi trường (chạy lần đầu)</span>
+<span class="c-cx">codex doctor</span>
+
+<span class="cm"># Khởi động interactive TUI session</span>
+<span class="c-cx">codex</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cấu hình config.toml — File cấu hình chính</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">~/.codex/config.toml</span>
+            <span class="cb-tag ct-ch">CONFIG</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Model mặc định</span>
+<span class="c-cx">model</span> = <span class="st-s">"gpt-5.4"</span>             <span class="cm"># hoặc "codex-1", "gpt-5.3-codex"</span>
+
+<span class="cm"># Approval policy mặc định</span>
+<span class="c-cx">approval_policy</span> = <span class="st-s">"on-request"</span>  <span class="cm"># suggest | on-request | never</span>
+
+<span class="cm"># Sandbox mode</span>
+<span class="c-cx">sandbox_mode</span> = <span class="st-s">"workspace-write"</span> <span class="cm"># read-only | workspace-write | danger-full-access</span>
+
+<span class="cm"># Ngôn ngữ giao tiếp</span>
+<span class="c-cx">instructions</span> = <span class="st-s">"Trả lời bằng tiếng Việt khi giải thích. Code comment bằng tiếng Anh."</span>
+
+<span class="cm"># Web search (dùng cache để tiết kiệm)</span>
+<span class="c-cx">web_search</span> = <span class="st-s">"cached"</span>           <span class="cm"># off | cached | live</span>
+
+<span class="cm"># MCP Servers (xem chi tiết ở S10)</span>
+[<span class="c-cx">mcp_servers</span>]
+
+  [<span class="c-cx">mcp_servers.github</span>]
+  command = <span class="st-s">"npx"</span>
+  args = [<span class="st-s">"-y"</span>, <span class="st-s">"@modelcontextprotocol/server-github"</span>]
+  env = { <span class="c-cx">GITHUB_TOKEN</span> = <span class="st-s">"ghp_xxxx"</span> }
+
+  [<span class="c-cx">mcp_servers.context7</span>]
+  type = <span class="st-s">"streamable-http"</span>
+  url = <span class="st-s">"https://mcp.context7.com/mcp"</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Thứ tự ưu tiên config (cao → thấp)</div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num fn-cx">1</div>
+            <div class="flow-body">
+              <div class="flow-title">Flag <code>-c</code> / <code>--config</code> trong lệnh</div>
+              <div class="flow-desc">Override trực tiếp khi gõ lệnh. Ví dụ: <code>codex -c approval_policy="never" "refactor auth module"</code>. Ưu tiên cao nhất, chỉ áp dụng cho lần chạy đó.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-ins">2</div>
+            <div class="flow-body">
+              <div class="flow-title">Project config <code>.codex/config.toml</code></div>
+              <div class="flow-desc">File trong thư mục dự án (trusted projects only). Commit vào repo để share settings với cả team. Càng gần working directory, càng ưu tiên hơn.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-ch">3</div>
+            <div class="flow-body">
+              <div class="flow-title">Profile file <code>~/.codex/profile-name.config.toml</code></div>
+              <div class="flow-desc">Chọn bằng <code>--profile tên-profile</code>. Dùng để có preset khác nhau: "strict" cho production, "auto" cho dev nhanh.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-sk">4</div>
+            <div class="flow-body">
+              <div class="flow-title">User config <code>~/.codex/config.toml</code></div>
+              <div class="flow-desc">Config mặc định của bạn — áp dụng cho mọi session. Đặt defaults chung ở đây: model, web_search, preferred language.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-au">5</div>
+            <div class="flow-body">
+              <div class="flow-title">System config (tổ chức quản lý)</div>
+              <div class="flow-desc">Trên máy managed, tổ chức có thể enforce constraints qua <code>requirements.toml</code>. Ví dụ: cấm dùng <code>approval_policy = "never"</code> hoặc <code>sandbox_mode = "danger-full-access"</code>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">AGENTS.md — File hướng dẫn dành cho agent</div>
+        <div class="grid-2">
+          <div class="rw-box rw-cx">
+            <div class="rw-label">📋 AGENTS.MD LÀ GÌ</div>
+            <div class="rw-title">Hướng dẫn Codex về codebase của bạn</div>
+            <div class="rw-body">
+              <code>AGENTS.md</code> là file Markdown trong repo, Codex đọc khi bắt đầu session. Giống README nhưng viết cho AI — mô tả conventions, architecture, quy tắc không được vi phạm.<br><br>
+              Đặt ở root repo → áp dụng toàn bộ. Đặt trong subfolder → áp dụng riêng thư mục đó.
+            </div>
+          </div>
+          <div class="rw-box rw-ins">
+            <div class="rw-label">⚡ TỰ TẠO AGENTS.MD</div>
+            <div class="rw-title">Để Codex tự generate từ codebase</div>
+            <div class="rw-body">
+              Gõ lệnh <code>/init</code> trong session → Codex phân tích codebase và tạo scaffold <code>AGENTS.md</code> phù hợp.<br><br>
+              Bạn review, chỉnh sửa theo thực tế, rồi commit. Mọi session sau đều kế thừa context này — không cần giải thích lại từ đầu.
+            </div>
+          </div>
+        </div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">AGENTS.md — Ví dụ cho dự án Next.js</span>
+            <span class="cb-tag ct-ins">AGENTS.MD</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Project: E-commerce Platform</span>
+
+<span class="c-cx">## Architecture</span>
+- Next.js 14 App Router, TypeScript strict mode
+- Database: PostgreSQL via Prisma ORM
+- Auth: NextAuth.js v5 with JWT
+- Styling: Tailwind CSS + shadcn/ui
+
+<span class="c-cx">## Conventions</span>
+- All API routes in `src/app/api/` follow REST conventions
+- Shared types in `src/types/` — never inline type definitions
+- Use `zod` for ALL input validation, never trust raw user input
+- Error handling: always use custom `AppError` class in `src/lib/errors.ts`
+
+<span class="c-cx">## Do NOT</span>
+- Never commit secrets or API keys
+- Never modify `prisma/migrations/` manually
+- Never use `any` type — use `unknown` and narrow
+- Never skip error boundaries in Server Components
+
+<span class="c-cx">## Testing</span>
+- Unit tests: Vitest in `__tests__/` next to source files
+- E2E tests: Playwright in `e2e/`
+- Run `pnpm test` before every commit</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S3: APPROVAL MODES ══ -->
+    <div class="section" id="s3">
+      <div class="sec-head">
+        <span class="sec-tag st-ins">APPROVAL</span>
+        <div>
+          <h2 class="sec-title">Approval Modes — Kiểm soát mức tự chủ của Agent</h2>
+          <p class="sec-sub">Chọn mức độ Codex được phép làm gì mà không cần xin phép</p>
+        </div>
+      </div>
+
+      <div class="cat-banner cb-ins">
+        <div class="cb-icon">🔐</div>
+        <div>
+          <div class="cb-badge">APPROVAL POLICY</div>
+          <div class="cb-title">3 chế độ kiểm soát — bạn quyết định mức độ tin tưởng</div>
+          <div class="cb-sub">Approval policy quyết định khi nào Codex cần hỏi bạn trước khi thực hiện. Kết hợp với Sandbox Mode để tạo nên mức bảo mật phù hợp với từng tình huống.</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Ba Approval Modes</div>
+        <div class="grid-3">
+          <div class="rw-box rw-cx" style="border-color:rgba(16,163,127,.3)">
+            <div class="rw-label">💡 SUGGEST</div>
+            <div class="rw-title">Chế độ đề xuất — Hỏi từng bước</div>
+            <div class="rw-body">
+              Codex <strong style="color:var(--text)">hiển thị diff và chờ bạn approve</strong> trước mọi thay đổi file và lệnh shell.<br><br>
+              Phù hợp khi: learning, lần đầu dùng với codebase mới, hoặc task có rủi ro cao.<br><br>
+              <span class="mode-badge mb-cx">--ask-for-approval suggest</span>
+            </div>
+          </div>
+          <div class="rw-box rw-ch" style="border-color:rgba(255,208,96,.3)">
+            <div class="rw-label">⚡ ON-REQUEST (Auto)</div>
+            <div class="rw-title">Tự động trong workspace — Hỏi khi ra ngoài</div>
+            <div class="rw-body">
+              Codex <strong style="color:var(--text)">tự edit file và chạy lệnh trong working directory</strong>. Chỉ hỏi khi: edit file ngoài workspace, cần network access, hoặc MCP tool destructive.<br><br>
+              <strong style="color:var(--ch)">Recommended cho daily work.</strong><br><br>
+              <span class="mode-badge mb-ch">--ask-for-approval on-request</span>
+            </div>
+          </div>
+          <div class="rw-box rw-p" style="border-color:rgba(255,101,132,.3)">
+            <div class="rw-label">⚠️ NEVER (YOLO)</div>
+            <div class="rw-title">Không hỏi — Chạy hoàn toàn tự động</div>
+            <div class="rw-body">
+              Codex không hỏi gì cả — làm hết theo judgment của model. Alias: <code>--yolo</code> hoặc <code>--dangerously-bypass-approvals-and-sandbox</code>.<br><br>
+              <strong style="color:var(--pink)">Chỉ dùng trong môi trường hardened / CI đã được kiểm soát chặt.</strong><br><br>
+              <span class="mode-badge mb-p">--ask-for-approval never</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Destructive actions luôn cần approval — Không ngoại lệ</div>
+        <div class="info i-warn">
+          <span class="info-ico">⚠️</span>
+          <div><strong style="color:var(--text)">Quy tắc bất di bất dịch:</strong> Dù bạn dùng approval mode nào, các MCP/app tool call được đánh dấu là <strong>destructive</strong> (xóa data, gửi email, push code...) <strong>luôn luôn cần approval</strong> riêng — ngay cả khi tool cùng đó có annotation read-only. Codex không bỏ qua điều này.</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cú pháp sử dụng Approval Modes</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Terminal — Approval mode examples</span>
+            <span class="cb-tag ct-cx">CLI</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Mode suggest: hỏi trước mọi thay đổi (an toàn nhất)</span>
+<span class="c-cx">codex</span> --ask-for-approval suggest <span class="st-s">"refactor the auth module"</span>
+
+<span class="cm"># Mode on-request: tự động trong workspace (recommended)</span>
+<span class="c-cx">codex</span> --sandbox workspace-write --ask-for-approval on-request \
+       <span class="st-s">"add unit tests to all service files"</span>
+
+<span class="cm"># Non-interactive (exec mode) — chạy task rồi thoát</span>
+<span class="c-cx">codex exec</span> --sandbox workspace-write \
+       <span class="st-s">"fix all TypeScript errors in src/"</span>
+
+<span class="cm"># YOLO mode — chỉ dùng trong CI/CD hardened</span>
+<span class="c-cx">codex</span> --yolo <span class="st-s">"bump all dependencies to latest"</span>
+
+<span class="cm"># Switch sang read-only mid-session</span>
+<span class="c-cx">/permissions</span>   <span class="cm"># trong TUI → chọn read-only mode</span>
+
+<span class="cm"># Lưu approval policy vào config.toml thay vì gõ mỗi lần</span>
+<span class="c-y">approval_policy</span> = <span class="st-s">"on-request"</span>   <span class="cm"># trong ~/.codex/config.toml</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S4: SANDBOX MODES ══ -->
+    <div class="section" id="s4">
+      <div class="sec-head">
+        <span class="sec-tag st-ch">SANDBOX</span>
+        <div>
+          <h2 class="sec-title">Sandbox Modes — Ranh giới bảo vệ hệ thống</h2>
+          <p class="sec-sub">Sandbox giới hạn những gì Codex có thể chạm tới — bất kể approval mode</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Ba Sandbox Modes</div>
+        <div class="grid-3">
+          <div class="rw-box rw-ins">
+            <div class="rw-label">👁️ READ-ONLY</div>
+            <div class="rw-title">Chỉ đọc — Không thay đổi gì</div>
+            <div class="rw-body">
+              Codex có thể đọc file, phân tích code, generate suggestions — nhưng <strong style="color:var(--text)">không thể ghi bất cứ file nào</strong>, không chạy lệnh có tác động.<br><br>
+              Dùng khi: code review, audit, explain codebase cho người mới.
+            </div>
+          </div>
+          <div class="rw-box rw-cx">
+            <div class="rw-label">✏️ WORKSPACE-WRITE</div>
+            <div class="rw-title">Ghi trong workspace — Default recommended</div>
+            <div class="rw-body">
+              Codex tự do đọc/ghi file <strong style="color:var(--text)">trong working directory</strong>. Network access tắt mặc định. Để ra ngoài workspace hoặc dùng network → hỏi approval.<br><br>
+              <strong style="color:var(--cx2)">Default cho daily work.</strong> Cân bằng tốt giữa tốc độ và an toàn.
+            </div>
+          </div>
+          <div class="rw-box rw-p">
+            <div class="rw-label">🔓 DANGER-FULL-ACCESS</div>
+            <div class="rw-title">Toàn quyền hệ thống</div>
+            <div class="rw-body">
+              Không có giới hạn — Codex có thể làm mọi thứ trên hệ thống của bạn bao gồm network, system files, external commands.<br><br>
+              <strong style="color:var(--pink)">Chỉ dùng trong Docker container hoặc VM cô lập hoàn toàn.</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Bật Network Access trong workspace-write</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">~/.codex/config.toml — Bật network cho domain cụ thể</span>
+            <span class="cb-tag ct-ch">SANDBOX CONFIG</span>
+          </div>
+          <div class="cb-body"><pre><span class="c-y">sandbox_mode</span> = <span class="st-s">"workspace-write"</span>
+
+<span class="cm"># Cho phép Codex gọi API cụ thể (trong workspace-write)</span>
+[<span class="c-cx">sandbox.network</span>]
+<span class="c-y">allow_domains</span> = [
+  <span class="st-s">"api.github.com"</span>,
+  <span class="st-s">"registry.npmjs.org"</span>,
+  <span class="st-s">"pypi.org"</span>,
+]
+
+<span class="cm"># Hoặc bật full network (cẩn thận)</span>
+<span class="cm"># allow_full_network = true</span>
+
+<span class="cm"># Cho Codex Cloud: bật internet access</span>
+<span class="cm"># Vào agent settings → Internet access → enable</span>
+<span class="cm"># hoặc cấu hình domain allow list</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S5: REMOTE CONTROL ══ -->
+    <div class="section" id="s5">
+      <div class="sec-head">
+        <span class="sec-tag st-au">REMOTE</span>
+        <div>
+          <h2 class="sec-title">Remote Control — Điều khiển Codex từ xa</h2>
+          <p class="sec-sub">Kết nối TUI từ máy khác, giao task qua Telegram/Discord, hoặc expose như WebSocket server</p>
+        </div>
+      </div>
+
+      <div class="cat-banner cb-au">
+        <div class="cb-icon">📡</div>
+        <div>
+          <div class="cb-badge">APP-SERVER</div>
+          <div class="cb-title">Codex như một daemon — luôn sẵn sàng nhận lệnh</div>
+          <div class="cb-sub">Dùng <code>codex app-server</code> để khởi động Codex như background service lắng nghe WebSocket. Kết nối từ bất kỳ TUI nào, từ plugin Telegram, Discord, hay CI script — không cần session tương tác.</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Ba cách dùng Remote Control</div>
+        <div class="grid-3">
+          <div class="rw-box rw-au">
+            <div class="rw-label">🖥️ REMOTE TUI</div>
+            <div class="rw-title">Attach TUI vào session đang chạy</div>
+            <div class="rw-body">
+              Khởi động app-server trên máy A, attach TUI từ máy B qua SSH hoặc local. Giống <code>tmux attach</code> nhưng cho Codex session — tiếp tục công việc từ chỗ đã dừng.
+            </div>
+          </div>
+          <div class="rw-box rw-ch">
+            <div class="rw-label">📱 TELEGRAM / DISCORD</div>
+            <div class="rw-title">Giao task qua messaging</div>
+            <div class="rw-body">
+              Plugin community cho phép send task đến Codex qua Telegram hoặc Discord. Two-way communication qua MCP — nhận progress update và kết quả ngay trên phone.
+            </div>
+          </div>
+          <div class="rw-box rw-ins">
+            <div class="rw-label">🔌 CI/CD INTEGRATION</div>
+            <div class="rw-title">Nhúng vào pipeline</div>
+            <div class="rw-body">
+              <code>codex exec</code> chạy non-interactive, output JSON events, exit code theo success/fail — tích hợp vào GitHub Actions, GitLab CI, Jenkins như bất kỳ CLI tool nào.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Thiết lập App Server</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Terminal — App Server & Remote Connection</span>
+            <span class="cb-tag ct-au">REMOTE</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm">── Trên máy chủ (server / laptop bạn để chạy) ──</span>
+
+<span class="cm"># Khởi động app-server (foreground)</span>
+<span class="c-cx">codex app-server</span> --listen ws://0.0.0.0:8765
+
+<span class="cm"># Hoặc chạy như daemon (background)</span>
+<span class="c-cx">codex app-server</span> --daemonize --listen ws://localhost:8765
+
+<span class="cm"># Kiểm tra daemon đang chạy</span>
+<span class="c-cx">codex app-server</span> --status
+
+<span class="cm">── Từ máy khác / terminal khác ──</span>
+
+<span class="cm"># Attach TUI vào app-server qua WebSocket</span>
+<span class="c-cx">codex</span> --remote ws://server-ip:8765
+
+<span class="cm"># Hoặc qua WSS (secure)</span>
+<span class="c-cx">codex</span> --remote wss://server-ip:8765
+
+<span class="cm">── Non-interactive exec vào remote server ──</span>
+
+<span class="c-cx">codex exec</span> --remote ws://server-ip:8765 \
+    <span class="st-s">"run all failing tests and fix them"</span>
+
+<span class="cm">── Resume session đã có (không mất context) ──</span>
+
+<span class="c-cx">codex</span> --resume                    <span class="cm"># resume gần nhất</span>
+<span class="c-cx">codex</span> --resume &lt;session-id&gt;      <span class="cm"># resume session cụ thể</span>
+<span class="c-cx">codex</span> /agent                     <span class="cm"># trong TUI: chọn thread từ picker</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cài Telegram Bot cho Remote Dispatch</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Plugin marketplace — Telegram / Discord remote</span>
+            <span class="cb-tag ct-ch">PLUGIN</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Cài plugin từ marketplace</span>
+<span class="c-cx">codex plugin marketplace add</span> owner/codex-telegram-plugin
+
+<span class="cm"># Hoặc tìm trong TUI</span>
+<span class="c-cx">/apps</span>    <span class="cm"># → Browse → tìm "telegram" hoặc "discord"</span>
+
+<span class="cm"># Sau khi cài: gửi task từ Telegram</span>
+<span class="cm"># Nhắn vào bot: "@codex fix the login bug in auth.ts"</span>
+<span class="cm"># Bot relay đến app-server → chạy task → reply kết quả</span>
+
+<span class="cm"># Xem tất cả plugins đã cài</span>
+<span class="c-cx">codex plugin list</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S6: MULTI-AGENT ══ -->
+    <div class="section" id="s6">
+      <div class="sec-head">
+        <span class="sec-tag st-sk">MULTI-AGENT</span>
+        <div>
+          <h2 class="sec-title">Multi-Agent — Nhiều agent song song</h2>
+          <p class="sec-sub">Delegate task phức tạp cho subagent chuyên biệt — chạy song song, tăng tốc đáng kể</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cách Multi-Agent hoạt động</div>
+        <div class="sub">
+          <p>Root agent nhận task → phân tích → spawn subagents cho các phần độc lập → collect results → synthesize. Mỗi subagent có context window riêng, không bị ảnh hưởng lẫn nhau.</p>
+        </div>
+        <div class="grid-2">
+          <div class="rw-box rw-sk">
+            <div class="rw-label">🌳 ROOT AGENT</div>
+            <div class="rw-title">Orchestrator — Phân phối và tổng hợp</div>
+            <div class="rw-body">
+              Nhận task ban đầu, lập kế hoạch phân chia, spawn subagents với context cụ thể, theo dõi progress, tổng hợp kết quả cuối cùng. Bạn chỉ giao task cho root agent.
+            </div>
+          </div>
+          <div class="rw-box rw-oc">
+            <div class="rw-label">🔧 SUBAGENTS</div>
+            <div class="rw-title">Specialists — Làm sâu trong domain riêng</div>
+            <div class="rw-body">
+              Mỗi subagent có identity riêng (<code>subagent_identity</code> trong hook inputs), làm việc trong scope hẹp, báo cáo lại root. Cấu hình thread caps và wait-time để tránh over-spawning.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Ví dụ thực tế: PR Review với Multi-Agent</div>
+        <div class="scenario">
+          <div class="scenario-title"><span style="color:var(--sk)">🔍</span> Task: "Review toàn bộ PR #142 trước khi merge"</div>
+          <div class="scenario-steps">
+            <div class="sc-step"><div class="sc-num" style="background:var(--sk-dim);color:var(--sk)">R</div><strong style="color:var(--text)">Root agent</strong> đọc diff của PR, phân chia thành 4 domains: security, performance, tests, style</div>
+            <div class="sc-step"><div class="sc-num" style="background:var(--oc-dim);color:var(--oc)">A1</div><strong style="color:var(--text)">Agent 1</strong> — Security review: kiểm tra injection, auth bypass, secrets exposure</div>
+            <div class="sc-step"><div class="sc-num" style="background:var(--ins-dim);color:var(--ins)">A2</div><strong style="color:var(--text)">Agent 2</strong> — Performance: N+1 queries, memory leaks, unoptimized loops</div>
+            <div class="sc-step"><div class="sc-num" style="background:var(--ch-dim);color:var(--ch)">A3</div><strong style="color:var(--text)">Agent 3</strong> — Test coverage: missing unit tests, edge cases, mock completeness</div>
+            <div class="sc-step"><div class="sc-num" style="background:var(--au-dim);color:var(--au)">A4</div><strong style="color:var(--text)">Agent 4</strong> — Code style: naming conventions, AGENTS.md compliance, dead code</div>
+            <div class="sc-step"><div class="sc-num" style="background:var(--sk-dim);color:var(--sk)">R</div><strong style="color:var(--text)">Root agent</strong> tổng hợp → tạo review comment GitHub với severity ranking → hỏi approval trước khi post</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cấu hình Multi-Agent trong config.toml</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">.codex/config.toml — Multi-Agent settings</span>
+            <span class="cb-tag ct-sk">CONFIG</span>
+          </div>
+          <div class="cb-body"><pre>[<span class="c-cx">multi_agent</span>]
+<span class="cm"># Số subagents tối đa cùng lúc (tránh rate limit)</span>
+<span class="c-y">thread_cap</span> = <span class="nm">4</span>
+
+<span class="cm"># Thời gian chờ subagent respond trước khi timeout</span>
+<span class="c-y">wait_time_seconds</span> = <span class="nm">120</span>
+
+<span class="cm"># Root agent hints — Codex biết đây là orchestrator</span>
+<span class="c-y">root_agent_hint</span> = <span class="kw">true</span>
+
+<span class="cm"># Depth tối đa của subagent tree</span>
+<span class="c-y">max_depth</span> = <span class="nm">3</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S7: COMPUTER USE & BROWSER ══ -->
+    <div class="section" id="s7">
+      <div class="sec-head">
+        <span class="sec-tag st-t">COMPUTER USE</span>
+        <div>
+          <h2 class="sec-title">Computer Use & Browser — Codex nhìn và điều khiển màn hình</h2>
+          <p class="sec-sub">GPT-5.5 với agentic-first training — đọc màn hình, click, gõ phím, điều hướng browser</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Hai chế độ tương tác với UI</div>
+        <div class="grid-2">
+          <div class="rw-box rw-t">
+            <div class="rw-label">🖥️ COMPUTER USE</div>
+            <div class="rw-title">Điều khiển desktop apps</div>
+            <div class="rw-body">
+              Codex đọc màn hình qua screenshot, di chuyển chuột, click, gõ phím, mở app bất kỳ. Dùng khi không có API — legacy apps, GUI tools, desktop software.<br><br>
+              <strong style="color:var(--text)">Ví dụ:</strong> "Mở Figma, export tất cả frame trong page 'Mockups' thành PNG 2x, lưu vào <code>./design-exports/</code>"
+            </div>
+          </div>
+          <div class="rw-box rw-oc">
+            <div class="rw-label">🌐 BROWSER (Playwright MCP)</div>
+            <div class="rw-title">Tương tác browser lập trình được</div>
+            <div class="rw-body">
+              Dùng Playwright MCP server — Codex navigate URL, click element, fill form, scrape data. Faster và reliable hơn Computer Use cho web tasks.<br><br>
+              <strong style="color:var(--text)">Ví dụ:</strong> "Vào staging.myapp.com, đăng nhập, chạy qua 10 user flows, screenshot bất kỳ lỗi nào"
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cài Playwright MCP Server</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">~/.codex/config.toml — Playwright MCP</span>
+            <span class="cb-tag ct-t">MCP</span>
+          </div>
+          <div class="cb-body"><pre>[<span class="c-cx">mcp_servers.playwright</span>]
+<span class="c-y">command</span> = <span class="st-s">"npx"</span>
+<span class="c-y">args</span> = [<span class="st-s">"-y"</span>, <span class="st-s">"@playwright/mcp@latest"</span>]
+
+<span class="cm"># Hoặc Chrome DevTools Protocol</span>
+[<span class="c-cx">mcp_servers.chrome</span>]
+<span class="c-y">command</span> = <span class="st-s">"npx"</span>
+<span class="c-y">args</span> = [<span class="st-s">"-y"</span>, <span class="st-s">"@modelcontextprotocol/server-chrome"</span>]
+
+<span class="cm"># Sau khi cài, dùng trong session:</span>
+<span class="cm"># "Go to https://example.com, fill the contact form with test data,</span>
+<span class="cm">#  take a screenshot of the success page"</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S8: SKILLS & AGENTS.MD ══ -->
+    <div class="section" id="s8">
+      <div class="sec-head">
+        <span class="sec-tag st-cx">SKILLS</span>
+        <div>
+          <h2 class="sec-title">Skills — Workflow có thể tái sử dụng</h2>
+          <p class="sec-sub">Viết SKILL.md một lần, Codex tự động nhận diện và áp dụng khi task phù hợp</p>
+        </div>
+      </div>
+
+      <div class="cat-banner cb-cx">
+        <div class="cb-icon">📖</div>
+        <div>
+          <div class="cb-badge">SKILLS</div>
+          <div class="cb-title">Codex học workflow của bạn một lần, dùng mãi mãi</div>
+          <div class="cb-sub">Skills là thư mục chứa <code>SKILL.md</code> + scripts tuỳ chọn. Codex load metadata (tên, mô tả) cho mọi skill, và chỉ đọc full instructions khi quyết định dùng — tiết kiệm context window. Skills có thể invoke explicitly hoặc Codex chọn tự động khi task match.</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Vị trí đặt Skills</div>
+        <div class="grid-2">
+          <div class="rw-box rw-ins">
+            <div class="rw-label">🌐 GLOBAL SKILLS</div>
+            <div class="rw-title">~/.agents/skills/ — Dùng trên mọi project</div>
+            <div class="rw-body">
+              Skills đặt ở thư mục home — available trong mọi session, mọi repo. Dùng cho workflow cá nhân lặp đi lặp lại: deploy checklist, commit message format, code review style…
+            </div>
+          </div>
+          <div class="rw-box rw-ch">
+            <div class="rw-label">📁 PROJECT SKILLS</div>
+            <div class="rw-title">.agents/skills/ — Riêng cho project</div>
+            <div class="rw-body">
+              Skills trong repo — commit vào version control, share với cả team. Dùng cho workflow đặc thù của dự án: API boilerplate, migration scripts, test generation patterns…
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Tạo SKILL.md — Cấu trúc đầy đủ</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">~/.agents/skills/deploy-checklist/SKILL.md</span>
+            <span class="cb-tag ct-cx">SKILL</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm">---
+name: deploy-checklist
+description: Pre-deployment validation workflow. Triggers when user mentions
+  "deploy", "release", "production", or "ship to prod". Runs test suite,
+  checks env variables, validates build, creates release notes.
+---</span>
+
+<span class="c-cx">## Deploy Checklist Workflow</span>
+
+Khi được gọi, thực hiện theo thứ tự sau:
+
+<span class="c-g">1.</span> Chạy `pnpm test` — nếu fail, dừng lại và report lỗi
+<span class="c-g">2.</span> Chạy `pnpm build` — kiểm tra không có TypeScript error
+<span class="c-g">3.</span> Verify tất cả env vars trong `.env.example` đã có trong `.env.production`
+<span class="c-g">4.</span> Chạy `pnpm run lint` — không được có error (warning ok)
+<span class="c-g">5.</span> Kiểm tra CHANGELOG.md đã được update cho version mới
+<span class="c-g">6.</span> Tạo git tag theo format `v{major}.{minor}.{patch}`
+<span class="c-g">7.</span> Hỏi confirmation trước khi push tag và trigger CI
+
+<span class="c-cx">## Abort conditions</span>
+- Bất kỳ test nào fail → dừng hẳn, không tiếp tục
+- Missing env var → list ra tất cả missing, hỏi user điền trước
+- Build error → hiện full error, suggest fix</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Invoke Skills trong session</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">TUI — Cách gọi Skills</span>
+            <span class="cb-tag ct-ins">TUI</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Xem danh sách skills đang có</span>
+<span class="c-cx">/skills</span>
+
+<span class="cm"># Explicit invoke bằng $ prefix</span>
+<span class="c-cx">$deploy-checklist</span>
+
+<span class="cm"># Hoặc nhắc tên trong prompt</span>
+<span class="c-w">"Use the deploy-checklist skill to prepare v2.1.0 release"</span>
+
+<span class="cm"># Implicit — Codex tự chọn khi task match</span>
+<span class="c-w">"we're ready to ship to production"</span>
+<span class="cm"># → Codex nhận ra "ship to production" matches deploy-checklist</span>
+<span class="cm"># → Tự động load và follow workflow</span>
+
+<span class="cm"># Cài skill từ plugin marketplace</span>
+<span class="c-cx">codex plugin marketplace add</span> owner/my-skills-pack</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">9 Skills phổ biến nhất (cộng đồng 2026)</div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">🚀</div>
+            <div class="card-title" style="color:var(--cx2)">deploy-checklist</div>
+            <div class="card-desc">Pre-deploy validation: test, build, env check, changelog, tag. Tự động khi nói "ship" hay "release".</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🧪</div>
+            <div class="card-title" style="color:var(--ins)">tdd-workflow</div>
+            <div class="card-desc">Red-green-refactor cycle. Viết test trước, implement sau, refactor khi green. Enforce TDD discipline.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">📝</div>
+            <div class="card-title" style="color:var(--ch)">conventional-commits</div>
+            <div class="card-desc">Format commit message theo Conventional Commits spec. Auto-detect scope từ changed files.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔍</div>
+            <div class="card-title" style="color:var(--sk)">fast-grep</div>
+            <div class="card-desc">Tìm function usage cross-codebase trong 5s thay vì 75s. Dùng smart indexing thay vì đọc từng file.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔐</div>
+            <div class="card-title" style="color:var(--pink)">security-scan</div>
+            <div class="card-desc">Scan repo tìm secrets, hardcoded credentials, injection vulnerabilities trước khi commit.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">📊</div>
+            <div class="card-title" style="color:var(--au)">api-boilerplate</div>
+            <div class="card-desc">Generate REST endpoint với validation, error handling, tests theo chuẩn project. 1 lệnh = full CRUD.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">📖</div>
+            <div class="card-title" style="color:var(--teal)">doc-generator</div>
+            <div class="card-desc">Auto-generate JSDoc/TSDoc từ function signatures và usage patterns. Giữ docs sync với code.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔄</div>
+            <div class="card-title" style="color:var(--oc)">db-migration</div>
+            <div class="card-desc">Scaffold Prisma/Drizzle migration an toàn: backup check, dry-run, rollback plan trước khi apply.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🧹</div>
+            <div class="card-title" style="color:var(--cx2)">debt-report</div>
+            <div class="card-desc">Phân tích toàn bộ codebase tìm TODO, deprecated usage, dead code, cyclomatic complexity cao.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S9: PLUGINS ══ -->
+    <div class="section" id="s9">
+      <div class="sec-head">
+        <span class="sec-tag st-ins">PLUGINS</span>
+        <div>
+          <h2 class="sec-title">Plugins — Gói tích hợp đầy đủ</h2>
+          <p class="sec-sub">Plugin = Skills + App connectors + MCP servers trong một package installable duy nhất</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Plugin gồm những gì?</div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">📖</div>
+            <div class="card-title" style="color:var(--cx2)">Skills</div>
+            <div class="card-desc">Reusable instructions. Codex load khi task match. Ví dụ: "Khi mở Linear issue, follow triage workflow này".</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔌</div>
+            <div class="card-title" style="color:var(--ins)">App Connectors</div>
+            <div class="card-desc">Kết nối dịch vụ: Slack, Gmail, GitHub. Codex đọc/ghi qua OAuth. Hiện trong TUI với <code>/apps</code>.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔗</div>
+            <div class="card-title" style="color:var(--ch)">MCP Servers</div>
+            <div class="card-desc">Custom tools và context. Tự động configure trong <code>config.toml</code> khi cài plugin.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cài và quản lý Plugins</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Terminal + TUI — Plugin management</span>
+            <span class="cb-tag ct-cx">PLUGINS</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Thêm marketplace (nguồn plugin)</span>
+<span class="c-cx">codex plugin marketplace add</span> openai/codex-plugins
+<span class="c-cx">codex plugin marketplace add</span> hashgraph-online/awesome-codex-plugins
+
+<span class="cm"># Xem marketplaces đang configured</span>
+<span class="c-cx">codex plugin marketplace list</span>
+
+<span class="cm"># Cài plugin từ marketplace</span>
+<span class="c-cx">codex plugin install</span> linear
+<span class="c-cx">codex plugin install</span> sentry
+<span class="c-cx">codex plugin install</span> slack
+<span class="c-cx">codex plugin install</span> github
+<span class="c-cx">codex plugin install</span> gmail
+
+<span class="cm"># Cài từ GitHub trực tiếp</span>
+<span class="c-cx">codex plugin marketplace add</span> owner/my-private-plugin
+
+<span class="cm"># Xem plugins đã cài</span>
+<span class="c-cx">codex plugin list</span>
+
+<span class="cm"># Upgrade plugin</span>
+<span class="c-cx">codex plugin upgrade</span> linear
+
+<span class="cm"># Gỡ plugin</span>
+<span class="c-cx">codex plugin remove</span> sentry
+
+<span class="cm"># Trong TUI: browse và manage</span>
+<span class="c-cx">/apps</span>     <span class="cm"># xem và chọn app connectors</span>
+<span class="c-cx">/skills</span>   <span class="cm"># xem skills từ plugins đã cài</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Plugins chính thức (ra mắt 27/03/2026)</div>
+        <div class="plugin-grid">
+          <div class="plugin-card pc-cx">
+            <div class="pc-header">
+              <div class="pc-icon">🔐</div>
+              <div>
+                <div class="pc-name">Codex Security</div>
+                <span class="pc-badge pbd-cx">OFFICIAL · SECURITY</span>
+              </div>
+            </div>
+            <div class="pc-desc">Scan codebase tìm vulnerabilities. Phân tích trust boundaries, tạo threat model có thể edit, tìm security issues trong sandbox. 1.2M commits đã scan trong beta, 792 critical findings.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Threat modeling</span>
+              <span class="pc-feat">CVE detection</span>
+              <span class="pc-feat">Sandbox testing</span>
+              <span class="pc-feat">Pro/Enterprise</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-ins">
+            <div class="pc-header">
+              <div class="pc-icon">📋</div>
+              <div>
+                <div class="pc-name">Linear</div>
+                <span class="pc-badge pbd-ins">OFFICIAL · DEV TOOLS</span>
+              </div>
+            </div>
+            <div class="pc-desc">Kết nối Linear issue tracker. Tạo issue từ bug, update status, query sprint backlog, link PR với issue. Auth, skills và MCP config được đóng gói sẵn.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Create issues</span>
+              <span class="pc-feat">Update status</span>
+              <span class="pc-feat">Sprint queries</span>
+              <span class="pc-feat">PR linking</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-p">
+            <div class="pc-header">
+              <div class="pc-icon">🐛</div>
+              <div>
+                <div class="pc-name">Sentry</div>
+                <span class="pc-badge pbd-p">OFFICIAL · MONITORING</span>
+              </div>
+            </div>
+            <div class="pc-desc">Fetch stack trace thực từ Sentry khi debug production error. Codex đọc actual error context, không làm việc từ screenshot hay paste — debug nhanh hơn nhiều.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Stack traces</span>
+              <span class="pc-feat">Error history</span>
+              <span class="pc-feat">Issue triage</span>
+              <span class="pc-feat">Performance</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-ch">
+            <div class="pc-header">
+              <div class="pc-icon">💬</div>
+              <div>
+                <div class="pc-name">Slack</div>
+                <span class="pc-badge pbd-ch">OFFICIAL · COMMUNICATION</span>
+              </div>
+            </div>
+            <div class="pc-desc">Tóm tắt channel, draft reply, search lịch sử tin nhắn, post kết quả task. Kết hợp với Dispatch: tự post daily standup vào channel.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Channel summary</span>
+              <span class="pc-feat">Draft replies</span>
+              <span class="pc-feat">Message search</span>
+              <span class="pc-feat">Auto-post</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-oc">
+            <div class="pc-header">
+              <div class="pc-icon">🐙</div>
+              <div>
+                <div class="pc-name">GitHub</div>
+                <span class="pc-badge pbd-oc">OFFICIAL · DEV TOOLS</span>
+              </div>
+            </div>
+            <div class="pc-desc">PR management, issue tracking, release notes generation, beyond git CLI. Review, comment, approve/request-changes trực tiếp qua Codex.</div>
+            <div class="pc-features">
+              <span class="pc-feat">PR review</span>
+              <span class="pc-feat">Issue management</span>
+              <span class="pc-feat">Release notes</span>
+              <span class="pc-feat">Actions trigger</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-au">
+            <div class="pc-header">
+              <div class="pc-icon">🚀</div>
+              <div>
+                <div class="pc-name">Vercel</div>
+                <span class="pc-badge pbd-au">OFFICIAL · DEPLOY</span>
+              </div>
+            </div>
+            <div class="pc-desc">Deploy, check preview URL, xem build logs, query deployment status, manage environment variables. Kết hợp với deploy-checklist skill cho CI/CD hoàn chỉnh.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Deploy preview</span>
+              <span class="pc-feat">Build logs</span>
+              <span class="pc-feat">Env vars</span>
+              <span class="pc-feat">Rollback</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-sk">
+            <div class="pc-header">
+              <div class="pc-icon">📋</div>
+              <div>
+                <div class="pc-name">Notion</div>
+                <span class="pc-badge pbd-sk">OFFICIAL · PRODUCTIVITY</span>
+              </div>
+            </div>
+            <div class="pc-desc">Đọc/tạo/update pages, databases. Tự động tạo meeting notes, technical docs, project wiki từ code và session context.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Read pages</span>
+              <span class="pc-feat">Create docs</span>
+              <span class="pc-feat">Update DB</span>
+              <span class="pc-feat">Template</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-t">
+            <div class="pc-header">
+              <div class="pc-icon">🤗</div>
+              <div>
+                <div class="pc-name">Hugging Face</div>
+                <span class="pc-badge pbd-t">OFFICIAL · AI/ML</span>
+              </div>
+            </div>
+            <div class="pc-desc">Browse models, download weights, push fine-tuned models, query model cards. Dùng trong ML pipelines: auto-push sau training, fetch benchmarks.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Model search</span>
+              <span class="pc-feat">Push models</span>
+              <span class="pc-feat">Model cards</span>
+              <span class="pc-feat">Datasets</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S10: MCP SERVERS ══ -->
+    <div class="section" id="s10">
+      <div class="sec-head">
+        <span class="sec-tag st-t">MCP</span>
+        <div>
+          <h2 class="sec-title">MCP Servers — Custom tools và context</h2>
+          <p class="sec-sub">Model Context Protocol — TOML config, STDIO hoặc HTTP, tự động launch khi session bắt đầu</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Hai loại MCP server trong Codex</div>
+        <div class="grid-2">
+          <div class="rw-box rw-cx">
+            <div class="rw-label">🖥️ STDIO (LOCAL)</div>
+            <div class="rw-title">Chạy như local process</div>
+            <div class="rw-body">
+              Codex launch server như child process, giao tiếp qua stdin/stdout. Dành cho tools cài local: npm packages, uvx (Python), binary tools.<br><br>
+              Codex tự khởi động khi session bắt đầu — không cần chạy tay.
+            </div>
+          </div>
+          <div class="rw-box rw-oc">
+            <div class="rw-label">🌐 STREAMABLE HTTP (REMOTE)</div>
+            <div class="rw-title">Server ở URL cố định</div>
+            <div class="rw-body">
+              Codex connect đến URL — dành cho cloud services, shared team servers, OAuth-protected APIs.<br><br>
+              Hỗ trợ OAuth login/logout trực tiếp từ Codex với <code>codex mcp add --auth oauth URL</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cấu hình MCP servers trong config.toml</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">~/.codex/config.toml — MCP Server config</span>
+            <span class="cb-tag ct-t">MCP CONFIG</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># ── STDIO servers (local process) ──</span>
+
+[<span class="c-cx">mcp_servers.github</span>]
+<span class="c-y">command</span> = <span class="st-s">"npx"</span>
+<span class="c-y">args</span> = [<span class="st-s">"-y"</span>, <span class="st-s">"@modelcontextprotocol/server-github"</span>]
+<span class="c-y">env</span> = { <span class="c-cx">GITHUB_TOKEN</span> = <span class="st-s">"ghp_xxxx"</span> }   <span class="cm"># least privilege!</span>
+
+[<span class="c-cx">mcp_servers.postgres</span>]
+<span class="c-y">command</span> = <span class="st-s">"npx"</span>
+<span class="c-y">args</span> = [<span class="st-s">"-y"</span>, <span class="st-s">"@modelcontextprotocol/server-postgres"</span>,
+         <span class="st-s">"postgresql://readonly_user:pass@localhost/mydb"</span>]
+
+[<span class="c-cx">mcp_servers.playwright</span>]
+<span class="c-y">command</span> = <span class="st-s">"npx"</span>
+<span class="c-y">args</span> = [<span class="st-s">"-y"</span>, <span class="st-s">"@playwright/mcp@latest"</span>]
+
+[<span class="c-cx">mcp_servers.openai-docs</span>]
+<span class="c-y">command</span> = <span class="st-s">"npx"</span>
+<span class="c-y">args</span> = [<span class="st-s">"-y"</span>, <span class="st-s">"@openai/mcp-server-docs"</span>]
+
+<span class="cm"># ── Streamable HTTP servers ──</span>
+
+[<span class="c-cx">mcp_servers.context7</span>]
+<span class="c-y">type</span> = <span class="st-s">"streamable-http"</span>
+<span class="c-y">url</span> = <span class="st-s">"https://mcp.context7.com/mcp"</span>
+
+[<span class="c-cx">mcp_servers.figma</span>]
+<span class="c-y">type</span> = <span class="st-s">"streamable-http"</span>
+<span class="c-y">url</span> = <span class="st-s">"https://api.figma.com/mcp"</span>
+<span class="c-y">auth</span> = <span class="st-s">"oauth"</span>  <span class="cm"># Codex tự mở browser để login</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">MCP Servers hữu ích nhất cho developer</div>
+        <div class="mcp-grid">
+          <div class="mcp-card">
+            <div class="mcp-icon">🐙</div>
+            <div><div class="mcp-name" style="color:var(--cx2)">GitHub MCP</div><div class="mcp-desc">PR, issues, reviews, branches — beyond git CLI</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">🗄️</div>
+            <div><div class="mcp-name" style="color:var(--ins)">PostgreSQL MCP</div><div class="mcp-desc">Query DB, schema analysis, migration planning</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">🌐</div>
+            <div><div class="mcp-name" style="color:var(--ch)">Playwright MCP</div><div class="mcp-desc">Browser automation, E2E tests, web scraping</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">🎨</div>
+            <div><div class="mcp-name" style="color:var(--sk)">Figma MCP</div><div class="mcp-desc">Đọc designs, lấy token, inspect components</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">📚</div>
+            <div><div class="mcp-name" style="color:var(--teal)">Context7 MCP</div><div class="mcp-desc">Up-to-date docs cho 1000+ libraries</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">📖</div>
+            <div><div class="mcp-name" style="color:var(--au)">OpenAI Docs MCP</div><div class="mcp-desc">Search và đọc OpenAI developer docs</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">🐛</div>
+            <div><div class="mcp-name" style="color:var(--pink)">Sentry MCP</div><div class="mcp-desc">Stack traces thực, error history, traces</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">📋</div>
+            <div><div class="mcp-name" style="color:var(--oc)">Linear MCP</div><div class="mcp-desc">Issues, sprints, projects, cycles</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">🖥️</div>
+            <div><div class="mcp-name" style="color:var(--cx2)">Codex as MCP Server</div><div class="mcp-desc">Expose Codex cho agent khác dùng qua stdio</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Quản lý MCP qua CLI</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Terminal — codex mcp commands</span>
+            <span class="cb-tag ct-cx">MCP CLI</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Thêm STDIO server</span>
+<span class="c-cx">codex mcp add</span> --name github \
+  --command "npx -y @modelcontextprotocol/server-github" \
+  --env GITHUB_TOKEN=ghp_xxxx
+
+<span class="cm"># Thêm HTTP server với OAuth</span>
+<span class="c-cx">codex mcp add</span> --name figma \
+  --url https://api.figma.com/mcp \
+  --auth oauth
+
+<span class="cm"># Xem servers đang configured (trong TUI)</span>
+<span class="c-cx">/mcp</span>            <span class="cm"># danh sách</span>
+<span class="c-cx">/mcp verbose</span>    <span class="cm"># kèm server diagnostics</span>
+
+<span class="cm"># Chạy Codex như MCP server (để agent khác dùng)</span>
+<span class="c-cx">codex mcp-server</span>   <span class="cm"># expose qua stdio</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S11: USE CASES ══ -->
+    <div class="section" id="s11">
+      <div class="sec-head">
+        <span class="sec-tag st-au">USE CASES</span>
+        <div>
+          <h2 class="sec-title">Use Cases thực tế theo vai trò</h2>
+          <p class="sec-sub">Các task bạn có thể chạy ngay hôm nay với Codex CLI</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Backend Developer</div>
+        <div class="grid-2">
+          <div class="rw-box rw-cx">
+            <div class="rw-label">🔄 REFACTORING LỚN</div>
+            <div class="rw-title">Batch refactor toàn codebase</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Lệnh:</strong> <code>codex exec "migrate all callback-style async functions to async/await in src/"</code><br><br>
+              Codex đọc từng file, detect pattern, refactor, chạy tests để verify không có regression. Một lệnh = hàng trăm file.
+            </div>
+          </div>
+          <div class="rw-box rw-ins">
+            <div class="rw-label">🗄️ DATABASE DEBUGGING</div>
+            <div class="rw-title">Debug production query với Sentry + Postgres</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Lệnh:</strong> "Fetch Sentry error #1234, lấy stack trace, query database với Postgres MCP để reproduce, fix và viết regression test"<br><br>
+              Codex làm hết từ error report đến fix test — không cần copy-paste.
+            </div>
+          </div>
+          <div class="rw-box rw-ch">
+            <div class="rw-label">🔐 SECURITY AUDIT</div>
+            <div class="rw-title">Scan và fix vulnerabilities</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Lệnh:</strong> <code>codex plugin install codex-security</code> rồi "Scan toàn bộ repo, tạo threat model, list critical vulns, fix những cái có thể auto-fix"<br><br>
+              Output: threat model markdown + fixed files + PR ready.
+            </div>
+          </div>
+          <div class="rw-box rw-sk">
+            <div class="rw-label">📊 CI/CD AUTOMATION</div>
+            <div class="rw-title">Nhúng vào GitHub Actions</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Pipeline:</strong> <code>codex exec --yolo "fix all failing tests in CI"</code> trong GitHub Actions — Codex chạy, fix, commit back. False positive review block dưới 1% với PR Review multi-agent.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Full-Stack Developer</div>
+        <div class="grid-2">
+          <div class="rw-box rw-t">
+            <div class="rw-label">🎨 FIGMA → CODE</div>
+            <div class="rw-title">Implement design từ Figma</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Lệnh:</strong> "Đọc Figma page 'Dashboard v2' qua Figma MCP, implement các component trong <code>src/components/dashboard/</code> theo design tokens và existing patterns trong codebase"<br><br>
+              Codex đọc design + đọc code hiện tại → generate consistent components.
+            </div>
+          </div>
+          <div class="rw-box rw-oc">
+            <div class="rw-label">🧪 E2E TEST WRITING</div>
+            <div class="rw-title">Generate Playwright tests từ user flows</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Lệnh:</strong> "Dùng Playwright MCP, navigate staging.myapp.com, khám phá tất cả user flows, tự động tạo E2E test suite coverage cho happy paths và error cases"<br><br>
+              Codex explore → discover → generate tests — không cần viết tay.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Tech Lead / Engineering Manager</div>
+        <div class="grid-2">
+          <div class="rw-box rw-p">
+            <div class="rw-label">📝 RELEASE NOTES</div>
+            <div class="rw-title">Auto-generate changelog từ commits + issues</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Lệnh:</strong> "Đọc git log từ v2.0.0 đến HEAD, fetch related Linear issues qua Linear MCP, tạo user-facing CHANGELOG.md theo keep-a-changelog format, group theo feature/fix/breaking"<br><br>
+              Mất 30 giây thay vì 30 phút.
+            </div>
+          </div>
+          <div class="rw-box rw-au">
+            <div class="rw-label">📊 TECH DEBT REPORT</div>
+            <div class="rw-title">Phân tích và prioritize tech debt</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Lệnh (Scheduled via cron):</strong> "Mỗi thứ 6, chạy debt-report skill, gom findings, sort theo impact, create Linear issues cho top 5, post summary lên #tech-debt Slack channel"
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S12: CHEAT SHEET ══ -->
+    <div class="section" id="s12">
+      <div class="sec-head">
+        <span class="sec-tag st-y">CHEATSHEET</span>
+        <div>
+          <h2 class="sec-title">Cheat Sheet toàn diện</h2>
+          <p class="sec-sub">Commands, slash commands, shortcuts và cấu hình quan trọng nhất</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Quick Reference</div>
+        <div class="cheat-grid">
+          <div class="cheat-card">
+            <h4 class="h4-cx">⚡ CLI Commands</h4>
+            <div class="cheat-row"><span class="ck">codex</span><span class="cv">Mở interactive TUI</span></div>
+            <div class="cheat-row"><span class="ck">codex exec "task"</span><span class="cv">Non-interactive, exit khi xong</span></div>
+            <div class="cheat-row"><span class="ck">codex --resume</span><span class="cv">Tiếp tục session gần nhất</span></div>
+            <div class="cheat-row"><span class="ck">codex --model gpt-5.4</span><span class="cv">Override model</span></div>
+            <div class="cheat-row"><span class="ck">codex doctor</span><span class="cv">Check môi trường</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-ins">🛡️ Sandbox + Approval</h4>
+            <div class="cheat-row"><span class="ck">--sandbox workspace-write</span><span class="cv">Ghi trong workspace</span></div>
+            <div class="cheat-row"><span class="ck">--sandbox read-only</span><span class="cv">Chỉ đọc</span></div>
+            <div class="cheat-row"><span class="ck">--ask-for-approval suggest</span><span class="cv">Hỏi trước mọi bước</span></div>
+            <div class="cheat-row"><span class="ck">--ask-for-approval on-request</span><span class="cv">Auto trong workspace</span></div>
+            <div class="cheat-row"><span class="ck">--yolo</span><span class="cv">Không hỏi gì (CI only)</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-ch">🔧 Slash Commands (TUI)</h4>
+            <div class="cheat-row"><span class="ck">/init</span><span class="cv">Generate AGENTS.md</span></div>
+            <div class="cheat-row"><span class="ck">/review</span><span class="cv">Review working tree changes</span></div>
+            <div class="cheat-row"><span class="ck">/diff</span><span class="cv">Xem file changes</span></div>
+            <div class="cheat-row"><span class="ck">/skills</span><span class="cv">Xem available skills</span></div>
+            <div class="cheat-row"><span class="ck">/mcp</span><span class="cv">Xem MCP servers + tools</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-sk">📱 Keyboard Shortcuts</h4>
+            <div class="cheat-row"><span class="ck">Enter (khi đang chạy)</span><span class="cv">Inject instruction ngay</span></div>
+            <div class="cheat-row"><span class="ck">Tab (khi đang chạy)</span><span class="cv">Queue prompt kế tiếp</span></div>
+            <div class="cheat-row"><span class="ck">@ trong composer</span><span class="cv">Fuzzy file search</span></div>
+            <div class="cheat-row"><span class="ck">$ trong composer</span><span class="cv">Mention skill</span></div>
+            <div class="cheat-row"><span class="ck">! prefix</span><span class="cv">Chạy shell command</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-au">🔌 Plugin Commands</h4>
+            <div class="cheat-row"><span class="ck">codex plugin install X</span><span class="cv">Cài plugin</span></div>
+            <div class="cheat-row"><span class="ck">codex plugin list</span><span class="cv">Xem đã cài</span></div>
+            <div class="cheat-row"><span class="ck">codex plugin upgrade X</span><span class="cv">Cập nhật</span></div>
+            <div class="cheat-row"><span class="ck">codex plugin remove X</span><span class="cv">Gỡ cài đặt</span></div>
+            <div class="cheat-row"><span class="ck">codex plugin marketplace add</span><span class="cv">Thêm nguồn</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-t">📡 Remote</h4>
+            <div class="cheat-row"><span class="ck">codex app-server --listen</span><span class="cv">Khởi động daemon</span></div>
+            <div class="cheat-row"><span class="ck">codex --remote ws://host</span><span class="cv">Attach TUI remote</span></div>
+            <div class="cheat-row"><span class="ck">codex exec --remote</span><span class="cv">Non-interactive remote</span></div>
+            <div class="cheat-row"><span class="ck">/agent</span><span class="cv">Switch thread trong TUI</span></div>
+            <div class="cheat-row"><span class="ck">--resume &lt;id&gt;</span><span class="cv">Resume session cụ thể</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Keyword Glossary</div>
+        <div class="kw-grid">
+          <span class="kw-pill kwp-cx">⚡ Codex CLI</span>
+          <span class="kw-pill kwp-ins">📖 SKILL.md</span>
+          <span class="kw-pill kwp-ch">📋 AGENTS.md</span>
+          <span class="kw-pill kwp-sk">🛡️ Sandbox Mode</span>
+          <span class="kw-pill kwp-au">🔐 Approval Policy</span>
+          <span class="kw-pill kwp-t">📡 App Server</span>
+          <span class="kw-pill kwp-p">🤖 Multi-Agent</span>
+          <span class="kw-pill kwp-cx">🔌 Plugin</span>
+          <span class="kw-pill kwp-oc">🔗 MCP Server</span>
+          <span class="kw-pill kwp-ins">💬 TUI Session</span>
+          <span class="kw-pill kwp-ch">🔄 codex exec</span>
+          <span class="kw-pill kwp-sk">🖥️ Computer Use</span>
+          <span class="kw-pill kwp-au">🌐 Playwright MCP</span>
+          <span class="kw-pill kwp-t">📊 config.toml</span>
+          <span class="kw-pill kwp-p">🧹 --yolo</span>
+        </div>
+      </div>
+
+      <div class="info i-ok">
+        <span class="info-ico">🎯</span>
+        <div>
+          <strong style="color:var(--text)">Workflow bắt đầu tốt nhất với Codex CLI:</strong><br>
+          <span style="color:var(--muted)">
+            <strong style="color:var(--cx2)">① npm install -g @openai/codex</strong> →
+            <strong style="color:var(--ins)">② codex login</strong> →
+            <strong style="color:var(--ch)">③ codex doctor</strong> (check env) →
+            <strong style="color:var(--sk)">④ cd vào project, chạy /init</strong> tạo AGENTS.md →
+            <strong style="color:var(--au)">⑤ Giao task đầu tiên</strong> với <code>--sandbox workspace-write --ask-for-approval suggest</code> →
+            <strong style="color:var(--teal)">⑥ Cài GitHub plugin</strong> →
+            <strong style="color:var(--pink)">⑦ Viết SKILL.md</strong> cho workflow lặp lại nhất của bạn
+          </span>
+        </div>
+      </div>
+
+      <div class="info i-warn" style="margin-top:12px">
+        <span class="info-ico">⚠️</span>
+        <div><strong style="color:var(--text)">Quy tắc vàng:</strong> Không bao giờ dùng <code>--yolo</code> hoặc <code>sandbox_mode = "danger-full-access"</code> trên máy dev thật. Luôn bắt đầu với <strong>suggest mode</strong> khi làm việc với codebase mới. Với MCP servers, dùng <strong>least privilege</strong> — read-only token nếu chỉ cần đọc.</div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <div class="footer">
+    <span>⚡ OpenAI Codex CLI · Skills · AGENTS.md · MCP · Plugins · Remote Control · Multi-Agent</span>
+    <span style="margin-left:auto;color:var(--faint)">Apache-2.0 · GPT-5.5 / codex-1 · macOS · Windows · Linux · 2026</span>
+  </div>
+</div><!-- /main -->
+
+<script>
+  const bar = document.getElementById('progBar');
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (total > 0 ? (scrolled / total) * 100 : 0) + '%';
+  });
+
+  const sections = document.querySelectorAll('.section[id]');
+  const links = document.querySelectorAll('.nav-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.22 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
