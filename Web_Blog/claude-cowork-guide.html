@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Cowork · Hướng dẫn chi tiết · Dispatch · MCP · Plugins</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080810; --s1: #0e0e1c; --s2: #131326; --s3: #18182e; --s4: #1e1e38;
+      --border: #222240; --border2: #2c2c50; --text: #e6e6f2; --muted: #666698;
+      --faint: #363660; --acc: #ffd060; --acc-dim: rgba(255,208,96,.11);
+      --green: #40d88e; --green-dim: rgba(64,216,142,.10);
+      --blue: #5ba8ff; --blue-dim: rgba(91,168,255,.10);
+      --purple: #a07af4; --purple-dim: rgba(160,122,244,.10);
+      --yellow: #ffd060; --yellow-dim: rgba(255,208,96,.10);
+      --teal: #30d8c0; --teal-dim: rgba(48,216,192,.10);
+      --orange: #ff8c50; --orange-dim: rgba(255,140,80,.10);
+      --pink: #ff6584; --pink-dim: rgba(255,101,132,.11); --pink-glow: rgba(255,101,132,.22);
+      --sky: #38bdf8; --sky-dim: rgba(56,189,248,.10);
+      --oc: #3b82f6; --oc-dim: rgba(59,130,246,.13); --oc-glow: rgba(59,130,246,.30); --oc2: #60a5fa; --oc2-dim: rgba(96,165,250,.12);
+      --ins: #40d88e; --ins-dim: rgba(64,216,142,.12); --ins-glow: rgba(64,216,142,.28);
+      --ch: #ffd060; --ch-dim: rgba(255,208,96,.12); --ch-glow: rgba(255,208,96,.28);
+      --sk: #a07af4; --sk-dim: rgba(160,122,244,.12); --sk-glow: rgba(160,122,244,.28);
+      --au: #ff8c50; --au-dim: rgba(255,140,80,.12); --au-glow: rgba(255,140,80,.28);
+      --code-bg: #05050e;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;left:0;top:0;width:272px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+    .sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+    .sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+    .logo-icon{width:44px;height:44px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 26px rgba(99,102,241,.35)}
+    .logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}
+    .logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+    .prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+    .prog-bar{height:100%;background:linear-gradient(90deg,#6366f1,var(--ins),var(--ch),var(--sk),var(--au));width:0%;transition:width .4s;border-radius:2px}
+    .nav-section{padding:8px 0 4px}
+    .nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+    .nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+    .ngh-oc{background:var(--oc-dim);color:var(--oc)}
+    .ngh-ins{background:var(--ins-dim);color:var(--ins)}
+    .ngh-ch{background:var(--ch-dim);color:var(--ch)}
+    .ngh-sk{background:var(--sk-dim);color:var(--sk)}
+    .ngh-au{background:var(--au-dim);color:var(--au)}
+    .ngh-p{background:var(--pink-dim);color:var(--pink)}
+    .ngh-t{background:var(--teal-dim);color:var(--teal)}
+    .nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+    .nav-link:hover,.nav-link.active{color:var(--text);background:rgba(99,102,241,.07);border-left-color:#6366f1}
+    .nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+
+    /* MAIN */
+    .main{margin-left:272px;min-height:100vh}
+    .hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);background:radial-gradient(ellipse 65% 55% at 75% 22%,rgba(99,102,241,.13) 0%,transparent 60%),radial-gradient(ellipse 50% 55% at 5% 85%,rgba(139,92,246,.08) 0%,transparent 55%),radial-gradient(ellipse 40% 50% at 50% 50%,rgba(160,122,244,.05) 0%,transparent 60%),var(--bg)}
+    .hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+    .hero-glow{position:absolute;right:-90px;top:-90px;width:520px;height:520px;background:radial-gradient(circle,rgba(99,102,241,.10) 0%,transparent 65%);pointer-events:none}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,.13);border:1px solid rgba(99,102,241,.38);color:#818cf8;padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+    .hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:#6366f1;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+    .hero h1{font-size:46px;font-weight:900;letter-spacing:-2.5px;line-height:1.05;margin-bottom:18px}
+    .h-oc{color:var(--oc)}.h-ins{color:var(--ins)}.h-ch{color:var(--ch)}.h-sk{color:var(--sk)}.h-au{color:var(--au)}
+    .h-ind{color:#818cf8}
+    .h-grad{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-desc{font-size:16px;color:var(--muted);max-width:640px;line-height:1.72;margin-bottom:30px}
+    .hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+    .chip-oc{background:var(--oc-dim);color:var(--oc)}
+    .chip-ins{background:var(--ins-dim);color:var(--ins)}
+    .chip-ch{background:var(--ch-dim);color:var(--ch)}
+    .chip-sk{background:var(--sk-dim);color:var(--sk)}
+    .chip-au{background:var(--au-dim);color:var(--au)}
+    .chip-t{background:var(--teal-dim);color:var(--teal)}
+    .chip-p{background:var(--pink-dim);color:var(--pink)}
+    .chip-s{background:var(--sky-dim);color:var(--sky)}
+    .chip-ind{background:rgba(99,102,241,.13);color:#818cf8}
+
+    /* CONTENT */
+    .content{padding:56px 64px;max-width:1060px}
+    .section{margin-bottom:80px}
+    .sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+    .sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+    .st-oc{color:var(--oc);background:var(--oc-dim);border:1px solid var(--oc-glow)}
+    .st-ins{color:var(--ins);background:var(--ins-dim);border:1px solid var(--ins-glow)}
+    .st-ch{color:var(--ch);background:var(--ch-dim);border:1px solid var(--ch-glow)}
+    .st-sk{color:var(--sk);background:var(--sk-dim);border:1px solid var(--sk-glow)}
+    .st-au{color:var(--au);background:var(--au-dim);border:1px solid var(--au-glow)}
+    .st-y{color:var(--yellow);background:var(--yellow-dim);border:1px solid rgba(255,208,96,.24)}
+    .st-t{color:var(--teal);background:var(--teal-dim);border:1px solid rgba(48,216,192,.24)}
+    .st-p{color:var(--pink);background:var(--pink-dim);border:1px solid var(--pink-glow)}
+    .st-ind{color:#818cf8;background:rgba(99,102,241,.13);border:1px solid rgba(99,102,241,.3)}
+    .sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+    .sec-sub{font-size:13px;color:var(--muted)}
+    .sub{margin-bottom:38px}
+    .sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+    .sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:#6366f1;border-radius:2px;flex-shrink:0}
+    .sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+    .sub ul,.sub ol{padding-left:22px}
+    .sub li{margin-bottom:6px}
+    .sub strong{color:var(--text)}
+
+    /* CAT BANNER */
+    .cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:32px;position:relative;overflow:hidden}
+    .cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .cb-oc{background:var(--oc-dim);border:1px solid rgba(59,130,246,.30)}
+    .cb-oc::before{background:linear-gradient(90deg,var(--oc),var(--oc2))}
+    .cb-ins{background:var(--ins-dim);border:1px solid rgba(64,216,142,.30)}
+    .cb-ins::before{background:linear-gradient(90deg,var(--ins),var(--teal))}
+    .cb-ch{background:var(--ch-dim);border:1px solid rgba(255,208,96,.30)}
+    .cb-ch::before{background:linear-gradient(90deg,var(--ch),var(--orange))}
+    .cb-sk{background:var(--sk-dim);border:1px solid rgba(160,122,244,.30)}
+    .cb-sk::before{background:linear-gradient(90deg,var(--sk),var(--pink))}
+    .cb-au{background:var(--au-dim);border:1px solid rgba(255,140,80,.30)}
+    .cb-au::before{background:linear-gradient(90deg,var(--au),var(--yellow))}
+    .cb-t{background:var(--teal-dim);border:1px solid rgba(48,216,192,.30)}
+    .cb-t::before{background:linear-gradient(90deg,var(--teal),var(--sky))}
+    .cb-ind{background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.30)}
+    .cb-ind::before{background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+    .cb-icon{font-size:36px;flex-shrink:0}
+    .cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+    .cb-oc .cb-badge{background:var(--oc-dim);color:var(--oc)}
+    .cb-ins .cb-badge{background:var(--ins-dim);color:var(--ins)}
+    .cb-ch .cb-badge{background:var(--ch-dim);color:var(--ch)}
+    .cb-sk .cb-badge{background:var(--sk-dim);color:var(--sk)}
+    .cb-au .cb-badge{background:var(--au-dim);color:var(--au)}
+    .cb-t .cb-badge{background:var(--teal-dim);color:var(--teal)}
+    .cb-ind .cb-badge{background:rgba(99,102,241,.13);color:#818cf8}
+    .cb-title{font-size:19px;font-weight:800;letter-spacing:-.5px}
+    .cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+    /* GRIDS */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:14px 0}
+    .card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+    .card:hover{border-color:#6366f1;transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+    .card-icon{font-size:24px;margin-bottom:8px}
+    .card-title{font-size:13px;font-weight:700;margin-bottom:4px}
+    .card-desc{font-size:12px;color:var(--muted);line-height:1.58}
+
+    /* CODE BLOCKS */
+    .cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+    .cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+    .cb-dots{display:flex;gap:5px}
+    .cbd{width:10px;height:10px;border-radius:50%}
+    .cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+    .cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px;flex-shrink:0}
+    .ct-oc{background:var(--oc-dim);color:var(--oc)}
+    .ct-ins{background:var(--ins-dim);color:var(--ins)}
+    .ct-ch{background:var(--ch-dim);color:var(--ch)}
+    .ct-sk{background:var(--sk-dim);color:var(--sk)}
+    .ct-au{background:var(--au-dim);color:var(--au)}
+    .ct-y{background:var(--yellow-dim);color:var(--yellow)}
+    .ct-g{background:var(--green-dim);color:var(--green)}
+    .ct-t{background:var(--teal-dim);color:var(--teal)}
+    .ct-p{background:var(--pink-dim);color:var(--pink)}
+    .ct-ind{background:rgba(99,102,241,.13);color:#818cf8}
+    .cb-body{padding:18px 20px;overflow-x:auto}
+    .cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.74;white-space:pre;color:#8899bb}
+    .kw{color:#c792ea}.tp{color:#ffcb6b}.fn{color:#82aaff}.st-s{color:#c3e88d}.cm{color:#546e7a;font-style:italic}
+    .nm{color:#f78c6c}.an{color:#ff6584}.pr{color:#89ddff}.vr{color:#eeffff}.cl{color:#ffcb6b}
+    .c-r{color:#ff6584}.c-b{color:#5ba8ff}.c-g{color:#40d88e}.c-t{color:#30d8c0}.c-y{color:#ffd060}
+    .c-o{color:#ff8c50}.c-p{color:#a07af4}.c-s{color:#38bdf8}.c-w{color:#eeffff}.c-m{color:#666698}
+    .c-ind{color:#818cf8}
+
+    /* INFO BOXES */
+    .info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.62}
+    .info-ico{font-size:16px;flex-shrink:0;margin-top:2px}
+    .i-ok{background:var(--green-dim);border:1px solid rgba(64,216,142,.2);color:#30a870}
+    .i-warn{background:var(--yellow-dim);border:1px solid rgba(255,208,96,.2);color:#b09030}
+    .i-tip{background:var(--blue-dim);border:1px solid rgba(91,168,255,.2);color:#3878d0}
+    .i-note{background:var(--purple-dim);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+    .i-err{background:var(--pink-dim);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+    .i-oc{background:var(--oc-dim);border:1px solid rgba(59,130,246,.2);color:#3b82f6}
+    .i-t{background:var(--teal-dim);border:1px solid rgba(48,216,192,.2);color:#22a89a}
+    .i-ind{background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);color:#818cf8}
+
+    /* RW BOX */
+    .rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:12px 0;position:relative;overflow:hidden}
+    .rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+    .rw-oc::before{background:var(--oc)}.rw-ins::before{background:var(--ins)}
+    .rw-ch::before{background:var(--ch)}.rw-sk::before{background:var(--sk)}
+    .rw-au::before{background:var(--au)}.rw-y::before{background:var(--yellow)}
+    .rw-t::before{background:var(--teal)}.rw-p::before{background:var(--pink)}
+    .rw-ind::before{background:#6366f1}
+    .rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+    .rw-oc .rw-label{color:var(--oc)}.rw-ins .rw-label{color:var(--ins)}.rw-ch .rw-label{color:var(--ch)}
+    .rw-sk .rw-label{color:var(--sk)}.rw-au .rw-label{color:var(--au)}.rw-y .rw-label{color:var(--yellow)}
+    .rw-t .rw-label{color:var(--teal)}.rw-p .rw-label{color:var(--pink)}.rw-ind .rw-label{color:#818cf8}
+    .rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+    .rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+    /* TABLE */
+    .tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+    .tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+    .tbl td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top}
+    .tbl tr:last-child td{border-bottom:none}
+    .tbl tr:hover td{background:var(--s2)}
+    .tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:1px 6px;border-radius:4px;background:var(--s3);color:var(--teal)}
+
+    /* STEP FLOW */
+    .flow{display:flex;flex-direction:column;gap:0;margin:14px 0}
+    .flow-step{display:flex;gap:16px;position:relative}
+    .flow-step:not(:last-child)::after{content:'';position:absolute;left:19px;top:40px;bottom:-8px;width:2px;background:var(--border2)}
+    .flow-num{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;z-index:1;margin-top:2px}
+    .fn-oc{background:var(--oc-dim);color:var(--oc);border:2px solid var(--oc)}
+    .fn-ins{background:var(--ins-dim);color:var(--ins);border:2px solid var(--ins)}
+    .fn-ch{background:var(--ch-dim);color:var(--ch);border:2px solid var(--ch)}
+    .fn-sk{background:var(--sk-dim);color:var(--sk);border:2px solid var(--sk)}
+    .fn-au{background:var(--au-dim);color:var(--au);border:2px solid var(--au)}
+    .fn-t{background:var(--teal-dim);color:var(--teal);border:2px solid var(--teal)}
+    .fn-ind{background:rgba(99,102,241,.13);color:#818cf8;border:2px solid #6366f1}
+    .flow-body{padding:4px 0 28px;flex:1}
+    .flow-title{font-size:14px;font-weight:700;margin-bottom:4px}
+    .flow-desc{font-size:13px;color:var(--muted);line-height:1.65}
+
+    /* CHEAT GRID */
+    .cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+    .cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px}
+    .cheat-card h4{font-size:12px;font-weight:800;margin-bottom:12px;letter-spacing:-.2px}
+    .h4-oc{color:var(--oc)}.h4-ins{color:var(--ins)}.h4-ch{color:var(--ch)}.h4-sk{color:var(--sk)}.h4-au{color:var(--au)}.h4-t{color:var(--teal)}.h4-ind{color:#818cf8}
+    .cheat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:11.5px;gap:8px}
+    .cheat-row:last-child{border-bottom:none}
+    .ck{font-family:'JetBrains Mono',monospace;color:var(--teal);flex-shrink:0}
+    .cv{color:var(--muted);text-align:right;font-size:11px}
+
+    /* KW PILLS */
+    .kw-grid{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+    .kw-pill{padding:4px 12px;border-radius:100px;font-size:11.5px;font-weight:700}
+    .kwp-oc{background:var(--oc-dim);color:var(--oc)}.kwp-ins{background:var(--ins-dim);color:var(--ins)}
+    .kwp-ch{background:var(--ch-dim);color:var(--ch)}.kwp-sk{background:var(--sk-dim);color:var(--sk)}
+    .kwp-au{background:var(--au-dim);color:var(--au)}.kwp-t{background:var(--teal-dim);color:var(--teal)}
+    .kwp-p{background:var(--pink-dim);color:var(--pink)}.kwp-ind{background:rgba(99,102,241,.13);color:#818cf8}
+
+    /* PLUGIN CARD */
+    .plugin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0}
+    .plugin-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all .2s;position:relative;overflow:hidden}
+    .plugin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+    .plugin-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+    .pc-oc::before{background:var(--oc)}.pc-oc:hover{border-color:var(--oc)}
+    .pc-ins::before{background:var(--ins)}.pc-ins:hover{border-color:var(--ins)}
+    .pc-ch::before{background:var(--ch)}.pc-ch:hover{border-color:var(--ch)}
+    .pc-sk::before{background:var(--sk)}.pc-sk:hover{border-color:var(--sk)}
+    .pc-au::before{background:var(--au)}.pc-au:hover{border-color:var(--au)}
+    .pc-t::before{background:var(--teal)}.pc-t:hover{border-color:var(--teal)}
+    .pc-p::before{background:var(--pink)}.pc-p:hover{border-color:var(--pink)}
+    .pc-ind::before{background:#6366f1}.pc-ind:hover{border-color:#6366f1}
+    .pc-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .pc-icon{font-size:26px}
+    .pc-name{font-size:13.5px;font-weight:800}
+    .pc-badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:4px}
+    .pbd-oc{background:var(--oc-dim);color:var(--oc)}
+    .pbd-ins{background:var(--ins-dim);color:var(--ins)}
+    .pbd-ch{background:var(--ch-dim);color:var(--ch)}
+    .pbd-sk{background:var(--sk-dim);color:var(--sk)}
+    .pbd-au{background:var(--au-dim);color:var(--au)}
+    .pbd-t{background:var(--teal-dim);color:var(--teal)}
+    .pbd-p{background:var(--pink-dim);color:var(--pink)}
+    .pbd-ind{background:rgba(99,102,241,.13);color:#818cf8}
+    .pc-desc{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:10px}
+    .pc-features{display:flex;flex-wrap:wrap;gap:5px}
+    .pc-feat{font-size:10.5px;padding:2px 8px;border-radius:4px;background:var(--s3);color:var(--muted)}
+
+    /* MCP GRID */
+    .mcp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+    .mcp-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px;display:flex;align-items:flex-start;gap:10px;transition:all .18s}
+    .mcp-card:hover{border-color:var(--border2);background:var(--s3)}
+    .mcp-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+    .mcp-name{font-size:12.5px;font-weight:700;margin-bottom:2px}
+    .mcp-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+    /* FOOTER */
+    .footer{padding:16px 64px;border-top:1px solid var(--border);font-size:11.5px;color:var(--faint);display:flex;align-items:center;gap:8px}
+
+    /* SCENARIO BOX */
+    .scenario{background:var(--s2);border:1px solid var(--border2);border-radius:14px;padding:20px 24px;margin:14px 0}
+    .scenario-title{font-size:13px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .scenario-steps{display:flex;flex-direction:column;gap:7px}
+    .sc-step{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--muted)}
+    .sc-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px}
+
+    code{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:1px 6px;border-radius:4px;background:var(--s3);color:var(--teal)}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">🤖</div>
+      <div class="logo-text">
+        <h2>Claude Cowork</h2>
+        <p>Hướng dẫn toàn diện 2026</p>
+      </div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
+  </div>
+
+  <div class="nav-section" aria-label="Page navigation">
+    <div class="nav-sect-label">🔄 Chuyển trang</div>
+    <a href="Claude-architecture-guide.html" class="nav-link"><span class="ico">📐</span> Arch Guide</a>
+    <a href="claude-guide.html" class="nav-link"><span class="ico">📖</span> Claude Guide</a>
+    <a href="claude-cowork-guide.html" class="nav-link active"><span class="ico">🤖</span> Cowork Guide</a>
+    <a href="open-clawbot-guide.html" class="nav-link"><span class="ico">🦞</span> OpenClaw Guide</a>
+    <a href="antigravity-guide.html" class="nav-link"><span class="ico">🚀</span> AntiGravity</a>
+    <a href="superpowers-antigravity-guide.html" class="nav-link"><span class="ico">⚡</span> Superpowers AG</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-sect-label">Nội dung</div>
+
+    <div class="nav-group-hdr ngh-oc">🏠 Tổng quan</div>
+    <a href="#s1" class="nav-link"><span class="ico">🧠</span> Cowork là gì?</a>
+    <a href="#s2" class="nav-link"><span class="ico">⚙️</span> Cài đặt & Yêu cầu</a>
+
+    <div class="nav-group-hdr ngh-ins">🚀 Tính năng</div>
+    <a href="#s3" class="nav-link"><span class="ico">📋</span> Tasks Mode</a>
+    <a href="#s4" class="nav-link"><span class="ico">📡</span> Dispatch</a>
+    <a href="#s5" class="nav-link"><span class="ico">🖥️</span> Computer Use</a>
+    <a href="#s6" class="nav-link"><span class="ico">📁</span> File Access</a>
+
+    <div class="nav-group-hdr ngh-ch">🔌 Plugins & MCP</div>
+    <a href="#s7" class="nav-link"><span class="ico">🧩</span> Plugins phổ biến</a>
+    <a href="#s8" class="nav-link"><span class="ico">🔗</span> MCP Servers</a>
+    <a href="#s9" class="nav-link"><span class="ico">🔧</span> Connectors</a>
+
+    <div class="nav-group-hdr ngh-sk">💡 Thực tế</div>
+    <a href="#s10" class="nav-link"><span class="ico">📖</span> Use Cases thực tế</a>
+    <a href="#s11" class="nav-link"><span class="ico">🗂️</span> Cheat Sheet</a>
+
+    <div class="nav-group-hdr ngh-au">⚠️ Lưu ý</div>
+    <a href="#s12" class="nav-link"><span class="ico">🔒</span> Bảo mật & Giới hạn</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-eyebrow"><span class="pulse"></span> Claude Desktop · Cowork Mode · 2026</div>
+    <h1>Claude <span class="h-grad">Cowork</span><br>Hướng dẫn chi tiết</h1>
+    <p class="hero-desc">Từ cài đặt lần đầu đến tự động hóa nâng cao — Dispatch, Computer Use, MCP Plugins, Connectors và các tình huống thực tế bạn có thể dùng ngay hôm nay.</p>
+    <div class="hero-chips">
+      <span class="chip chip-ind">macOS & Windows</span>
+      <span class="chip chip-oc">Pro / Max / Team</span>
+      <span class="chip chip-ins">Tasks Mode</span>
+      <span class="chip chip-ch">Dispatch</span>
+      <span class="chip chip-sk">Computer Use</span>
+      <span class="chip chip-t">MCP Plugins</span>
+      <span class="chip chip-au">38+ Connectors</span>
+      <span class="chip chip-p">Isolated VM</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- S1: LÀ GÌ -->
+    <div class="section" id="s1">
+      <div class="sec-head">
+        <span class="sec-tag st-ind">OVERVIEW</span>
+        <div>
+          <h2 class="sec-title">Claude Cowork là gì?</h2>
+          <p class="sec-sub">Từ chatbot chuyển sang AI agent thực sự làm việc trên máy tính của bạn</p>
+        </div>
+      </div>
+
+      <div class="cat-banner cb-ind">
+        <div class="cb-icon">🤖</div>
+        <div>
+          <div class="cb-badge">COWORK</div>
+          <div class="cb-title">AI Agent trên Desktop của bạn</div>
+          <div class="cb-sub">Claude Cowork là chế độ hoạt động trong Claude Desktop App — cho phép Claude <strong>thực sự thực hiện công việc</strong> trên máy tính của bạn: đọc file, chạy task nhiều bước, tự động hóa theo lịch, và kết nối với hàng chục dịch vụ.</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Sự khác biệt cốt lõi với Claude Chat thông thường</div>
+        <table class="tbl">
+          <thead><tr><th>Tiêu chí</th><th>Claude Chat (web)</th><th>Claude Cowork</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Khả năng</strong></td><td style="color:var(--muted)">Trả lời câu hỏi, viết text</td><td style="color:var(--ins)">Thực hiện task nhiều bước, tự động hóa thực sự</td></tr>
+            <tr><td><strong>Truy cập file</strong></td><td style="color:var(--pink)">Upload thủ công từng file</td><td style="color:var(--ins)">Đọc/ghi thẳng vào thư mục local</td></tr>
+            <tr><td><strong>Chạy không giám sát</strong></td><td style="color:var(--pink)">Không — cần người nhập liệu</td><td style="color:var(--ins)">Có — Dispatch chạy khi bạn vắng</td></tr>
+            <tr><td><strong>Kết nối dịch vụ</strong></td><td style="color:var(--ch)">Hạn chế qua MCP web</td><td style="color:var(--ins)">38+ connector: Gmail, Slack, GitHub, Notion…</td></tr>
+            <tr><td><strong>Điều khiển màn hình</strong></td><td style="color:var(--pink)">Không</td><td style="color:var(--ins)">Có — Computer Use (Pro/Max)</td></tr>
+            <tr><td><strong>Môi trường chạy</strong></td><td style="color:var(--muted)">Server cloud</td><td style="color:var(--ins)">VM cô lập trên máy local của bạn</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Ba chế độ trong Claude Desktop</div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">💬</div>
+            <div class="card-title" style="color:var(--oc)">Chat Mode</div>
+            <div class="card-desc">Trò chuyện thông thường. Hỏi đáp, viết lách, phân tích. Không cần Desktop app, cũng có trên web.</div>
+          </div>
+          <div class="card" style="border-color:rgba(99,102,241,.4)">
+            <div class="card-icon">🤖</div>
+            <div class="card-title" style="color:#818cf8">Cowork Mode ★</div>
+            <div class="card-desc">Chế độ agent — Claude thực hiện task nhiều bước, truy cập file, kết nối service, chạy tự động hóa.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">💻</div>
+            <div class="card-title" style="color:var(--ins)">Code Mode</div>
+            <div class="card-desc">Dành cho developer. CLI agent, viết code, chạy test, submit PR, tích hợp với terminal.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info i-ind">
+        <span class="info-ico">💡</span>
+        <div><strong style="color:var(--text)">Nguồn gốc Cowork:</strong> Anthropic nhận thấy developer dùng Claude Code cho rất nhiều việc <em>ngoài coding</em> — quản lý file, nghiên cứu, soạn báo cáo. Cowork ra đời tháng 1/2026 để mang trải nghiệm đó đến cho tất cả mọi người, không cần biết code.</div>
+      </div>
+    </div>
+
+    <!-- S2: CÀI ĐẶT -->
+    <div class="section" id="s2">
+      <div class="sec-head">
+        <span class="sec-tag st-oc">SETUP</span>
+        <div>
+          <h2 class="sec-title">Cài đặt & Yêu cầu hệ thống</h2>
+          <p class="sec-sub">Những gì bạn cần trước khi bắt đầu</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Yêu cầu tối thiểu</div>
+        <div class="grid-2">
+          <div class="rw-box rw-oc">
+            <div class="rw-label">🍎 macOS</div>
+            <div class="rw-title">Mac (Apple Silicon hoặc Intel)</div>
+            <div class="rw-body">
+              macOS Sonoma (14+) trở lên<br>
+              RAM khuyến nghị: 8GB trở lên<br>
+              Dung lượng trống: ~2GB (cho VM download lần đầu)<br>
+              <strong style="color:var(--oc)">Computer Use</strong>: yêu cầu Apple Silicon (M1/M2/M3/M4)
+            </div>
+          </div>
+          <div class="rw-box rw-ins">
+            <div class="rw-label">🪟 Windows</div>
+            <div class="rw-title">Windows 10/11 (64-bit)</div>
+            <div class="rw-body">
+              Ra mắt Windows: <strong style="color:var(--ins)">10/02/2026</strong> — đầy đủ tính năng<br>
+              WSL2 được cài sẵn (Cowork tự cấu hình)<br>
+              RAM khuyến nghị: 8GB trở lên<br>
+              <strong style="color:var(--ins)">Full parity</strong>: tất cả tính năng như macOS
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Các bước cài đặt từng bước</div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num fn-oc">1</div>
+            <div class="flow-body">
+              <div class="flow-title">Tải Claude Desktop App</div>
+              <div class="flow-desc">Vào <code>claude.com/download</code> → chọn macOS hoặc Windows → tải về và cài đặt. App luôn accessible từ dock/taskbar.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-ins">2</div>
+            <div class="flow-body">
+              <div class="flow-title">Đăng ký gói trả phí (Pro / Max / Team)</div>
+              <div class="flow-desc">Cowork chỉ có trên paid plans: <strong style="color:var(--ins)">Pro ($20/tháng)</strong>, Max ($100-200/tháng), Team ($30/user), Enterprise. Pro đủ dùng để bắt đầu; Max có usage limit cao hơn.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-ch">3</div>
+            <div class="flow-body">
+              <div class="flow-title">Mở Desktop App → Tìm mode selector</div>
+              <div class="flow-desc">Trong giao diện Desktop app, bạn thấy thanh chọn chế độ gồm <strong style="color:var(--ch)">Chat</strong> | <strong style="color:#818cf8">Cowork</strong> | <strong style="color:var(--ins)">Code</strong>. Click vào tab <strong>Cowork</strong>.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-sk">4</div>
+            <div class="flow-body">
+              <div class="flow-title">Lần đầu: Download VM (~2GB)</div>
+              <div class="flow-desc">Cowork chạy trong một <strong style="color:var(--sk)">isolated virtual machine</strong> trên máy bạn. Lần đầu tiên sẽ tải xuống ~2GB. Mất khoảng 5–10 phút. Các lần sau khởi động nhanh hơn nhiều.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-au">5</div>
+            <div class="flow-body">
+              <div class="flow-title">Cấp quyền thư mục (Folder Permissions)</div>
+              <div class="flow-desc">Cowork hỏi bạn muốn cho phép truy cập thư mục nào. Ví dụ: <code>~/Documents</code>, <code>~/Downloads</code>. Chỉ những thư mục bạn cho phép mới accessible. <strong style="color:var(--au)">Bạn kiểm soát hoàn toàn.</strong></div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-t">6</div>
+            <div class="flow-body">
+              <div class="flow-title">Kết nối Connectors (tuỳ chọn)</div>
+              <div class="flow-desc">Vào Settings → Extensions để kết nối Gmail, Slack, GitHub, Notion, Google Drive, v.v. Mỗi connector cần xác thực OAuth một lần. Sau đó Claude có thể đọc/ghi dữ liệu từ các dịch vụ đó.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-ind">7</div>
+            <div class="flow-body">
+              <div class="flow-title">Giao task đầu tiên!</div>
+              <div class="flow-desc">Gõ mô tả task trong Cowork tab. Claude hiển thị kế hoạch thực hiện → bạn duyệt → Claude bắt đầu làm việc. Desktop app <strong style="color:#818cf8">phải để mở</strong> trong khi Claude đang chạy task.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info i-warn">
+        <span class="info-ico">⚠️</span>
+        <div><strong style="color:var(--text)">Lưu ý quan trọng:</strong> Desktop app phải <strong>ở trạng thái mở</strong> trong khi Claude đang thực hiện task. Nếu bạn đóng app hoặc máy tính ngủ, session sẽ kết thúc. Với Dispatch (task theo lịch), bạn vẫn cần máy tính đang chạy.</div>
+      </div>
+    </div>
+
+    <!-- S3: TASKS MODE -->
+    <div class="section" id="s3">
+      <div class="sec-head">
+        <span class="sec-tag st-ins">TASKS</span>
+        <div>
+          <h2 class="sec-title">Tasks Mode — Giao việc cho Claude</h2>
+          <p class="sec-sub">Cách Claude lập kế hoạch và thực hiện task nhiều bước</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Quy trình hoạt động của một Task</div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num fn-oc">①</div>
+            <div class="flow-body">
+              <div class="flow-title">Bạn mô tả task bằng ngôn ngữ tự nhiên</div>
+              <div class="flow-desc">Ví dụ: <em style="color:var(--text)">"Đọc tất cả file PDF trong thư mục ~/Downloads/Reports, tóm tắt từng file, gom vào một document Word và lưu vào ~/Documents/Summary.docx"</em></div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-ins">②</div>
+            <div class="flow-body">
+              <div class="flow-title">Claude lập kế hoạch và hiển thị cho bạn</div>
+              <div class="flow-desc">Claude chia nhỏ task thành subtasks, liệt kê từng bước, cho bạn thấy sẽ dùng tool/connector nào. Bạn có thể <strong style="color:var(--ins)">sửa, bổ sung, hoặc approve</strong> trước khi bắt đầu.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-ch">③</div>
+            <div class="flow-body">
+              <div class="flow-title">Claude thực hiện — bạn theo dõi real-time</div>
+              <div class="flow-desc">Progress indicators hiện từng bước đang chạy. Claude cho bạn thấy reasoning. Bạn có thể can thiệp, chỉnh hướng hoặc để tự chạy hết.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-sk">④</div>
+            <div class="flow-body">
+              <div class="flow-title">Claude dừng lại khi cần quyết định quan trọng</div>
+              <div class="flow-desc">Nếu sắp làm điều gì <strong style="color:var(--sk)">có tác động lớn</strong> (gửi email, xóa file, tạo PR...), Claude hỏi xác nhận trước. Không bao giờ tự làm tức thì mà không có approval.</div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num fn-au">⑤</div>
+            <div class="flow-body">
+              <div class="flow-title">Kết quả: Deliverable hoàn chỉnh</div>
+              <div class="flow-desc">Claude trả về sản phẩm cuối cùng — file Word, spreadsheet, email draft, code file... Không phải hướng dẫn từng bước — là <strong style="color:var(--au)">kết quả thực sự</strong>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Ví dụ task thực tế có thể giao ngay</div>
+        <div class="grid-2">
+          <div class="scenario">
+            <div class="scenario-title"><span style="color:var(--oc)">📊</span> Tổng hợp báo cáo tháng</div>
+            <div class="scenario-steps">
+              <div class="sc-step"><div class="sc-num" style="background:var(--oc-dim);color:var(--oc)">1</div>Đọc 12 file Excel doanh số từ ~/Reports/2025/</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--oc-dim);color:var(--oc)">2</div>Tính tổng, so sánh tháng này vs tháng trước</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--oc-dim);color:var(--oc)">3</div>Tạo báo cáo PDF với biểu đồ và nhận xét</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--oc-dim);color:var(--oc)">4</div>Lưu vào ~/Documents, gửi Slack cho team</div>
+            </div>
+          </div>
+          <div class="scenario">
+            <div class="scenario-title"><span style="color:var(--ins)">📧</span> Xử lý inbox email</div>
+            <div class="scenario-steps">
+              <div class="sc-step"><div class="sc-num" style="background:var(--ins-dim);color:var(--ins)">1</div>Quét Gmail, phân loại email theo chủ đề</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--ins-dim);color:var(--ins)">2</div>Draft trả lời cho các email cần reply</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--ins-dim);color:var(--ins)">3</div>Tạo danh sách action items từ email quan trọng</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--ins-dim);color:var(--ins)">4</div>Hỏi xác nhận trước khi gửi bất kỳ email nào</div>
+            </div>
+          </div>
+          <div class="scenario">
+            <div class="scenario-title"><span style="color:var(--ch)">📝</span> Nghiên cứu & soạn tài liệu</div>
+            <div class="scenario-steps">
+              <div class="sc-step"><div class="sc-num" style="background:var(--ch-dim);color:var(--ch)">1</div>Đọc tất cả notes trong ~/Notes/Project-X/</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--ch-dim);color:var(--ch)">2</div>Tìm kiếm web để bổ sung thông tin mới nhất</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--ch-dim);color:var(--ch)">3</div>Tổng hợp, soạn thảo document Word hoàn chỉnh</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--ch-dim);color:var(--ch)">4</div>Lưu và upload lên Google Drive</div>
+            </div>
+          </div>
+          <div class="scenario">
+            <div class="scenario-title"><span style="color:var(--sk)">🔧 </span> Quản lý GitHub PR</div>
+            <div class="scenario-steps">
+              <div class="sc-step"><div class="sc-num" style="background:var(--sk-dim);color:var(--sk)">1</div>Lấy danh sách PR đang open từ GitHub</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--sk-dim);color:var(--sk)">2</div>Review code, tìm bug và vấn đề tiềm ẩn</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--sk-dim);color:var(--sk)">3</div>Viết comment review chi tiết trên từng PR</div>
+              <div class="sc-step"><div class="sc-num" style="background:var(--sk-dim);color:var(--sk)">4</div>Suggest improvements, approve hoặc request changes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4: DISPATCH -->
+    <div class="section" id="s4">
+      <div class="sec-head">
+        <span class="sec-tag st-ch">DISPATCH</span>
+        <div>
+          <h2 class="sec-title">Dispatch — Task chạy theo lịch & từ mobile</h2>
+          <p class="sec-sub">Giao task từ điện thoại, hoặc lên lịch tự động — Claude làm khi bạn vắng</p>
+        </div>
+      </div>
+
+      <div class="cat-banner cb-ch">
+        <div class="cb-icon">📡</div>
+        <div>
+          <div class="cb-badge">DISPATCH</div>
+          <div class="cb-title">Giao việc từ điện thoại, Claude làm trên laptop</div>
+          <div class="cb-sub">Dispatch cho phép bạn assign task cho Cowork từ bất kỳ đâu — qua mobile app, hoặc cài sẵn lịch lặp lại. Claude làm việc khi bạn đang nghỉ, và bạn về thấy kết quả đã sẵn sàng.</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Hai cách dùng Dispatch</div>
+        <div class="grid-2">
+          <div class="rw-box rw-ch">
+            <div class="rw-label">📱 REMOTE DISPATCH</div>
+            <div class="rw-title">Giao task từ điện thoại</div>
+            <div class="rw-body">
+              Cài Claude app trên iPhone/Android → kết nối với Desktop Cowork<br><br>
+              Nhắn task trên điện thoại → Claude nhận và bắt đầu làm trên laptop ngay lập tức.<br><br>
+              <strong style="color:var(--text)">Ví dụ thực tế:</strong> Đang trong cuộc họp, nhớ ra cần prep deck cho meeting chiều → mở Claude mobile → nhắn "Tạo slide từ file notes trong ~/Notes/Q4/" → về đến bàn thấy deck đã xong.
+            </div>
+          </div>
+          <div class="rw-box rw-au">
+            <div class="rw-label">⏰ SCHEDULED DISPATCH</div>
+            <div class="rw-title">Task lặp lại theo lịch</div>
+            <div class="rw-body">
+              Gõ <code>schedule</code> trước mô tả task → chọn tần suất: daily / weekly / custom cron.<br><br>
+              Claude tự chạy đúng giờ, không cần bạn ở đó.<br><br>
+              <strong style="color:var(--text)">Ví dụ thực tế:</strong> Mỗi sáng 7h, Claude quét email mới → tóm tắt → tạo daily briefing → lưu vào Notion. Bạn mở máy thấy briefing đã sẵn sàng.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Ví dụ Scheduled Dispatch phổ biến nhất</div>
+        <div class="cheat-grid">
+          <div class="cheat-card">
+            <h4 class="h4-ch">☀️ Daily Briefing</h4>
+            <div class="cheat-row"><span class="ck">Lịch</span><span class="cv">Mỗi ngày 7:00 AM</span></div>
+            <div class="cheat-row"><span class="ck">Quét Gmail</span><span class="cv">Email quan trọng</span></div>
+            <div class="cheat-row"><span class="ck">Kiểm tra Calendar</span><span class="cv">Meetings hôm nay</span></div>
+            <div class="cheat-row"><span class="ck">Slack unread</span><span class="cv">Tin nhắn cần xử lý</span></div>
+            <div class="cheat-row"><span class="ck">Output</span><span class="cv">Notion page / file</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-ins">📊 Weekly Report</h4>
+            <div class="cheat-row"><span class="ck">Lịch</span><span class="cv">Thứ 6, 5:00 PM</span></div>
+            <div class="cheat-row"><span class="ck">Thu thập data</span><span class="cv">GitHub / Jira</span></div>
+            <div class="cheat-row"><span class="ck">Tính metrics</span><span class="cv">Velocity, bugs, PRs</span></div>
+            <div class="cheat-row"><span class="ck">So sánh</span><span class="cv">vs tuần trước</span></div>
+            <div class="cheat-row"><span class="ck">Output</span><span class="cv">Email cho manager</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-au">🗂️ File Processing</h4>
+            <div class="cheat-row"><span class="ck">Lịch</span><span class="cv">Mỗi giờ</span></div>
+            <div class="cheat-row"><span class="ck">Scan thư mục</span><span class="cv">~/Downloads/Inbox/</span></div>
+            <div class="cheat-row"><span class="ck">Phân loại</span><span class="cv">Hóa đơn / Hợp đồng</span></div>
+            <div class="cheat-row"><span class="ck">Đổi tên</span><span class="cv">YYYY-MM-DD_type</span></div>
+            <div class="cheat-row"><span class="ck">Di chuyển</span><span class="cv">Đúng thư mục</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info i-ok">
+        <span class="info-ico">✅</span>
+        <div><strong style="color:var(--text)">Dispatch trên Teams:</strong> Kể từ 25/03/2026, Dispatch đã có trên tất cả Teams plans. Admin cần bật trong Settings → Team Management → Dispatch. Mặc định tắt để admin kiểm soát.</div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cách kích hoạt Scheduled Dispatch</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Cowork — Tasks Mode</span>
+            <span class="cb-tag ct-ch">DISPATCH</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Cú pháp: gõ "schedule" trước mô tả task</span>
+
+<span class="c-y">schedule</span> Mỗi sáng thứ 2 lúc 8:00 AM, quét inbox Gmail, 
+tóm tắt các email quan trọng từ tuần trước, 
+tạo file markdown trong ~/Notes/weekly-briefings/ 
+với tên YYYY-MM-DD_weekly.md
+
+<span class="cm"># Claude sẽ hỏi:</span>
+<span class="c-g">→ "Tôi hiểu bạn muốn tôi làm X mỗi Y. Tôi sẽ:"</span>
+<span class="c-g">→ "1. [step 1]"</span>
+<span class="c-g">→ "2. [step 2]"</span>
+<span class="c-g">→ "Bạn có muốn tiếp tục không?"</span>
+
+<span class="cm"># Sau khi duyệt, task được lưu vào Scheduled Tasks list</span>
+<span class="cm"># Chạy tự động mà không cần bạn ở đó</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5: COMPUTER USE -->
+    <div class="section" id="s5">
+      <div class="sec-head">
+        <span class="sec-tag st-sk">COMPUTER USE</span>
+        <div>
+          <h2 class="sec-title">Computer Use — Claude điều khiển màn hình</h2>
+          <p class="sec-sub">Claude thấy màn hình bạn, di chuyển chuột, gõ bàn phím — làm được mọi thứ bạn làm</p>
+        </div>
+      </div>
+
+      <div class="cat-banner cb-sk">
+        <div class="cb-icon">🖥️</div>
+        <div>
+          <div class="cb-badge">COMPUTER USE</div>
+          <div class="cb-title">Mắt và tay trên desktop của bạn</div>
+          <div class="cb-sub">Computer Use cho phép Claude nhìn màn hình, click chuột, gõ phím, mở ứng dụng — giống như có người thật đang điều khiển máy tính của bạn. Mọi thứ bạn làm được trên GUI đều làm được.</div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Computer Use có thể làm gì?</div>
+        <div class="grid-2">
+          <div class="rw-box rw-sk">
+            <div class="rw-label">🖱️ GUI AUTOMATION</div>
+            <div class="rw-title">Điều khiển ứng dụng desktop</div>
+            <div class="rw-body">
+              Mở bất kỳ app nào (Figma, Excel, Photoshop...)<br>
+              Click vào menu, button, form, dropdown<br>
+              Drag & drop file, scroll, zoom<br>
+              <strong style="color:var(--text)">Ví dụ:</strong> "Mở Figma, xuất tất cả artboard thành PNG, lưu vào ~/exports/"
+            </div>
+          </div>
+          <div class="rw-box rw-t">
+            <div class="rw-label">🌐 BROWSER AUTOMATION</div>
+            <div class="rw-title">Duyệt web, điền form</div>
+            <div class="rw-body">
+              Kết hợp với Claude in Chrome: navigate URL, click link, điền form, scrape data<br>
+              <strong style="color:var(--text)">Ví dụ:</strong> "Vào portal HR, download payslip 3 tháng gần nhất, lưu vào ~/Documents/Payslips/"
+            </div>
+          </div>
+          <div class="rw-box rw-oc">
+            <div class="rw-label">📋 LEGACY APP HANDLING</div>
+            <div class="rw-title">App cũ không có API</div>
+            <div class="rw-body">
+              Nhiều phần mềm nội bộ công ty không có API. Computer Use giải quyết bằng cách thao tác GUI trực tiếp.<br>
+              <strong style="color:var(--text)">Ví dụ:</strong> "Vào phần mềm kế toán ABC, export báo cáo Q4, lưu thành Excel"
+            </div>
+          </div>
+          <div class="rw-box rw-ins">
+            <div class="rw-label">🔗 CROSS-APP WORKFLOW</div>
+            <div class="rw-title">Nối nhiều app với nhau</div>
+            <div class="rw-body">
+              Copy data từ app này sang app khác mà không cần API integration.<br>
+              <strong style="color:var(--text)">Ví dụ:</strong> "Đọc data từ Excel, nhập vào CRM, sau đó tạo invoice trong phần mềm kế toán"
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info i-warn">
+        <span class="info-ico">⚠️</span>
+        <div><strong style="color:var(--text)">Yêu cầu:</strong> Computer Use yêu cầu <strong>Pro hoặc Max plan</strong> và hiện chỉ dùng được trên macOS. Tính năng này vẫn đang trong research preview. Claude sẽ hỏi xác nhận trước khi thực hiện bất kỳ thao tác GUI nào.</div>
+      </div>
+    </div>
+
+    <!-- S6: FILE ACCESS -->
+    <div class="section" id="s6">
+      <div class="sec-head">
+        <span class="sec-tag st-t">FILE ACCESS</span>
+        <div>
+          <h2 class="sec-title">File Access — Truy cập file local trực tiếp</h2>
+          <p class="sec-sub">Không cần upload thủ công — Claude đọc/ghi thẳng vào thư mục bạn cho phép</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cách File Access hoạt động</div>
+        <div class="sub">
+          <p>Khi cài Cowork, bạn chỉ định các thư mục được phép truy cập. Claude hoạt động trong <strong>isolated VM</strong> nhưng có mount point vào các thư mục đó. Kết quả là Claude có thể:</p>
+          <ul>
+            <li><strong>Đọc</strong> bất kỳ file nào trong thư mục được phép: PDF, Word, Excel, markdown, JSON, code...</li>
+            <li><strong>Tạo file mới</strong> và lưu trực tiếp vào thư mục</li>
+            <li><strong>Sửa file</strong> hiện có (với confirmation của bạn)</li>
+            <li><strong>Di chuyển, đổi tên</strong> file theo quy tắc bạn đặt ra</li>
+          </ul>
+        </div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Ví dụ task dùng File Access</span>
+            <span class="cb-tag ct-t">FILE</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Task 1: Tóm tắt nhiều file PDF</span>
+<span class="c-w">"Đọc tất cả PDF trong ~/Downloads/Papers/,</span>
+<span class="c-w"> tóm tắt từng bài thành 3 bullet points,</span>
+<span class="c-w"> gom vào ~/Notes/paper-summaries.md"</span>
+
+<span class="cm"># Task 2: Reorganize file theo ngày</span>
+<span class="c-w">"Đi qua ~/Downloads/, tìm tất cả file có tên</span>
+<span class="c-w"> chứa 'invoice', đổi tên thành YYYY-MM-DD_invoice_*.pdf</span>
+<span class="c-w"> và di chuyển vào ~/Documents/Invoices/[year]/"</span>
+
+<span class="cm"># Task 3: Phân tích code base</span>
+<span class="c-w">"Đọc toàn bộ src/ folder trong project của tôi,</span>
+<span class="c-w"> phân tích dependencies, tìm dead code,</span>
+<span class="c-w"> tạo báo cáo markdown về kỹ thuật nợ (tech debt)"</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="info i-ok">
+        <span class="info-ico">🔒</span>
+        <div><strong style="color:var(--text)">Bảo mật:</strong> Claude chỉ truy cập được các thư mục bạn <strong>chủ động cho phép</strong>. Bạn có thể thay đổi permissions bất cứ lúc nào trong Settings → Folder Access. Mọi thứ chạy local — không có data nào gửi lên cloud ngoài prompt và response với model.</div>
+      </div>
+    </div>
+
+    <!-- S7: PLUGINS -->
+    <div class="section" id="s7">
+      <div class="sec-head">
+        <span class="sec-tag st-ch">PLUGINS</span>
+        <div>
+          <h2 class="sec-title">Plugins phổ biến nhất</h2>
+          <p class="sec-sub">Bộ sưu tập plugins mở rộng khả năng của Cowork cho từng domain</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cách cài Plugin</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">Plugin Installation Methods</span>
+            <span class="cb-tag ct-sk">PLUGIN</span>
+          </div>
+          <div class="cb-body"><pre><span class="cm"># Cách 1: Từ marketplace trong app</span>
+<span class="c-y">/plugin install</span> <span class="c-g">tên-plugin</span>
+
+<span class="cm"># Cách 2: Từ GitHub</span>
+<span class="c-y">git clone</span> https://github.com/author/plugin-name.git
+<span class="c-y">claude --plugin-dir</span> ./plugin-name
+
+<span class="cm"># Cách 3: Upload ZIP thủ công</span>
+<span class="cm"># Cowork → Plugins → + → Upload Plugin → drag & drop ZIP</span>
+
+<span class="cm"># Xem plugins đã cài</span>
+<span class="c-y">/plugin list</span>
+
+<span class="cm"># Gỡ plugin</span>
+<span class="c-y">/plugin remove</span> <span class="c-g">tên-plugin</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Plugins nổi bật theo domain</div>
+        <div class="plugin-grid">
+          <div class="plugin-card pc-oc">
+            <div class="pc-header">
+              <div class="pc-icon">📊</div>
+              <div>
+                <div class="pc-name">CoworkPowers</div>
+                <span class="pc-badge pbd-oc">PRODUCTIVITY</span>
+              </div>
+            </div>
+            <div class="pc-desc">Plugin đa năng nhất — "một lệnh kích hoạt cả workflow: research → format → deliver". Gói 11+ workflow phổ biến sẵn dùng.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Research workflows</span>
+              <span class="pc-feat">Document generation</span>
+              <span class="pc-feat">Data formatting</span>
+              <span class="pc-feat">Auto-deliver</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-ins">
+            <div class="pc-header">
+              <div class="pc-icon">📣</div>
+              <div>
+                <div class="pc-name">Google Ads MCP Plugin</div>
+                <span class="pc-badge pbd-ins">MARKETING</span>
+              </div>
+            </div>
+            <div class="pc-desc">Kết nối thẳng Google Ads API qua MCP. Encode các paid search workflow thành skills, báo cáo hiệu suất, tối ưu bidding.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Ads performance report</span>
+              <span class="pc-feat">Keyword analysis</span>
+              <span class="pc-feat">Bid optimization</span>
+              <span class="pc-feat">A/B copy testing</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-ch">
+            <div class="pc-header">
+              <div class="pc-icon">👥</div>
+              <div>
+                <div class="pc-name">People Management</div>
+                <span class="pc-badge pbd-ch">HR</span>
+              </div>
+            </div>
+            <div class="pc-desc">Open-source plugin quản lý nhân sự. Tự động hóa onboarding checklist, theo dõi performance, tổng hợp 1:1 notes.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Onboarding workflows</span>
+              <span class="pc-feat">Performance tracking</span>
+              <span class="pc-feat">1:1 summaries</span>
+              <span class="pc-feat">Team analytics</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-sk">
+            <div class="pc-header">
+              <div class="pc-icon">💻</div>
+              <div>
+                <div class="pc-name">PR Review Agent</div>
+                <span class="pc-badge pbd-sk">DEVELOPER</span>
+              </div>
+            </div>
+            <div class="pc-desc">Nhiều AI agent review PR song song, cross-verify findings, rank issues theo severity. False positive rate dưới 1%.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Multi-agent review</span>
+              <span class="pc-feat">Severity ranking</span>
+              <span class="pc-feat">Cross-verification</span>
+              <span class="pc-feat">GitHub integration</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-t">
+            <div class="pc-header">
+              <div class="pc-icon">💰</div>
+              <div>
+                <div class="pc-name">Finance Tracker</div>
+                <span class="pc-badge pbd-t">FINANCE</span>
+              </div>
+            </div>
+            <div class="pc-desc">Tích hợp CoinTracker, Aiwyn, FactSet cho tax tools và investment tracking. Tự động categorize transactions, tạo báo cáo thuế.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Tax reports</span>
+              <span class="pc-feat">Investment tracking</span>
+              <span class="pc-feat">Transaction categorize</span>
+              <span class="pc-feat">P&L summaries</span>
+            </div>
+          </div>
+          <div class="plugin-card pc-au">
+            <div class="pc-header">
+              <div class="pc-icon">⚖️</div>
+              <div>
+                <div class="pc-name">Legal Assistant</div>
+                <span class="pc-badge pbd-au">LEGAL</span>
+              </div>
+            </div>
+            <div class="pc-desc">Tích hợp LegalZoom, Harvey AI cho review hợp đồng, tóm tắt terms, track deadlines pháp lý, flagging rủi ro.</div>
+            <div class="pc-features">
+              <span class="pc-feat">Contract review</span>
+              <span class="pc-feat">Risk flagging</span>
+              <span class="pc-feat">Deadline tracking</span>
+              <span class="pc-feat">Terms summarize</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Enterprise Plugin Marketplace</div>
+        <div class="rw-box rw-ind">
+          <div class="rw-label">🏢 ENTERPRISE</div>
+          <div class="rw-title">Private Plugin Marketplace cho tổ chức</div>
+          <div class="rw-body">
+            Từ tháng 2/2026, admin Enterprise có thể tạo <strong style="color:#818cf8">private marketplace</strong> riêng qua menu "Customize" trong admin settings:<br><br>
+            • Thêm Anthropic public plugins, partner plugins, hoặc custom plugins tự build<br>
+            • Kiểm soát từng employee có access plugin nào (per-user provisioning)<br>
+            • Auto-install plugin cho specific team<br>
+            • Giấu plugin không liên quan để tránh nhầm lẫn<br>
+            • Dùng <strong style="color:#818cf8">private GitHub repo</strong> làm plugin source — code không rời hạ tầng nội bộ
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S8: MCP SERVERS -->
+    <div class="section" id="s8">
+      <div class="sec-head">
+        <span class="sec-tag st-t">MCP</span>
+        <div>
+          <h2 class="sec-title">MCP Servers — Giao thức kết nối đa năng</h2>
+          <p class="sec-sub">Model Context Protocol — viết một lần, dùng được với mọi MCP client</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">MCP là gì? (Giải thích đơn giản)</div>
+        <div class="sub">
+          <p><strong>MCP (Model Context Protocol)</strong> là tiêu chuẩn mở do Anthropic phát triển, cho phép bất kỳ phần mềm nào "nói chuyện" với Claude theo cách chuẩn hóa. Giống như USB — bạn cắm một cái gì đó tuân theo chuẩn USB vào, là nó hoạt động ngay.</p>
+          <p>Với MCP, developer viết integration một lần → bất kỳ MCP-compliant client nào (Claude Desktop, Cowork, Claude Code, Cursor...) đều dùng được.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-icon">📖</div>
+            <div class="card-title" style="color:var(--oc)">Resources</div>
+            <div class="card-desc">Data read-only mà model có thể lấy: nội dung file, rows DB, API responses. Claude "đọc" context từ đây.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">⚡</div>
+            <div class="card-title" style="color:var(--ins)">Tools</div>
+            <div class="card-desc">Actions Claude có thể gọi: tạo issue, gửi tin nhắn, chạy query, gọi API. Claude "làm" việc qua đây.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">📝</div>
+            <div class="card-title" style="color:var(--ch)">Prompts</div>
+            <div class="card-desc">Template prompt định sẵn cho các tác vụ phổ biến. Claude sử dụng để thực hiện task nhất quán.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">MCP Servers phổ biến nhất</div>
+        <div class="mcp-grid">
+          <div class="mcp-card">
+            <div class="mcp-icon">📧</div>
+            <div><div class="mcp-name" style="color:var(--oc)">Gmail MCP</div><div class="mcp-desc">Đọc/gửi email, tìm kiếm, tạo draft, label, filter</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">📅</div>
+            <div><div class="mcp-name" style="color:var(--ins)">Google Calendar</div><div class="mcp-desc">Xem lịch, tạo/sửa event, kiểm tra availability</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">💾</div>
+            <div><div class="mcp-name" style="color:var(--ch)">Google Drive</div><div class="mcp-desc">Upload, download, tạo/sửa Docs, Sheets, Slides</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">💬</div>
+            <div><div class="mcp-name" style="color:var(--sk)">Slack MCP</div><div class="mcp-desc">Gửi tin, đọc channel, tìm kiếm lịch sử, tạo workflow</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">🐙</div>
+            <div><div class="mcp-name" style="color:var(--teal)">GitHub MCP</div><div class="mcp-desc">Tạo issue, review PR, tạo branch, push code</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">📋</div>
+            <div><div class="mcp-name" style="color:var(--au)">Notion MCP</div><div class="mcp-desc">Đọc/tạo/sửa pages, databases, blocks</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">✅</div>
+            <div><div class="mcp-name" style="color:var(--oc)">Jira MCP</div><div class="mcp-desc">Tạo ticket, cập nhật status, query sprint, report</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">🗄️</div>
+            <div><div class="mcp-name" style="color:var(--ins)">PostgreSQL MCP</div><div class="mcp-desc">Query DB, analyze schema, generate reports từ data</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">📊</div>
+            <div><div class="mcp-name" style="color:var(--ch)">Airtable MCP</div><div class="mcp-desc">Đọc/ghi records, query views, automation triggers</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">🖥️</div>
+            <div><div class="mcp-name" style="color:var(--sk)">TMUX Terminal</div><div class="mcp-desc">Chạy shell commands, manage sessions, output capture</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">✍️</div>
+            <div><div class="mcp-name" style="color:var(--teal)">DocuSign MCP</div><div class="mcp-desc">Gửi document ký điện tử, track status, auto-remind</div></div>
+          </div>
+          <div class="mcp-card">
+            <div class="mcp-icon">📝</div>
+            <div><div class="mcp-name" style="color:var(--au)">WordPress MCP</div><div class="mcp-desc">Tạo/sửa bài viết, quản lý media, publish schedule</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Cài MCP Server trong Claude Desktop</div>
+        <div class="cblock">
+          <div class="cb-head">
+            <div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div>
+            <span class="cb-name">~/.claude/config.json — Cấu hình MCP Servers</span>
+            <span class="cb-tag ct-t">CONFIG</span>
+          </div>
+          <div class="cb-body"><pre>{
+  <span class="st-s">"mcpServers"</span>: {
+    <span class="st-s">"github"</span>: {
+      <span class="st-s">"command"</span>: <span class="st-s">"npx"</span>,
+      <span class="st-s">"args"</span>: [<span class="st-s">"-y"</span>, <span class="st-s">"@modelcontextprotocol/server-github"</span>],
+      <span class="st-s">"env"</span>: {
+        <span class="st-s">"GITHUB_PERSONAL_ACCESS_TOKEN"</span>: <span class="st-s">"ghp_xxxxxxxxxxxx"</span>
+      }
+    },
+    <span class="st-s">"notion"</span>: {
+      <span class="st-s">"command"</span>: <span class="st-s">"npx"</span>,
+      <span class="st-s">"args"</span>: [<span class="st-s">"-y"</span>, <span class="st-s">"@notion/mcp-server"</span>],
+      <span class="st-s">"env"</span>: {
+        <span class="st-s">"NOTION_API_KEY"</span>: <span class="st-s">"secret_xxxxxxxxxx"</span>
+      }
+    },
+    <span class="st-s">"postgres"</span>: {
+      <span class="st-s">"command"</span>: <span class="st-s">"npx"</span>,
+      <span class="st-s">"args"</span>: [<span class="st-s">"-y"</span>, <span class="st-s">"@modelcontextprotocol/server-postgres"</span>,
+               <span class="st-s">"postgresql://user:pass@localhost:5432/mydb"</span>]
+    }
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="info i-tip">
+        <span class="info-ico">🔐</span>
+        <div><strong style="color:var(--text)">Best practice bảo mật MCP:</strong> Luôn cấp <strong>quyền tối thiểu cần thiết</strong> cho mỗi server. Ví dụ: GitHub token chỉ cần quyền read-only nếu chỉ để review PR. Nếu server bị compromise, blast radius sẽ bị giới hạn. Track MCP config trong version control như dotfiles.</div>
+      </div>
+    </div>
+
+    <!-- S9: CONNECTORS -->
+    <div class="section" id="s9">
+      <div class="sec-head">
+        <span class="sec-tag st-au">CONNECTORS</span>
+        <div>
+          <h2 class="sec-title">Connectors — 38+ dịch vụ sẵn dùng</h2>
+          <p class="sec-sub">Kết nối một lần bằng OAuth, Claude dùng được ngay — không cần code</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Danh sách Connectors theo danh mục</div>
+        <table class="tbl">
+          <thead><tr><th>Danh mục</th><th>Connectors</th><th>Có thể làm gì</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--oc)">📧 Email & Calendar</strong></td>
+              <td><code>Gmail</code> <code>Google Calendar</code> <code>Outlook</code></td>
+              <td>Đọc/gửi email, tạo event, kiểm tra availability</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ins)">💾 Storage & Docs</strong></td>
+              <td><code>Google Drive</code> <code>OneDrive</code> <code>Dropbox</code> <code>Notion</code></td>
+              <td>Upload/download file, tạo/sửa doc, organize folders</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ch)">💬 Communication</strong></td>
+              <td><code>Slack</code> <code>Teams</code> <code>Telegram</code> <code>Discord</code></td>
+              <td>Gửi tin, đọc channel, tạo webhook, summarize threads</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--sk)">🔧 Dev Tools</strong></td>
+              <td><code>GitHub</code> <code>GitLab</code> <code>Jira</code> <code>Linear</code> <code>Asana</code></td>
+              <td>Tạo issue, review PR, update ticket, track sprint</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--teal)">📊 Data & CRM</strong></td>
+              <td><code>Airtable</code> <code>Salesforce</code> <code>HubSpot</code> <code>Apollo</code></td>
+              <td>Query records, update contacts, generate reports</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--au)">💰 Finance & Legal</strong></td>
+              <td><code>DocuSign</code> <code>FactSet</code> <code>MSCI</code> <code>LegalZoom</code></td>
+              <td>Ký điện tử, query market data, contract review</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--pink)">📣 Marketing</strong></td>
+              <td><code>Clay</code> <code>Outreach</code> <code>Similarweb</code> <code>WordPress</code></td>
+              <td>Prospecting, email sequences, web analytics, publish</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info i-ok">
+        <span class="info-ico">🔗</span>
+        <div><strong style="color:var(--text)">Kết nối Connector:</strong> Vào <strong>Settings → Extensions</strong> trong Claude Desktop → chọn connector muốn thêm → đăng nhập OAuth → xong. Claude tự detect connector đã cài và dùng khi cần thiết, không cần mention tên trong mỗi task.</div>
+      </div>
+    </div>
+
+    <!-- S10: USE CASES THỰC TẾ -->
+    <div class="section" id="s10">
+      <div class="sec-head">
+        <span class="sec-tag st-ins">USE CASES</span>
+        <div>
+          <h2 class="sec-title">Use Cases thực tế theo vai trò</h2>
+          <p class="sec-sub">Các tình huống cụ thể bạn có thể dùng Cowork ngay hôm nay</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Marketing / Content Creator</div>
+        <div class="grid-2">
+          <div class="rw-box rw-ins">
+            <div class="rw-label">📝 CONTENT PIPELINE</div>
+            <div class="rw-title">Tự động hóa content từ A→Z</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Task:</strong> "Mỗi thứ 2 sáng, đọc 5 bài blog mới nhất trong ~/content/drafts/, edit theo brand voice, tạo social media snippets cho LinkedIn/Twitter, schedule vào Buffer"<br><br>
+              <strong style="color:var(--ins)">Tools dùng:</strong> File Access + Buffer MCP + Claude writing
+            </div>
+          </div>
+          <div class="rw-box rw-ch">
+            <div class="rw-label">🔍 RESEARCH DIGEST</div>
+            <div class="rw-title">Tổng hợp industry news tự động</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Task:</strong> "Mỗi thứ 6, search web tìm 10 bài viết về [industry], tóm tắt, highlight insights quan trọng, tạo newsletter draft trong Notion"<br><br>
+              <strong style="color:var(--ch)">Tools dùng:</strong> Web Search + Notion MCP + Dispatch
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Developer / Engineering</div>
+        <div class="grid-2">
+          <div class="rw-box rw-sk">
+            <div class="rw-label">🔀 PR AUTOMATION</div>
+            <div class="rw-title">Review PR và viết documentation</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Task:</strong> "Mỗi sáng, lấy tất cả PR open trên GitHub repos của tôi, review code quality, viết comment nhận xét chi tiết, flag critical issues lên Slack channel #engineering"<br><br>
+              <strong style="color:var(--sk)">Tools dùng:</strong> GitHub MCP + Slack MCP + PR Review Plugin
+            </div>
+          </div>
+          <div class="rw-box rw-t">
+            <div class="rw-label">🐛 BUG TRIAGE</div>
+            <div class="rw-title">Phân loại và assign bug tự động</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Task:</strong> "Mỗi giờ, quét Jira issues mới tạo trong dự án X, phân loại theo severity, assign cho đúng developer theo ownership matrix trong Notion, thêm label và estimate"<br><br>
+              <strong style="color:var(--teal)">Tools dùng:</strong> Jira MCP + Notion MCP + Dispatch
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Manager / Operations</div>
+        <div class="grid-2">
+          <div class="rw-box rw-oc">
+            <div class="rw-label">📈 WEEKLY REPORT</div>
+            <div class="rw-title">Báo cáo team tự động mỗi tuần</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Task:</strong> "Thứ 6 4PM: thu thập data từ Jira (tickets completed), GitHub (PRs merged), Slack (sentiment analysis from standup), tạo báo cáo PDF gửi email cho leadership team"<br><br>
+              <strong style="color:var(--oc)">Tools dùng:</strong> Jira + GitHub + Slack + Gmail MCP + Dispatch
+            </div>
+          </div>
+          <div class="rw-box rw-au">
+            <div class="rw-label">📋 MEETING PREP</div>
+            <div class="rw-title">Chuẩn bị tài liệu trước meeting</div>
+            <div class="rw-body">
+              <strong style="color:var(--text)">Task:</strong> "1 giờ trước mỗi meeting trong Google Calendar, đọc agenda, pull relevant Notion docs, tóm tắt background context, tạo briefing note và pin vào Slack thread của meeting"<br><br>
+              <strong style="color:var(--au)">Tools dùng:</strong> Google Calendar + Notion + Slack MCP + Dispatch
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S11: CHEAT SHEET -->
+    <div class="section" id="s11">
+      <div class="sec-head">
+        <span class="sec-tag st-y">CHEATSHEET</span>
+        <div>
+          <h2 class="sec-title">Cheat Sheet nhanh</h2>
+          <p class="sec-sub">Tham khảo nhanh các tính năng, command và tips quan trọng</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Quick Reference</div>
+        <div class="cheat-grid">
+          <div class="cheat-card">
+            <h4 class="h4-ind">🚀 Cowork Basics</h4>
+            <div class="cheat-row"><span class="ck">Mode selector</span><span class="cv">Chat | Cowork | Code</span></div>
+            <div class="cheat-row"><span class="ck">Mô tả task</span><span class="cv">Ngôn ngữ tự nhiên</span></div>
+            <div class="cheat-row"><span class="ck">Approve plan</span><span class="cv">Review → Confirm</span></div>
+            <div class="cheat-row"><span class="ck">Can thiệp</span><span class="cv">Gõ redirect bất cứ lúc</span></div>
+            <div class="cheat-row"><span class="ck">App phải mở</span><span class="cv">Trong khi task chạy</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-ch">📡 Dispatch</h4>
+            <div class="cheat-row"><span class="ck">schedule ...</span><span class="cv">Bật chế độ lên lịch</span></div>
+            <div class="cheat-row"><span class="ck">daily / weekly</span><span class="cv">Tần suất lặp lại</span></div>
+            <div class="cheat-row"><span class="ck">cron: "0 8 * * 1"</span><span class="cv">Thứ 2 lúc 8AM</span></div>
+            <div class="cheat-row"><span class="ck">Mobile app</span><span class="cv">Giao task từ điện thoại</span></div>
+            <div class="cheat-row"><span class="ck">Teams: off by default</span><span class="cv">Admin bật trong Settings</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-sk">🔌 Plugins</h4>
+            <div class="cheat-row"><span class="ck">/plugin install X</span><span class="cv">Cài từ marketplace</span></div>
+            <div class="cheat-row"><span class="ck">/plugin list</span><span class="cv">Xem đã cài</span></div>
+            <div class="cheat-row"><span class="ck">/plugin remove X</span><span class="cv">Gỡ plugin</span></div>
+            <div class="cheat-row"><span class="ck">Upload ZIP</span><span class="cv">Plugins → + → Upload</span></div>
+            <div class="cheat-row"><span class="ck">GitHub source</span><span class="cv">--plugin-dir ./path</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-t">🔗 MCP Config</h4>
+            <div class="cheat-row"><span class="ck">~/.claude/config.json</span><span class="cv">Cấu hình MCP servers</span></div>
+            <div class="cheat-row"><span class="ck">command: "npx"</span><span class="cv">Chạy via npx</span></div>
+            <div class="cheat-row"><span class="ck">env: {TOKEN}</span><span class="cv">API keys</span></div>
+            <div class="cheat-row"><span class="ck">Restart Desktop</span><span class="cv">Sau khi sửa config</span></div>
+            <div class="cheat-row"><span class="ck">Min permissions</span><span class="cv">Least privilege rule</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-oc">💻 Computer Use</h4>
+            <div class="cheat-row"><span class="ck">Yêu cầu</span><span class="cv">Pro / Max plan</span></div>
+            <div class="cheat-row"><span class="ck">macOS</span><span class="cv">Apple Silicon tốt nhất</span></div>
+            <div class="cheat-row"><span class="ck">+ Claude in Chrome</span><span class="cv">Browser automation</span></div>
+            <div class="cheat-row"><span class="ck">GUI apps</span><span class="cv">Figma, Excel, bất kỳ</span></div>
+            <div class="cheat-row"><span class="ck">Confirm trước</span><span class="cv">Trước thao tác quan trọng</span></div>
+          </div>
+          <div class="cheat-card">
+            <h4 class="h4-ins">📁 File Access</h4>
+            <div class="cheat-row"><span class="ck">Settings → Folders</span><span class="cv">Cấp quyền thư mục</span></div>
+            <div class="cheat-row"><span class="ck">Isolated VM</span><span class="cv">Mount vào thư mục</span></div>
+            <div class="cheat-row"><span class="ck">Read / Write / Move</span><span class="cv">Full file operations</span></div>
+            <div class="cheat-row"><span class="ck">No upload cần</span><span class="cv">Truy cập trực tiếp</span></div>
+            <div class="cheat-row"><span class="ck">Revoke bất cứ lúc</span><span class="cv">Trong Settings</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Keyword Glossary</div>
+        <div class="kw-grid">
+          <span class="kw-pill kwp-ind">🤖 Cowork Mode</span>
+          <span class="kw-pill kwp-ch">📡 Dispatch</span>
+          <span class="kw-pill kwp-sk">🔌 MCP Server</span>
+          <span class="kw-pill kwp-ins">📁 File Access</span>
+          <span class="kw-pill kwp-oc">🖥️ Computer Use</span>
+          <span class="kw-pill kwp-au">🧩 Plugin</span>
+          <span class="kw-pill kwp-t">🔗 Connector</span>
+          <span class="kw-pill kwp-p">🔒 Isolated VM</span>
+          <span class="kw-pill kwp-ind">📋 Tasks Mode</span>
+          <span class="kw-pill kwp-ch">⏰ Scheduled Task</span>
+          <span class="kw-pill kwp-ins">📱 Remote Control</span>
+          <span class="kw-pill kwp-oc">🎛️ Folder Permissions</span>
+          <span class="kw-pill kwp-sk">🌐 Claude in Chrome</span>
+          <span class="kw-pill kwp-t">📐 Model Context Protocol</span>
+        </div>
+      </div>
+
+      <div class="info i-ok">
+        <span class="info-ico">🎯</span>
+        <div>
+          <strong style="color:var(--text)">Workflow bắt đầu tốt nhất với Cowork:</strong><br>
+          <span style="color:var(--muted)">
+            <strong style="color:#818cf8">① Cài Desktop App</strong> → tải về từ claude.com/download →
+            <strong style="color:var(--ins)">② Chọn Pro plan</strong> ($20/tháng) →
+            <strong style="color:var(--ch)">③ Mở Cowork tab</strong>, chờ download VM ~2GB →
+            <strong style="color:var(--sk)">④ Cấp quyền</strong> một thư mục Documents →
+            <strong style="color:var(--au)">⑤ Giao task đầu tiên</strong> đơn giản (tóm tắt file) →
+            <strong style="color:var(--teal)">⑥ Thêm Connector</strong> (Gmail hoặc Notion) →
+            <strong style="color:var(--pink)">⑦ Cài một Plugin</strong> (CoworkPowers để bắt đầu)
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- S12: BẢO MẬT & GIỚI HẠN -->
+    <div class="section" id="s12">
+      <div class="sec-head">
+        <span class="sec-tag st-p">SECURITY</span>
+        <div>
+          <h2 class="sec-title">Bảo mật & Giới hạn cần biết</h2>
+          <p class="sec-sub">Những điều quan trọng để dùng Cowork an toàn và hiệu quả</p>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Mô hình bảo mật của Cowork</div>
+        <div class="grid-2">
+          <div class="rw-box rw-ins">
+            <div class="rw-label">✅ BẢO MẬT TỐT</div>
+            <div class="rw-title">Isolated VM — không thoát ra ngoài</div>
+            <div class="rw-body">
+              Claude chạy trong virtual machine cô lập — không thể tự ý truy cập file ngoài thư mục được phép, không thể cài phần mềm ngoài VM, không thể can thiệp vào OS.<br><br>
+              Mọi action quan trọng đều cần <strong style="color:var(--ins)">xác nhận của bạn</strong> trước khi thực hiện.
+            </div>
+          </div>
+          <div class="rw-box rw-p">
+            <div class="rw-label">⚠️ RỦI RO CẦN ĐỂ Ý</div>
+            <div class="rw-title">Prompt Injection & Scheduled Tasks</div>
+            <div class="rw-body">
+              Nếu Claude đọc file độc hại chứa "instruction" ẩn, có thể bị lợi dụng (prompt injection). Khi dùng Dispatch, task chạy khi bạn không ở đó — thiết lập cẩn thận và giới hạn scope.<br><br>
+              <strong style="color:var(--pink)">Monitor</strong> scheduled task creation như tín hiệu bảo mật quan trọng.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-title">Giới hạn thực tế cần biết</div>
+        <div class="sub">
+          <ul>
+            <li><strong>Máy phải mở:</strong> Cowork không chạy khi laptop ngủ. Dispatch cũng không chạy được nếu máy tắt/sleep.</li>
+            <li><strong>Usage limits:</strong> Pro users hit limit sớm hơn Max. Task phức tạp nhiều steps tốn nhiều usage hơn.</li>
+            <li><strong>Rate limits & sub-agents:</strong> Khi task spawn nhiều sub-agents, rate limit cộng dồn nhanh hơn.</li>
+            <li><strong>Computer Use preview:</strong> Tính năng này đang nghiên cứu, chỉ macOS, có thể không ổn định.</li>
+            <li><strong>Không thay thế domain expertise:</strong> Cowork làm tốt khi bạn biết muốn gì — nó không tự "biết" business logic đặc thù của công ty bạn.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="info i-warn" style="margin-top:12px">
+        <span class="info-ico">⚠️</span>
+        <div><strong style="color:var(--text)">Quy tắc vàng:</strong> Không cấp quyền Cowork truy cập <strong>thư mục nhạy cảm</strong> (~/ssh, secret keys, password manager export). Dùng nguyên tắc <em>least privilege</em> — chỉ cho phép những gì thực sự cần. Với MCP servers, luôn dùng API key có scope tối thiểu.</div>
+      </div>
+
+      <div class="sub" style="margin-top: 28px">
+        <div class="sub-title">Cowork phù hợp nhất với ai?</div>
+        <div class="grid-3">
+          <div class="card" style="border-color:rgba(64,216,142,.25)">
+            <div class="card-icon">✅</div>
+            <div class="card-title" style="color:var(--ins)">Phù hợp</div>
+            <div class="card-desc">Knowledge workers, operations, marketing, developers — bất kỳ ai có repetitive tasks, cần tự động hóa mà không muốn học coding.</div>
+          </div>
+          <div class="card" style="border-color:rgba(255,208,96,.25)">
+            <div class="card-icon">⚡</div>
+            <div class="card-title" style="color:var(--ch)">Lý tưởng nhất</div>
+            <div class="card-desc">Tasks nhiều bước cần kết nối nhiều tool, scheduled automation, file processing khối lượng lớn, cross-app workflow.</div>
+          </div>
+          <div class="card" style="border-color:rgba(255,101,132,.25)">
+            <div class="card-icon">❌</div>
+            <div class="card-title" style="color:var(--pink)">Không phù hợp</div>
+            <div class="card-desc">Real-time decision making, tasks cần latency thấp, hoặc khi bạn cần kết quả ngay lập tức mà không có thời gian để Claude plan + execute.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <div class="footer">
+    <span>🤖 Claude Cowork · Desktop App · Dispatch · Computer Use · MCP · Plugins</span>
+    <span style="margin-left:auto;color:var(--faint)">Pro · Max · Team · Enterprise · macOS · Windows · 2026</span>
+  </div>
+</div><!-- /main -->
+
+<script>
+  const bar = document.getElementById('progBar');
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (total > 0 ? (scrolled / total) * 100 : 0) + '%';
+  });
+
+  const sections = document.querySelectorAll('.section[id]');
+  const links = document.querySelectorAll('.nav-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
