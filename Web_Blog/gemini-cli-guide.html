@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini CLI — Hướng dẫn toàn diện cho Developer</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08090d;
+            --bg2: #0e1018;
+            --surface: #131520;
+            --surface2: #1a1d2e;
+            --surface3: #21253a;
+            --border: #252840;
+            --border2: #2f3350;
+            --accent: #1a8af8;
+            --accent-lt: #5aaefa;
+            --amber: #f5a623;
+            --green: #3ecf8e;
+            --red: #f06b6b;
+            --sky: #38bdf8;
+            --teal: #2dd4bf;
+            --text: #dde1f5;
+            --muted: #6b7094;
+            --muted2: #8b90b8;
+            --nav-w: 276px;
+            --radius: 10px;
+            --font-body: 'Instrument Sans', sans-serif;
+            --font-head: 'Syne', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+        html { scroll-behavior: smooth; font-size: 15px }
+        body { font-family: var(--font-body); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; line-height: 1.75 }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px }
+        ::-webkit-scrollbar-track { background: transparent }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px }
+
+        /* ══ SIDEBAR ══ */
+        #sidebar {
+            width: var(--nav-w); min-height: 100vh; background: var(--bg2);
+            border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; bottom: 0;
+            overflow-y: auto; z-index: 200; display: flex; flex-direction: column;
+            transition: transform .3s ease;
+        }
+        .sb-header {
+            padding: 24px 20px 18px; border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(26,138,248,.06) 0%, transparent 100%);
+        }
+        .sb-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px }
+        .sb-orb {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: linear-gradient(135deg, #1a8af8 0%, #0d5ec9 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 800; color: #fff; font-family: var(--font-mono);
+            letter-spacing: -.05em; box-shadow: 0 4px 18px rgba(26,138,248,.35);
+        }
+        .sb-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -.02em }
+        .sb-ver {
+            display: inline-flex; align-items: center; gap: 5px; font-size: 11px;
+            color: var(--muted); font-family: var(--font-mono); background: var(--surface2);
+            padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border)
+        }
+        .sb-ver .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+        .sb-progress { padding: 14px 20px 10px; border-bottom: 1px solid var(--border) }
+        .sb-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px }
+        .sb-progress-bar { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden }
+        .sb-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #0d5ec9); border-radius: 99px; width: 0%; transition: width .4s ease }
+
+        .sb-section { padding: 18px 14px 6px }
+        .sb-section-label { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding: 0 6px; margin-bottom: 5px }
+        .sb-link {
+            display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 8px;
+            text-decoration: none; color: var(--muted2); font-size: 13px; transition: all .18s;
+            cursor: pointer; margin-bottom: 1px; position: relative;
+        }
+        .sb-link:hover { background: var(--surface); color: var(--text) }
+        .sb-link.active { background: rgba(26,138,248,.12); color: var(--accent-lt) }
+        .sb-link.active::before {
+            content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+            width: 2px; background: var(--accent); border-radius: 1px
+        }
+        .sb-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0 }
+        .sb-badge {
+            margin-left: auto; font-size: 10px; background: rgba(26,138,248,.18);
+            color: var(--accent-lt); padding: 1px 7px; border-radius: 99px; font-family: var(--font-mono)
+        }
+        .sb-badge.green { background: rgba(62,207,142,.15); color: var(--green) }
+        .sb-badge.amber { background: rgba(245,166,35,.15); color: var(--amber) }
+        .sb-footer { margin-top: auto; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); font-family: var(--font-mono) }
+
+        /* ══ MAIN ══ */
+        main { margin-left: var(--nav-w); flex: 1; padding: 0; max-width: 900px }
+        .section {
+            padding: 60px 64px; border-bottom: 1px solid var(--border);
+            scroll-margin-top: 20px; animation: fadeUp .5s ease both
+        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+        .section-tag {
+            display: inline-flex; align-items: center; gap: 7px; font-size: 11px;
+            letter-spacing: .1em; text-transform: uppercase; color: var(--accent-lt);
+            font-weight: 600; font-family: var(--font-mono); margin-bottom: 14px
+        }
+        .section-tag::before { content: ''; width: 22px; height: 1px; background: currentColor }
+
+        h1 { font-family: var(--font-head); font-size: 48px; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 20px }
+        h1 .grad {
+            background: linear-gradient(135deg, #fff 0%, var(--accent-lt) 60%, #0d5ec9 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent
+        }
+        h2 { font-family: var(--font-head); font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; color: var(--text) }
+        h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 28px 0 10px; display: flex; align-items: center; gap: 8px }
+        p { color: #9fa3c4; margin-bottom: 14px }
+
+        /* ══ CALLOUTS ══ */
+        .callout { border-left: 3px solid var(--accent); padding: 14px 18px; background: rgba(26,138,248,.07); border-radius: 0 8px 8px 0; margin: 18px 0; font-size: 13.5px; color: #bfc3e0 }
+        .callout-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; font-family: var(--font-mono) }
+        .callout.warn { border-color: var(--amber); background: rgba(245,166,35,.07) }
+        .callout.warn .callout-label { color: var(--amber) }
+        .callout.good { border-color: var(--green); background: rgba(62,207,142,.07) }
+        .callout.good .callout-label { color: var(--green) }
+        .callout.err { border-color: var(--red); background: rgba(240,107,107,.07) }
+        .callout.err .callout-label { color: var(--red) }
+        .callout.sky { border-color: var(--sky); background: rgba(56,189,248,.07) }
+        .callout.sky .callout-label { color: var(--sky) }
+
+        /* ══ CARDS ══ */
+        .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0 }
+        .cards.col3 { grid-template-columns: 1fr 1fr 1fr }
+        .card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px; transition: border-color .2s, transform .2s, box-shadow .2s; cursor: default
+        }
+        .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,138,248,.12) }
+        .card-ico { font-size: 22px; margin-bottom: 10px }
+        .card-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; color: var(--text) }
+        .card-desc { font-size: 13px; color: var(--muted2); line-height: 1.55 }
+
+        /* ══ TABLE ══ */
+        .tbl-wrap { overflow-x: auto; margin: 16px 0; border-radius: var(--radius); border: 1px solid var(--border) }
+        table { width: 100%; border-collapse: collapse; font-size: 13.5px }
+        th { text-align: left; padding: 11px 16px; background: var(--surface2); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; border-bottom: 1px solid var(--border) }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: #bbbdd6; vertical-align: top }
+        tr:last-child td { border-bottom: none }
+        tr:hover td { background: rgba(255,255,255,.02) }
+        td strong { color: var(--text) }
+        .tag-new { background: rgba(62,207,142,.15); color: var(--green); padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono) }
+        .tag-core { background: rgba(26,138,248,.15); color: var(--accent-lt); padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono) }
+        .tag-pro { background: rgba(245,166,35,.15); color: var(--amber); padding: 2px 8px; border-radius: 99px; font-size: 11px; font-family: var(--font-mono) }
+
+        /* ══ STEPS ══ */
+        .steps { margin: 20px 0 }
+        .step { display: flex; gap: 18px; margin-bottom: 24px; align-items: flex-start }
+        .step-num {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #0d5ec9);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; flex-shrink: 0; color: #fff;
+            font-family: var(--font-mono); box-shadow: 0 4px 14px rgba(26,138,248,.3)
+        }
+        .step-title { font-weight: 600; color: var(--text); margin-bottom: 5px }
+        .step-desc { font-size: 13.5px; color: var(--muted2) }
+
+        /* ══ FEAT LIST ══ */
+        .feat-list { list-style: none; margin: 10px 0 }
+        .feat-list li { padding: 9px 0 9px 22px; position: relative; font-size: 14px; color: #9fa3c4; border-bottom: 1px solid rgba(37,40,64,.6) }
+        .feat-list li:last-child { border: none }
+        .feat-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent) }
+
+        /* ══ CODE BLOCK ══ */
+        .code-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+            margin: 16px 0; overflow: hidden
+        }
+        .code-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface2)
+        }
+        .code-lang { font-size: 11px; color: var(--muted); font-family: var(--font-mono); letter-spacing: .05em }
+        .code-copy {
+            font-size: 11px; color: var(--muted2); background: var(--surface3); border: 1px solid var(--border);
+            padding: 3px 10px; border-radius: 5px; cursor: pointer; transition: all .18s; font-family: var(--font-mono)
+        }
+        .code-copy:hover { color: var(--text); border-color: var(--accent) }
+        .code-copy.copied { color: var(--green); border-color: var(--green) }
+        pre { padding: 18px 20px; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.7 }
+        code { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent-lt); background: rgba(26,138,248,.1); padding: 2px 6px; border-radius: 4px }
+        pre code { color: var(--text); background: none; padding: 0; font-size: inherit }
+
+        /* syntax */
+        .c-cmd { color: #5aaefa }
+        .c-flag { color: #f5a623 }
+        .c-str { color: #3ecf8e }
+        .c-cmt { color: #505878 }
+        .c-key { color: #c084fc }
+        .c-val { color: #38bdf8 }
+
+        /* ══ HERO STATS ══ */
+        .hero-stats { display: flex; gap: 28px; margin-top: 32px }
+        .stat { text-align: center }
+        .stat-num { font-family: var(--font-head); font-size: 36px; font-weight: 800; letter-spacing: -.03em; color: var(--text) }
+        .stat-num span { font-size: 20px; color: var(--accent) }
+        .stat-lbl { font-size: 12px; color: var(--muted); margin-top: 2px }
+
+        /* ══ TERMINAL DEMO ══ */
+        .terminal {
+            background: #0b0d14; border: 1px solid var(--border); border-radius: var(--radius);
+            overflow: hidden; margin: 20px 0; box-shadow: 0 16px 48px rgba(0,0,0,.4)
+        }
+        .terminal-bar {
+            padding: 10px 16px; background: var(--surface2); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 8px
+        }
+        .t-dot { width: 12px; height: 12px; border-radius: 50% }
+        .t-dot.r { background: #ff5f56 }
+        .t-dot.y { background: #ffbd2e }
+        .t-dot.g { background: #27c93f }
+        .t-title { flex: 1; text-align: center; font-size: 12px; color: var(--muted); font-family: var(--font-mono) }
+        .terminal-body { padding: 20px; font-family: var(--font-mono); font-size: 13px; line-height: 1.9 }
+        .t-prompt { color: var(--accent) }
+        .t-cmd { color: var(--text) }
+        .t-out { color: #6b7094 }
+        .t-ai { color: #3ecf8e }
+        .t-think { color: #f5a623; font-style: italic }
+        .t-tool { color: #c084fc }
+        .t-blank { height: 8px }
+
+        /* ══ MODE TABS ══ */
+        .mode-tabs { display: flex; gap: 8px; margin: 18px 0 12px }
+        .mode-tab {
+            padding: 6px 16px; border-radius: 6px; font-size: 12px; font-family: var(--font-mono);
+            cursor: pointer; border: 1px solid var(--border); color: var(--muted2); transition: all .18s
+        }
+        .mode-tab:hover { border-color: var(--border2); color: var(--text) }
+        .mode-tab.active { background: rgba(26,138,248,.12); border-color: var(--accent); color: var(--accent-lt) }
+
+        .mode-content { display: none }
+        .mode-content.active { display: block }
+
+        /* ══ SLASH CMD TABLE ══ */
+        .slash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0 }
+        .slash-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px }
+        .slash-cmd { font-family: var(--font-mono); font-size: 13px; color: var(--accent-lt); margin-bottom: 5px; font-weight: 500 }
+        .slash-desc { font-size: 12.5px; color: var(--muted2) }
+
+        /* ══ MCP DIAGRAM ══ */
+        .mcp-box {
+            background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px;
+            padding: 12px 18px; font-size: 13px; color: var(--muted2)
+        }
+        .mcp-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(37,40,64,.5) }
+        .mcp-row:last-child { border: none }
+        .mcp-ico { font-size: 16px; width: 22px; text-align: center }
+        .mcp-name { font-weight: 500; color: var(--text); font-size: 13px; min-width: 140px }
+        .mcp-url { font-family: var(--font-mono); font-size: 11px; color: var(--muted) }
+
+        /* ══ COMPARISON ══ */
+        .cmp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0 }
+        .cmp-bad { background: rgba(240,107,107,.06); border: 1px solid rgba(240,107,107,.2); border-radius: 8px; padding: 14px 16px }
+        .cmp-good { background: rgba(62,207,142,.06); border: 1px solid rgba(62,207,142,.2); border-radius: 8px; padding: 14px 16px }
+        .cmp-lbl { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; font-family: var(--font-mono) }
+        .cmp-bad .cmp-lbl { color: var(--red) }
+        .cmp-good .cmp-lbl { color: var(--green) }
+        .cmp-text { font-size: 13px; color: var(--muted2); font-family: var(--font-mono) }
+
+        /* ══ HERO GLOW ══ */
+        .hero-glow {
+            position: absolute; top: -40px; right: -60px; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(26,138,248,.08) 0%, transparent 70%);
+            pointer-events: none
+        }
+        .section:first-child { position: relative; overflow: hidden }
+
+        /* ══ RESPONSIVE ══ */
+        @media (max-width: 900px) {
+            #sidebar { transform: translateX(-100%) }
+            #sidebar.open { transform: translateX(0) }
+            main { margin-left: 0 }
+            .section { padding: 40px 24px }
+            .cards { grid-template-columns: 1fr }
+            .cards.col3 { grid-template-columns: 1fr }
+            .slash-grid { grid-template-columns: 1fr }
+            .cmp-row { grid-template-columns: 1fr }
+        }
+
+        /* ══ HAMBURGER ══ */
+        .hamburger {
+            display: none; position: fixed; top: 16px; left: 16px; z-index: 300;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: 8px 10px; cursor: pointer; color: var(--text)
+        }
+        @media (max-width: 900px) { .hamburger { display: flex } }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 150 }
+        .overlay.open { display: block }
+    </style>
+</head>
+
+<body>
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<nav id="sidebar">
+    <div class="sb-header">
+        <div class="sb-brand">
+            <div class="sb-orb">G</div>
+            <span class="sb-title">Gemini CLI</span>
+        </div>
+        <div class="sb-ver">
+            <span class="dot"></span>
+            v0.21.0 · 2026
+        </div>
+    </div>
+
+    <div class="sb-progress">
+        <div class="sb-progress-label"><span>Tiến độ đọc</span><span id="pct">0%</span></div>
+        <div class="sb-progress-bar"><div class="sb-progress-fill" id="pfill"></div></div>
+    </div>
+
+    <div class="sb-section">
+        <div class="sb-section-label">Bài viết</div>
+        <a class="sb-link" href="Claude-architecture-guide.html">
+            <span class="sb-icon">🏗️</span> Claude Architecture
+        </a>
+        <a class="sb-link" href="antigravity-guide.html">
+            <span class="sb-icon">🚀</span> Antigravity Guide
+        </a>
+        <a class="sb-link" href="claude-guide.html">
+            <span class="sb-icon">🧠</span> Claude Guide
+        </a>
+        <a class="sb-link active" href="gemini-cli-guide.html">
+            <span class="sb-icon">⚡</span> Gemini CLI
+        </a>
+        <a class="sb-link" href="open-clawbot-guide.html">
+            <span class="sb-icon">🤖</span> Open Clawbot
+        </a>
+        <a class="sb-link" href="superpowers-antigravity-guide.html">
+            <span class="sb-icon">✨</span> Superpowers
+        </a>
+    </div>
+
+    <div class="sb-section">
+        <div class="sb-section-label">Bắt đầu</div>
+        <a class="sb-link active" href="#intro" onclick="setActive(this)">
+            <span class="sb-icon">🚀</span> Giới thiệu
+        </a>
+        <a class="sb-link" href="#install" onclick="setActive(this)">
+            <span class="sb-icon">⚙️</span> Cài đặt
+        </a>
+        <a class="sb-link" href="#auth" onclick="setActive(this)">
+            <span class="sb-icon">🔑</span> Xác thực
+        </a>
+    </div>
+
+    <div class="sb-section">
+        <div class="sb-section-label">Cơ bản</div>
+        <a class="sb-link" href="#modes" onclick="setActive(this)">
+            <span class="sb-icon">💬</span> Chế độ dùng
+        </a>
+        <a class="sb-link" href="#commands" onclick="setActive(this)">
+            <span class="sb-icon">⌨️</span> Slash Commands
+            <span class="sb-badge">25+</span>
+        </a>
+        <a class="sb-link" href="#tools" onclick="setActive(this)">
+            <span class="sb-icon">🔧</span> Built-in Tools
+            <span class="sb-badge green">core</span>
+        </a>
+    </div>
+
+    <div class="sb-section">
+        <div class="sb-section-label">Nâng cao</div>
+        <a class="sb-link" href="#mcp" onclick="setActive(this)">
+            <span class="sb-icon">🔌</span> MCP Servers
+            <span class="sb-badge amber">hot</span>
+        </a>
+        <a class="sb-link" href="#geminimd" onclick="setActive(this)">
+            <span class="sb-icon">📄</span> GEMINI.md
+        </a>
+        <a class="sb-link" href="#noninteractive" onclick="setActive(this)">
+            <span class="sb-icon">🤖</span> Headless Mode
+        </a>
+        <a class="sb-link" href="#planmode" onclick="setActive(this)">
+            <span class="sb-icon">🗺️</span> Plan Mode
+            <span class="sb-badge green">new</span>
+        </a>
+    </div>
+
+    <div class="sb-section">
+        <div class="sb-section-label">Thực chiến</div>
+        <a class="sb-link" href="#usecase" onclick="setActive(this)">
+            <span class="sb-icon">💡</span> Use Cases
+        </a>
+        <a class="sb-link" href="#tips" onclick="setActive(this)">
+            <span class="sb-icon">⚡</span> Tips & Tricks
+        </a>
+        <a class="sb-link" href="#quota" onclick="setActive(this)">
+            <span class="sb-icon">📊</span> Quota & Model
+        </a>
+    </div>
+
+    <div class="sb-footer">
+        © 2026 Google · Apache 2.0<br>
+        github.com/google-gemini/gemini-cli
+    </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<main>
+
+    <!-- ── INTRO ── -->
+    <section class="section" id="intro">
+        <div class="hero-glow"></div>
+        <div class="section-tag">01 · Giới thiệu</div>
+        <h1><span class="grad">Gemini CLI</span><br>AI Agent trong Terminal</h1>
+        <p style="font-size:16px;color:#b0b4d0;max-width:600px">
+            Gemini CLI là open-source AI agent mang sức mạnh của Gemini trực tiếp vào terminal của bạn.
+            Không chỉ là chatbot — đây là một agent có khả năng đọc/ghi file, chạy lệnh shell, tìm kiếm web, và kết nối với bất kỳ MCP server nào.
+        </p>
+
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-num">95<span>k+</span></div>
+                <div class="stat-lbl">GitHub Stars</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">1<span>M</span></div>
+                <div class="stat-lbl">Token Context</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">1k<span>/ngày</span></div>
+                <div class="stat-lbl">Free Requests</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">60<span>/phút</span></div>
+                <div class="stat-lbl">Free RPM</div>
+            </div>
+        </div>
+
+        <div class="callout good" style="margin-top:28px">
+            <div class="callout-label">✅ Miễn phí với Google Account</div>
+            Bạn có thể dùng Gemini 2.5 Pro hoàn toàn miễn phí với Google Account cá nhân — 1,000 request/ngày, 60 request/phút.
+            Đây là giới hạn cao nhất trong các AI CLI tool hiện tại.
+        </div>
+
+        <div class="cards col3" style="margin-top:24px">
+            <div class="card">
+                <div class="card-ico">💻</div>
+                <div class="card-title">Terminal-first</div>
+                <div class="card-desc">Thiết kế cho developer sống trong command line. Không cần rời terminal.</div>
+            </div>
+            <div class="card">
+                <div class="card-ico">🔧</div>
+                <div class="card-title">Built-in Tools</div>
+                <div class="card-desc">Google Search, đọc/ghi file, shell commands, web fetching — sẵn có.</div>
+            </div>
+            <div class="card">
+                <div class="card-ico">🔌</div>
+                <div class="card-title">MCP Extensible</div>
+                <div class="card-desc">Kết nối với GitHub, Databases, Cloud Run và hàng trăm MCP server khác.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CÀI ĐẶT ── -->
+    <section class="section" id="install">
+        <div class="section-tag">02 · Cài đặt</div>
+        <h2>⚙️ Cài đặt Gemini CLI</h2>
+        <p>Yêu cầu: <strong>Node.js 18+</strong>. Có 3 cách cài:</p>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div>
+                    <div class="step-title">NPX — Không cần cài (nhanh nhất)</div>
+                    <div class="step-desc">Dùng ngay không cần cài đặt, phù hợp để thử nghiệm lần đầu.</div>
+                    <div class="code-block" style="margin-top:10px">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="code-copy" onclick="copyCode(this, 'npx @google/gemini-cli')">Copy</button>
+                        </div>
+                        <pre><code><span class="c-cmd">npx</span> @google/gemini-cli</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div>
+                    <div class="step-title">NPM Global — Cài vĩnh viễn (khuyến nghị)</div>
+                    <div class="step-desc">Dùng lệnh <code>gemini</code> từ bất cứ đâu sau khi cài.</div>
+                    <div class="code-block" style="margin-top:10px">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="code-copy" onclick="copyCode(this, 'npm install -g @google/gemini-cli\ngemini')">Copy</button>
+                        </div>
+                        <pre><code><span class="c-cmd">npm</span> install <span class="c-flag">-g</span> @google/gemini-cli
+
+<span class="c-cmt"># Sau đó chạy:</span>
+<span class="c-cmd">gemini</span></code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div>
+                    <div class="step-title">Conda (môi trường độc lập)</div>
+                    <div class="step-desc">Dành cho người muốn cô lập môi trường Node.js.</div>
+                    <div class="code-block" style="margin-top:10px">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="code-copy" onclick="copyCode(this, 'conda create -y -n gemini_env -c conda-forge nodejs\nconda activate gemini_env\nnpm install -g @google/gemini-cli')">Copy</button>
+                        </div>
+                        <pre><code><span class="c-cmd">conda</span> create <span class="c-flag">-y -n</span> gemini_env <span class="c-flag">-c</span> conda-forge nodejs
+<span class="c-cmd">conda</span> activate gemini_env
+<span class="c-cmd">npm</span> install <span class="c-flag">-g</span> @google/gemini-cli</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="callout warn">
+            <div class="callout-label">⚠️ Lưu ý Node.js version</div>
+            Gemini CLI yêu cầu Node.js 18 trở lên. Chạy <code>node --version</code> để kiểm tra.
+            Nếu cần upgrade: <code>nvm install 20 && nvm use 20</code>
+        </div>
+    </section>
+
+    <!-- ── XÁC THỰC ── -->
+    <section class="section" id="auth">
+        <div class="section-tag">03 · Xác thực</div>
+        <h2>🔑 Xác thực (Authentication)</h2>
+        <p>Gemini CLI hỗ trợ nhiều phương thức xác thực, tùy theo nhu cầu sử dụng:</p>
+
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Phương thức</th>
+                        <th>Cách dùng</th>
+                        <th>Phù hợp</th>
+                        <th>Quota</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Google Account</strong> <span class="tag-core">miễn phí</span></td>
+                        <td>Đăng nhập qua browser khi khởi động lần đầu</td>
+                        <td>Individual developer</td>
+                        <td>1k req/ngày · 60 rpm</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Google AI Studio Key</strong></td>
+                        <td><code>export GOOGLE_API_KEY="..."</code></td>
+                        <td>Pay-as-you-go, scripting</td>
+                        <td>Theo billing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vertex AI</strong></td>
+                        <td><code>export GOOGLE_GENAI_USE_VERTEXAI=true</code></td>
+                        <td>Enterprise, GCP users</td>
+                        <td>Theo billing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gemini Code Assist</strong> <span class="tag-pro">Standard/Enterprise</span></td>
+                        <td>Tự động detect qua workspace</td>
+                        <td>Teams sử dụng Code Assist</td>
+                        <td>Quota riêng theo plan</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>🔐 Cách lấy Google AI Studio API Key</h3>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div>
+                    <div class="step-title">Truy cập aistudio.google.com</div>
+                    <div class="step-desc">Đăng nhập bằng Google Account → vào phần <strong>API keys</strong> → <strong>Create API key</strong></div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div>
+                    <div class="step-title">Export vào environment</div>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="code-copy" onclick="copyCode(this, 'export GOOGLE_API_KEY=\"YOUR_API_KEY_HERE\"')">Copy</button>
+                        </div>
+                        <pre><code><span class="c-cmd">export</span> <span class="c-key">GOOGLE_API_KEY</span>=<span class="c-str">"YOUR_API_KEY_HERE"</span>
+
+<span class="c-cmt"># Thêm vào ~/.bashrc hoặc ~/.zshrc để persist:</span>
+<span class="c-cmd">echo</span> <span class="c-str">'export GOOGLE_API_KEY="YOUR_KEY"'</span> >> ~/.zshrc</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div>
+                    <div class="step-title">Khởi động Gemini CLI</div>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="code-copy" onclick="copyCode(this, 'gemini')">Copy</button>
+                        </div>
+                        <pre><code><span class="c-cmd">gemini</span></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── MODES ── -->
+    <section class="section" id="modes">
+        <div class="section-tag">04 · Chế độ dùng</div>
+        <h2>💬 Các chế độ sử dụng</h2>
+        <p>Gemini CLI có 3 chế độ chính, mỗi chế độ phù hợp với tình huống khác nhau:</p>
+
+        <div class="mode-tabs">
+            <div class="mode-tab active" onclick="switchMode(this,'m1')">Interactive Shell</div>
+            <div class="mode-tab" onclick="switchMode(this,'m2')">Inline Prompt</div>
+            <div class="mode-tab" onclick="switchMode(this,'m3')">Pipe Input</div>
+        </div>
+
+        <div id="m1" class="mode-content active">
+            <div class="callout sky">
+                <div class="callout-label">💬 Interactive Shell — Chế độ chính</div>
+                Gõ <code>gemini</code> để vào interactive shell. Bạn có thể chat nhiều lượt, agent sẽ nhớ context của conversation.
+                Đây là chế độ phổ biến nhất để làm việc với codebase.
+            </div>
+            <div class="terminal">
+                <div class="terminal-bar">
+                    <span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span>
+                    <span class="t-title">gemini — interactive shell</span>
+                </div>
+                <div class="terminal-body">
+                    <div><span class="t-prompt">$</span> <span class="t-cmd">gemini</span></div>
+                    <div class="t-blank"></div>
+                    <div class="t-out">Welcome to Gemini CLI v0.21.0</div>
+                    <div class="t-out">✓ Authenticated as your-email@gmail.com (Gemini 2.5 Pro)</div>
+                    <div class="t-blank"></div>
+                    <div><span class="t-prompt">❯</span> <span class="t-cmd">Explain the architecture of this codebase</span></div>
+                    <div class="t-blank"></div>
+                    <div class="t-think">◆ Thinking... reading project structure</div>
+                    <div class="t-tool">⚡ read_file(package.json)</div>
+                    <div class="t-tool">⚡ glob("src/**/*.ts")</div>
+                    <div class="t-blank"></div>
+                    <div class="t-ai">✦ This is a Spring Boot microservice (Rider Service)...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="m2" class="mode-content">
+            <div class="callout sky">
+                <div class="callout-label">⚡ Inline Prompt — One-shot</div>
+                Dùng flag <code>-p</code> để chạy một prompt không cần vào interactive mode. Rất hữu ích cho scripting và automation.
+            </div>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">bash</span>
+                    <button class="code-copy" onclick="copyCode(this,'gemini -p \"Explain the architecture of this codebase\"')">Copy</button>
+                </div>
+                <pre><code><span class="c-cmt"># Prompt đơn giản</span>
+<span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Explain the architecture of this codebase"</span>
+
+<span class="c-cmt"># Output dạng JSON (cho scripting)</span>
+<span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"List all API endpoints"</span> <span class="c-flag">--output-format json</span>
+
+<span class="c-cmt"># Stream JSON (cho realtime events)</span>
+<span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Run tests and deploy"</span> <span class="c-flag">--output-format stream-json</span></code></pre>
+            </div>
+        </div>
+
+        <div id="m3" class="mode-content">
+            <div class="callout sky">
+                <div class="callout-label">📥 Pipe Input — Xử lý stdin</div>
+                Pipe nội dung file/output vào Gemini CLI để xử lý. Kết hợp mạnh với các CLI tool khác.
+            </div>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">bash</span>
+                    <button class="code-copy" onclick="copyCode(this,'cat error.log | gemini -p \"What caused this error?\"')">Copy</button>
+                </div>
+                <pre><code><span class="c-cmt"># Phân tích log file</span>
+<span class="c-cmd">cat</span> error.log | <span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"What caused this error?"</span>
+
+<span class="c-cmt"># Review git diff</span>
+<span class="c-cmd">git diff</span> | <span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Review this code change"</span>
+
+<span class="c-cmt"># Dịch README</span>
+<span class="c-cmd">cat</span> README.md | <span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Translate this to Vietnamese"</span></code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── SLASH COMMANDS ── -->
+    <section class="section" id="commands">
+        <div class="section-tag">05 · Slash Commands</div>
+        <h2>⌨️ Slash Commands</h2>
+        <p>Trong interactive mode, gõ <code>/</code> để xem tất cả commands. Đây là các lệnh quan trọng nhất:</p>
+
+        <div class="slash-grid">
+            <div class="slash-item">
+                <div class="slash-cmd">/help</div>
+                <div class="slash-desc">Xem tất cả commands và keyboard shortcuts. Điểm khởi đầu tốt nhất.</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/chat save &lt;name&gt;</div>
+                <div class="slash-desc">Lưu conversation hiện tại. Dùng sau để /chat resume.</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/chat resume &lt;name&gt;</div>
+                <div class="slash-desc">Tiếp tục conversation đã lưu trước đó.</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/chat share</div>
+                <div class="slash-desc">Export conversation thành Markdown file để chia sẻ.</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/clear</div>
+                <div class="slash-desc">Xóa màn hình terminal, giữ nguyên context conversation.</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/reset</div>
+                <div class="slash-desc">Xóa toàn bộ context conversation, bắt đầu lại từ đầu.</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/memory show</div>
+                <div class="slash-desc">Xem toàn bộ context đã được load (GEMINI.md + memory files).</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/memory add &lt;text&gt;</div>
+                <div class="slash-desc">Thêm memory mới vào GEMINI.md của dự án.</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/settings</div>
+                <div class="slash-desc">Mở settings panel: model, approval mode, theme, plugins...</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/tools</div>
+                <div class="slash-desc">Xem danh sách tất cả tools đang available (built-in + MCP).</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/extensions</div>
+                <div class="slash-desc">Quản lý extensions: list, install, update, remove.</div>
+            </div>
+            <div class="slash-item">
+                <div class="slash-cmd">/bug</div>
+                <div class="slash-desc">Report bug trực tiếp lên GitHub issues của Gemini CLI.</div>
+            </div>
+        </div>
+
+        <h3>⌨️ Keyboard Shortcuts</h3>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr><th>Phím</th><th>Tác dụng</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>Shift+Tab</code></td><td>Chuyển giữa các approval mode (Auto, Plan, Manual)</td></tr>
+                    <tr><td><code>Ctrl+C</code></td><td>Hủy action đang chạy (agent sẽ dừng lại)</td></tr>
+                    <tr><td><code>Ctrl+D</code></td><td>Thoát Gemini CLI</td></tr>
+                    <tr><td><code>↑ / ↓</code></td><td>Navigate lịch sử prompt đã nhập</td></tr>
+                    <tr><td><code>Alt+Enter</code></td><td>Xuống dòng trong prompt (multi-line input)</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── BUILT-IN TOOLS ── -->
+    <section class="section" id="tools">
+        <div class="section-tag">06 · Built-in Tools</div>
+        <h2>🔧 Built-in Tools</h2>
+        <p>Gemini CLI có sẵn các tools mạnh mẽ mà agent sẽ tự chọn và dùng khi cần. Bạn không cần gọi thủ công.</p>
+
+        <div class="cards col3">
+            <div class="card">
+                <div class="card-ico">📁</div>
+                <div class="card-title">File Operations</div>
+                <div class="card-desc"><code>read_file</code>, <code>write_file</code>, <code>edit_file</code>, <code>glob</code> — đọc/ghi/sửa file trên local.</div>
+            </div>
+            <div class="card">
+                <div class="card-ico">🔍</div>
+                <div class="card-title">Search & Grep</div>
+                <div class="card-desc"><code>grep_search</code>, <code>glob</code> — tìm kiếm pattern trong codebase, regex search nhanh.</div>
+            </div>
+            <div class="card">
+                <div class="card-ico">💻</div>
+                <div class="card-title">Shell Commands</div>
+                <div class="card-desc"><code>run_shell_command</code> — chạy bất kỳ lệnh terminal nào (npm, git, mvn, kubectl...)</div>
+            </div>
+            <div class="card">
+                <div class="card-ico">🌐</div>
+                <div class="card-title">Web Fetch</div>
+                <div class="card-desc"><code>fetch_url</code> — lấy nội dung trang web, parse HTML, đọc documentation online.</div>
+            </div>
+            <div class="card">
+                <div class="card-ico">🔎</div>
+                <div class="card-title">Google Search</div>
+                <div class="card-desc"><code>google_search</code> — tìm kiếm real-time trên Google, grounding response với thông tin mới nhất.</div>
+            </div>
+            <div class="card">
+                <div class="card-ico">🖼️</div>
+                <div class="card-title">Multimodal Input</div>
+                <div class="card-desc">Nhận diện và xử lý ảnh, PDF làm input. Generate app từ wireframe ảnh.</div>
+            </div>
+        </div>
+
+        <div class="callout" style="margin-top:20px">
+            <div class="callout-label">💡 Agent tự quyết định dùng tool nào</div>
+            Bạn chỉ cần mô tả task bằng ngôn ngữ tự nhiên. Agent sẽ tự quyết định cần dùng tool nào và sẽ hỏi xác nhận trước khi thực hiện hành động có thể gây ra thay đổi (ghi file, chạy lệnh).
+        </div>
+
+        <h3>🛡️ Approval Modes</h3>
+        <p>Kiểm soát mức độ tự động của agent. Dùng <code>Shift+Tab</code> để chuyển giữa các mode:</p>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr><th>Mode</th><th>Mô tả</th><th>Phù hợp</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Default (Manual)</strong></td>
+                        <td>Hỏi xác nhận trước mỗi tool call có tác động</td>
+                        <td>Mọi tình huống — an toàn nhất</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Auto-Edit</strong></td>
+                        <td>Tự động file edits, hỏi khi chạy shell</td>
+                        <td>Refactoring code quen thuộc</td>
+                    </tr>
+                    <tr>
+                        <td><strong>YOLO (Full Auto)</strong> <span class="tag-pro">⚠️</span></td>
+                        <td>Tự động mọi thứ, không hỏi</td>
+                        <td>Sandbox, automation pipeline</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Plan Mode</strong> <span class="tag-new">new</span></td>
+                        <td>Read-only: chỉ đọc, lập kế hoạch, không ghi file</td>
+                        <td>Research, planning trước khi implement</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── MCP ── -->
+    <section class="section" id="mcp">
+        <div class="section-tag">07 · MCP Servers</div>
+        <h2>🔌 MCP — Model Context Protocol</h2>
+        <p>MCP cho phép Gemini CLI kết nối với các external service. Đây là cách mở rộng khả năng của agent vượt ra ngoài local file system.</p>
+
+        <div class="callout good">
+            <div class="callout-label">✅ Cách kết nối MCP server</div>
+            Thêm vào file <code>~/.gemini/settings.json</code> (global) hoặc <code>.gemini/settings.json</code> trong project (local).
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">json — ~/.gemini/settings.json</span>
+                <button class="code-copy" onclick="copyCode(this, '{\n  \"mcpServers\": {\n    \"github\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-github\"]\n    },\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/home/user/projects\"]\n    }\n  }\n}')">Copy</button>
+            </div>
+            <pre><code>{
+  <span class="c-key">"mcpServers"</span>: {
+    <span class="c-key">"github"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"npx"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"-y"</span>, <span class="c-str">"@modelcontextprotocol/server-github"</span>],
+      <span class="c-key">"env"</span>: { <span class="c-key">"GITHUB_TOKEN"</span>: <span class="c-str">"ghp_..."</span> }
+    },
+    <span class="c-key">"postgres"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"npx"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"-y"</span>, <span class="c-str">"@modelcontextprotocol/server-postgres"</span>,
+               <span class="c-str">"postgresql://user:pass@localhost/mydb"</span>]
+    },
+    <span class="c-key">"brave-search"</span>: {
+      <span class="c-key">"command"</span>: <span class="c-str">"npx"</span>,
+      <span class="c-key">"args"</span>: [<span class="c-str">"-y"</span>, <span class="c-str">"@modelcontextprotocol/server-brave-search"</span>],
+      <span class="c-key">"env"</span>: { <span class="c-key">"BRAVE_API_KEY"</span>: <span class="c-str">"BSA..."</span> }
+    }
+  }
+}</code></pre>
+        </div>
+
+        <h3>📦 MCP Servers phổ biến</h3>
+        <div class="mcp-box">
+            <div class="mcp-row">
+                <span class="mcp-ico">🐙</span>
+                <span class="mcp-name">GitHub</span>
+                <span class="mcp-url">@modelcontextprotocol/server-github</span>
+            </div>
+            <div class="mcp-row">
+                <span class="mcp-ico">🗄️</span>
+                <span class="mcp-name">PostgreSQL</span>
+                <span class="mcp-url">@modelcontextprotocol/server-postgres</span>
+            </div>
+            <div class="mcp-row">
+                <span class="mcp-ico">🗃️</span>
+                <span class="mcp-name">SQLite</span>
+                <span class="mcp-url">@modelcontextprotocol/server-sqlite</span>
+            </div>
+            <div class="mcp-row">
+                <span class="mcp-ico">☁️</span>
+                <span class="mcp-name">Cloud Run (Google)</span>
+                <span class="mcp-url">Extension từ Gemini CLI Gallery</span>
+            </div>
+            <div class="mcp-row">
+                <span class="mcp-ico">🔍</span>
+                <span class="mcp-name">Brave Search</span>
+                <span class="mcp-url">@modelcontextprotocol/server-brave-search</span>
+            </div>
+            <div class="mcp-row">
+                <span class="mcp-ico">📦</span>
+                <span class="mcp-name">Filesystem</span>
+                <span class="mcp-url">@modelcontextprotocol/server-filesystem</span>
+            </div>
+        </div>
+
+        <div class="callout sky" style="margin-top:16px">
+            <div class="callout-label">💡 Với Spring Boot / PostgreSQL project</div>
+            Kết nối MCP server PostgreSQL để agent có thể query schema trực tiếp: "Describe the rider_forms table" → agent sẽ tự query DB để trả lời.
+        </div>
+    </section>
+
+    <!-- ── GEMINI.MD ── -->
+    <section class="section" id="geminimd">
+        <div class="section-tag">08 · GEMINI.md</div>
+        <h2>📄 GEMINI.md — Project Context</h2>
+        <p>File <code>GEMINI.md</code> được Gemini CLI tự động load mỗi khi bạn bắt đầu session trong thư mục dự án. Đây là cách cung cấp persistent context cho agent.</p>
+
+        <div class="callout">
+            <div class="callout-label">📍 Vị trí tìm kiếm</div>
+            Gemini CLI tìm <code>GEMINI.md</code> theo thứ tự: thư mục hiện tại → thư mục cha (recursive) → home directory. Bạn có thể có nhiều file nested cho nhiều level context.
+        </div>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">markdown — GEMINI.md (ví dụ Spring Boot project)</span>
+                <button class="code-copy" onclick="copyCode(this, '# Project Context\n\n## Stack\n- Java 17 + Spring Boot 3.2\n- PostgreSQL 14 + Liquibase\n- Kafka (consumer)\n- Maven build\n\n## Architecture\n- Hexagonal Architecture (Ports & Adapters)\n- DDD aggregates\n- Package: com.mbageas.rider\n\n## Key Conventions\n- Service layer: @Transactional on Application Services only\n- Entity IDs: UUID\n- Exception: RiderException(code, message)\n\n## Common Commands\n- Build: mvn clean install -DskipTests\n- Test: mvn test\n- Run local: mvn spring-boot:run -Dspring.profiles.active=local')">Copy</button>
+            </div>
+            <pre><code><span class="c-cmt"># Project Context</span>
+
+<span class="c-cmt">## Stack</span>
+- Java 17 + Spring Boot 3.2
+- PostgreSQL 14 + Liquibase
+- Kafka (consumer)
+- Maven build
+
+<span class="c-cmt">## Architecture</span>
+- Hexagonal Architecture (Ports & Adapters)
+- DDD aggregates
+- Package: com.mbageas.rider
+
+<span class="c-cmt">## Key Conventions</span>
+- Service layer: @Transactional on Application Services only
+- Entity IDs: UUID
+- Exception: RiderException(code, message)
+
+<span class="c-cmt">## Common Commands</span>
+<span class="c-cmt"># Build:</span> mvn clean install -DskipTests
+<span class="c-cmt"># Test:</span>  mvn test
+<span class="c-cmt"># Run local:</span> mvn spring-boot:run -Dspring.profiles.active=local</code></pre>
+        </div>
+
+        <h3>📝 Tips viết GEMINI.md hiệu quả</h3>
+        <ul class="feat-list">
+            <li>Mô tả stack và version cụ thể — tránh agent suggest wrong syntax</li>
+            <li>Liệt kê architecture patterns bạn đang dùng (DDD, Hexagonal, CQRS...)</li>
+            <li>Ghi các convention quan trọng (naming, exception handling, transaction boundary)</li>
+            <li>Thêm common commands thường dùng (build, test, run)</li>
+            <li>Đề cập các file/folder quan trọng để agent navigate nhanh hơn</li>
+            <li>Ghi chú các gotcha / anti-patterns cần tránh trong project</li>
+        </ul>
+    </section>
+
+    <!-- ── HEADLESS ── -->
+    <section class="section" id="noninteractive">
+        <div class="section-tag">09 · Headless Mode</div>
+        <h2>🤖 Headless / Non-interactive Mode</h2>
+        <p>Dùng Gemini CLI trong script, CI/CD pipeline, hoặc automation — không cần user input.</p>
+
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">bash</span>
+                <button class="code-copy" onclick="copyCode(this,'# CI: auto code review khi có PR\ngemini -p \"Review the staged changes and output a JSON report\" \\\n  --output-format json \\\n  --yolo \\\n  --allowed-tools read_file,grep_search')">Copy</button>
+            </div>
+            <pre><code><span class="c-cmt"># CI: auto code review khi có PR</span>
+<span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Review the staged changes, find bugs and security issues"</span> \
+  <span class="c-flag">--output-format json</span> \
+  <span class="c-flag">--yolo</span> \
+  <span class="c-flag">--allowed-tools</span> read_file,grep_search
+
+<span class="c-cmt"># Generate changelog từ git log</span>
+<span class="c-cmd">git log</span> --oneline -20 | <span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Generate a changelog from these commits"</span>
+
+<span class="c-cmt"># Custom slash command trong headless mode</span>
+<span class="c-cmd">gemini</span> <span class="c-str">"/joke Chuck Norris"</span>
+
+<span class="c-cmt"># Giới hạn tools được phép dùng (bảo mật)</span>
+<span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Analyze this codebase"</span> \
+  <span class="c-flag">--allowed-tools</span> read_file,glob,grep_search \
+  <span class="c-flag">--yolo</span></code></pre>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="card-ico">🔒</div>
+                <div class="card-title">--allowed-tools</div>
+                <div class="card-desc">Whitelist các tool được phép dùng. An toàn hơn cho automation pipeline.</div>
+            </div>
+            <div class="card">
+                <div class="card-ico">📤</div>
+                <div class="card-title">--output-format json</div>
+                <div class="card-desc">Output dạng JSON để parse trong script. Kết hợp với <code>jq</code> để xử lý.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── PLAN MODE ── -->
+    <section class="section" id="planmode">
+        <div class="section-tag">10 · Plan Mode</div>
+        <h2>🗺️ Plan Mode — Research-first</h2>
+        <p>Plan mode là chế độ read-only, giúp agent nghiên cứu và lập kế hoạch mà không có nguy cơ thay đổi code.</p>
+
+        <div class="callout good">
+            <div class="callout-label">✅ Khi nào dùng Plan Mode</div>
+            Trước khi implement feature lớn, migrate database, hay refactor codebase phức tạp — dùng Plan Mode để agent phân tích toàn bộ rồi đề xuất implementation plan.
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-bar">
+                <span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span>
+                <span class="t-title">gemini — plan mode</span>
+            </div>
+            <div class="terminal-body">
+                <div><span class="t-prompt">❯</span> <span class="t-cmd">Plan how to migrate RiderForm to use the new PersonProfile schema</span></div>
+                <div class="t-blank"></div>
+                <div class="t-think">◆ [PLAN MODE] Research only, no file changes</div>
+                <div class="t-tool">⚡ read_file(src/domain/RiderForm.java)</div>
+                <div class="t-tool">⚡ grep_search("PersonProfile", "src/**")</div>
+                <div class="t-tool">⚡ glob("src/infrastructure/persistence/**")</div>
+                <div class="t-blank"></div>
+                <div class="t-ai">✦ Migration Plan:</div>
+                <div class="t-ai">  1. Add person_profile_id FK to rider_forms table</div>
+                <div class="t-ai">  2. Create PersonProfileRepository port</div>
+                <div class="t-ai">  3. Update RiderFormApplicationService to resolve profile</div>
+                <div class="t-ai">  4. Liquibase migration: V1.5.0__add_person_profile_fk.sql</div>
+                <div class="t-ai">  Estimate: ~3 hours, 6 files</div>
+                <div class="t-blank"></div>
+                <div><span class="t-prompt">❯</span> <span class="t-cmd">Looks good, proceed with implementation</span></div>
+                <div class="t-think">◆ Switching to Edit Mode...</div>
+            </div>
+        </div>
+
+        <h3>⚙️ Bật Plan Mode mặc định</h3>
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">interactive</span>
+            </div>
+            <pre><code><span class="c-cmt"># Trong interactive shell:</span>
+/settings → Default Approval Mode → Plan
+
+<span class="c-cmt"># Hoặc dùng Shift+Tab để toggle giữa các mode</span></code></pre>
+        </div>
+    </section>
+
+    <!-- ── USE CASES ── -->
+    <section class="section" id="usecase">
+        <div class="section-tag">11 · Use Cases</div>
+        <h2>💡 Use Cases thực tế</h2>
+        <p>Các tình huống thực chiến phù hợp nhất với Gemini CLI, đặc biệt trong môi trường Spring Boot / Microservices:</p>
+
+        <h3>🐛 Debug & Fix lỗi</h3>
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">prompt examples</span>
+            </div>
+            <pre><code><span class="c-cmt"># Phân tích exception</span>
+<span class="c-cmd">cat</span> stacktrace.log | <span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Find root cause and suggest fix"</span>
+
+<span class="c-cmt"># Fix lỗi OptimisticLockingFailure</span>
+<span class="t-ai">> Fix the ObjectOptimisticLockingFailureException in RiderFormService</span>
+<span class="t-ai">  and add proper retry mechanism</span>
+
+<span class="c-cmt"># Tìm N+1 query</span>
+<span class="t-ai">> Find N+1 query problems in the repository layer and suggest fixes</span></code></pre>
+        </div>
+
+        <h3>✨ Feature Development</h3>
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">prompt examples</span>
+            </div>
+            <pre><code><span class="c-cmt"># Tạo Liquibase migration</span>
+<span class="t-ai">> Create a Liquibase migration to add person_profiles table</span>
+<span class="t-ai">  with UUID PK, name, dob, gender fields, with proper indexes</span>
+
+<span class="c-cmt"># Tạo unit test</span>
+<span class="t-ai">> Write unit tests for HealthDeclarationMappingService,</span>
+<span class="t-ai">  cover recursive question tree and edge cases</span>
+
+<span class="c-cmt"># Review code trước commit</span>
+<span class="c-cmd">git diff</span> --staged | <span class="c-cmd">gemini</span> <span class="c-flag">-p</span> <span class="c-str">"Review for bugs, security issues, and Spring best practices"</span></code></pre>
+        </div>
+
+        <h3>📚 Hiểu codebase nhanh</h3>
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">prompt examples</span>
+            </div>
+            <pre><code><span class="t-ai">> Explain the flow from Kafka consumer to database persistence</span>
+<span class="t-ai">  in this Rider Service codebase</span>
+
+<span class="t-ai">> Draw an ASCII diagram of the hexagonal architecture layers</span>
+<span class="t-ai">  and list which classes belong to each layer</span>
+
+<span class="t-ai">> What does RiderFormRequestService.processRequest() do step by step?</span></code></pre>
+        </div>
+
+        <h3>🔒 Pentest / Security Review</h3>
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">prompt examples</span>
+            </div>
+            <pre><code><span class="t-ai">> Check all API endpoints for missing authentication/authorization</span>
+<span class="t-ai">> Find SQL injection vulnerabilities in repository layer</span>
+<span class="t-ai">> Check if sensitive data (PII, passwords) is being logged</span></code></pre>
+        </div>
+    </section>
+
+    <!-- ── TIPS ── -->
+    <section class="section" id="tips">
+        <div class="section-tag">12 · Tips & Tricks</div>
+        <h2>⚡ Tips & Tricks</h2>
+
+        <h3>✅ Prompt tốt vs Prompt kém</h3>
+        <div class="cmp-row">
+            <div class="cmp-bad">
+                <div class="cmp-lbl">❌ Quá chung chung</div>
+                <div class="cmp-text">Fix the bug in my code</div>
+            </div>
+            <div class="cmp-good">
+                <div class="cmp-lbl">✅ Cụ thể, có context</div>
+                <div class="cmp-text">Fix the NullPointerException in RiderFormService.java line 87 when user has no profile</div>
+            </div>
+        </div>
+        <div class="cmp-row">
+            <div class="cmp-bad">
+                <div class="cmp-lbl">❌ Một lúc quá nhiều</div>
+                <div class="cmp-text">Refactor toàn bộ service layer, viết test, thêm logging, sửa bug</div>
+            </div>
+            <div class="cmp-good">
+                <div class="cmp-lbl">✅ Từng bước rõ ràng</div>
+                <div class="cmp-text">1. First, just show me the plan. 2. Then refactor only the service layer.</div>
+            </div>
+        </div>
+        <div class="cmp-row">
+            <div class="cmp-bad">
+                <div class="cmp-lbl">❌ Không nói format mong muốn</div>
+                <div class="cmp-text">Explain the system</div>
+            </div>
+            <div class="cmp-good">
+                <div class="cmp-lbl">✅ Chỉ rõ output format</div>
+                <div class="cmp-text">Explain the system as ASCII diagram with 3-sentence description for each layer</div>
+            </div>
+        </div>
+
+        <h3>🛠️ Tips thực tế</h3>
+        <ul class="feat-list">
+            <li><strong>Bắt đầu với Plan Mode</strong> cho task lớn — tránh agent làm sai hướng rồi mới phát hiện</li>
+            <li><strong>Dùng <code>/chat save</code></strong> khi context conversation đang tốt để resume sau</li>
+            <li><strong>Ctrl+C ngay lập tức</strong> nếu thấy agent đang làm sai hướng — đừng để nó tiếp tục</li>
+            <li><strong>Cung cấp ví dụ</strong> trong prompt: "Implement similar to how RiderFormService handles validation"</li>
+            <li><strong>Review file changes</strong> trước khi confirm — dùng <code>git diff</code> sau mỗi batch thay đổi</li>
+            <li><strong>GEMINI.md là investment</strong> — 30 phút viết GEMINI.md tốt tiết kiệm hàng giờ context trong tương lai</li>
+            <li><strong>Pipe git diff vào Gemini</strong> để review PR trước khi push — nhất là với team có code review nghiêm</li>
+            <li><strong>Dùng <code>--output-format json</code></strong> khi cần parse output trong shell script</li>
+        </ul>
+
+        <div class="callout warn">
+            <div class="callout-label">⚠️ Không dùng YOLO mode trong production repo</div>
+            Full Auto mode (YOLO) rất tiện nhưng nguy hiểm trong codebase quan trọng. Agent có thể xóa/sửa file theo cách không ngờ tới.
+            Luôn commit trước khi dùng YOLO, hoặc chỉ dùng trong branch tạm.
+        </div>
+    </section>
+
+    <!-- ── QUOTA ── -->
+    <section class="section" id="quota">
+        <div class="section-tag">13 · Quota & Model</div>
+        <h2>📊 Quota & Models</h2>
+        <p>Gemini CLI cung cấp mức miễn phí hào phóng nhất trong các AI CLI tool hiện tại:</p>
+
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Plan</th>
+                        <th>Model</th>
+                        <th>Daily Quota</th>
+                        <th>RPM</th>
+                        <th>Chi phí</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Google Account</strong> <span class="tag-core">free</span></td>
+                        <td>Gemini 2.5 Pro</td>
+                        <td>1,000 req</td>
+                        <td>60</td>
+                        <td>$0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Google AI Pro</strong></td>
+                        <td>Gemini 2.5 Pro</td>
+                        <td>Higher limits</td>
+                        <td>Higher</td>
+                        <td>$19.99/tháng</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AI Studio API Key</strong></td>
+                        <td>Chọn model</td>
+                        <td>Pay-as-you-go</td>
+                        <td>Theo tier</td>
+                        <td>Theo usage</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code Assist Standard</strong></td>
+                        <td>Gemini 2.5 Pro</td>
+                        <td>Quota riêng</td>
+                        <td>—</td>
+                        <td>$19/user/tháng</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code Assist Enterprise</strong> <span class="tag-pro">pro</span></td>
+                        <td>Gemini 2.5 Pro + 3</td>
+                        <td>Cao nhất</td>
+                        <td>—</td>
+                        <td>$45/user/tháng</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="callout good">
+            <div class="callout-label">✅ Gemini 2.5 Pro với 1M token context</div>
+            Đây là điểm mạnh vượt trội của Gemini CLI: 1 triệu token context window cho phép load toàn bộ codebase lớn vào một session.
+            Với Spring Boot monorepo 50k dòng code, bạn vẫn có thể hỏi về bất kỳ file nào mà không cần chia nhỏ.
+        </div>
+
+        <h3>📌 Kiểm tra quota hiện tại</h3>
+        <div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">bash</span>
+            </div>
+            <pre><code><span class="c-cmt"># Xem thông tin model và quota trong /settings</span>
+/settings
+
+<span class="c-cmt"># Hoặc hỏi trực tiếp:</span>
+<span class="t-ai">> What model are you using and what are the quota limits?</span></code></pre>
+        </div>
+
+        <div class="callout sky" style="margin-top:24px">
+            <div class="callout-label">🔗 Tài nguyên thêm</div>
+            <ul style="margin-top:6px;padding-left:18px;color:#9fa3c4;font-size:13.5px">
+                <li style="margin-bottom:4px"><strong>GitHub:</strong> github.com/google-gemini/gemini-cli</li>
+                <li style="margin-bottom:4px"><strong>Docs:</strong> geminicli.com/docs</li>
+                <li style="margin-bottom:4px"><strong>Free Course:</strong> DeepLearning.ai — "Gemini CLI: Code & Create"</li>
+                <li><strong>Changelog:</strong> geminicli.com/docs/changelogs</li>
+            </ul>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    /* ── SIDEBAR ACTIVE ── */
+    function setActive(el) {
+        document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    /* ── PROGRESS BAR ── */
+    window.addEventListener('scroll', () => {
+        const doc = document.documentElement;
+        const scroll = doc.scrollTop;
+        const height = doc.scrollHeight - doc.clientHeight;
+        const pct = Math.round((scroll / height) * 100);
+        document.getElementById('pfill').style.width = pct + '%';
+        document.getElementById('pct').textContent = pct + '%';
+
+        // update sidebar active based on scroll
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(sec => {
+            const top = sec.getBoundingClientRect().top;
+            if (top < 160 && top > -400) {
+                const id = sec.id;
+                const link = document.querySelector(`.sb-link[href="#${id}"]`);
+                if (link) {
+                    document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            }
+        });
+    });
+
+    /* ── MODE TABS ── */
+    function switchMode(el, id) {
+        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.mode-content').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(id).classList.add('active');
+    }
+
+    /* ── COPY CODE ── */
+    function copyCode(btn, text) {
+        const textToCopy = text || btn.closest('.code-block').querySelector('pre').innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    }
+
+    /* ── MOBILE SIDEBAR ── */
+    function toggleSidebar() {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('overlay');
+        sb.classList.toggle('open');
+        ov.classList.toggle('open');
+    }
+</script>
+</body>
+</html>
