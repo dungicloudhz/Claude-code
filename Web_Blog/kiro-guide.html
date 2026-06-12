@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiro 👻 — Hướng dẫn toàn tập · Agentic IDE từ AWS</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080810;--s1:#0e0e1c;--s2:#131326;--s3:#18182e;--s4:#1e1e38;
+  --border:#222240;--border2:#2c2c50;--text:#e6e6f2;--muted:#666698;--faint:#363660;
+  --acc:#ffd060;--acc-d:#c89820;--acc-dim:rgba(255,208,96,.11);--acc-glow:rgba(255,208,96,.24);
+  --green:#40d88e;--green-dim:rgba(64,216,142,.10);
+  --blue:#5ba8ff;--blue-dim:rgba(91,168,255,.10);
+  --purple:#a07af4;--purple-dim:rgba(160,122,244,.10);
+  --yellow:#ffd060;--yellow-dim:rgba(255,208,96,.10);
+  --teal:#30d8c0;--teal-dim:rgba(48,216,192,.10);
+  --orange:#ff8c50;--orange-dim:rgba(255,140,80,.10);
+  --pink:#ff6584;--pink-dim:rgba(255,101,132,.11);--pink-glow:rgba(255,101,132,.22);
+  --sky:#38bdf8;--sky-dim:rgba(56,189,248,.10);
+  /* Kiro brand: ghost purple-blue */
+  --ki:#7c6cf8;--ki-dim:rgba(124,108,248,.13);--ki-glow:rgba(124,108,248,.30);
+  --ki2:#a07af4;--ki2-dim:rgba(160,122,244,.12);
+  /* sections */
+  --ins:#5ba8ff;--ins-dim:rgba(91,168,255,.12);--ins-glow:rgba(91,168,255,.28);
+  --ch:#40d88e;--ch-dim:rgba(64,216,142,.12);--ch-glow:rgba(64,216,142,.28);
+  --sk:#a07af4;--sk-dim:rgba(160,122,244,.12);--sk-glow:rgba(160,122,244,.28);
+  --au:#ffd060;--au-dim:rgba(255,208,96,.12);--au-glow:rgba(255,208,96,.28);
+  --code-bg:#05050e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;width:268px;height:100vh;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;z-index:400;display:flex;flex-direction:column}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.logo-icon{width:44px;height:44px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,var(--ki),var(--ki2));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 26px var(--ki-glow)}
+.logo-text h2{font-size:15px;font-weight:800;letter-spacing:-.4px}
+.logo-text p{font-size:10.5px;color:var(--muted);margin-top:2px}
+.prog-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--ki),var(--ins),var(--ch),var(--sk),var(--au));width:0%;transition:width .4s;border-radius:2px}
+.nav-section{padding:8px 0 4px}
+.nav-sect-label{padding:8px 18px 3px;font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--faint)}
+.nav-group-hdr{display:flex;align-items:center;gap:7px;margin:6px 12px 3px;padding:6px 10px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.ngh-ki{background:var(--ki-dim);color:var(--ki)}
+.ngh-ins{background:var(--ins-dim);color:var(--ins)}
+.ngh-ch{background:var(--ch-dim);color:var(--ch)}
+.ngh-sk{background:var(--sk-dim);color:var(--sk)}
+.ngh-au{background:var(--au-dim);color:var(--au)}
+.ngh-other{background:rgba(255,255,255,.05);color:var(--muted)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:6px 18px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:600;border-left:2px solid transparent;transition:all .14s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(124,108,248,.07);border-left-color:var(--ki)}
+.nav-link .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;background:var(--ki-dim);color:var(--ki)}
+
+/* MAIN */
+.main{margin-left:268px;min-height:100vh}
+.hero{padding:80px 64px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--border);
+  background:radial-gradient(ellipse 65% 55% at 75% 22%,rgba(124,108,248,.12) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 55% at 10% 82%,rgba(91,168,255,.07) 0%,transparent 55%),
+             radial-gradient(ellipse 40% 50% at 50% 50%,rgba(64,216,142,.04) 0%,transparent 60%),var(--bg)}
+.hero-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-glow{position:absolute;right:-90px;top:-90px;width:520px;height:520px;background:radial-gradient(circle,rgba(124,108,248,.10) 0%,transparent 65%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--ki-dim);border:1px solid rgba(124,108,248,.38);color:var(--ki);padding:5px 16px;border-radius:100px;font-size:11.5px;font-weight:700;margin-bottom:26px;letter-spacing:.3px}
+.hero-eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--ki);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-size:52px;font-weight:900;letter-spacing:-2.5px;line-height:1.04;margin-bottom:18px}
+.h-ki{color:var(--ki)}.h-ins{color:var(--ins)}.h-ch{color:var(--ch)}.h-sk{color:var(--sk)}.h-au{color:var(--au)}.h-acc{color:var(--acc)}
+.h-grad{background:linear-gradient(135deg,var(--ki) 0%,var(--ki2) 50%,var(--au) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;color:var(--muted);max-width:580px;line-height:1.72;margin-bottom:30px}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:700}
+.chip-ki{background:var(--ki-dim);color:var(--ki)}.chip-ins{background:var(--ins-dim);color:var(--ins)}
+.chip-ch{background:var(--ch-dim);color:var(--ch)}.chip-sk{background:var(--sk-dim);color:var(--sk)}
+.chip-au{background:var(--au-dim);color:var(--au)}.chip-t{background:var(--teal-dim);color:var(--teal)}
+.chip-p{background:var(--pink-dim);color:var(--pink)}.chip-s{background:var(--sky-dim);color:var(--sky)}
+
+/* CAT BANNERS */
+.cat-banner{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:14px;margin-bottom:44px;position:relative;overflow:hidden}
+.cat-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cb-ki{background:var(--ki-dim);border:1px solid rgba(124,108,248,.30)}.cb-ki::before{background:linear-gradient(90deg,var(--ki),var(--ki2))}
+.cb-ins{background:var(--ins-dim);border:1px solid rgba(91,168,255,.30)}.cb-ins::before{background:linear-gradient(90deg,var(--ins),var(--sky))}
+.cb-ch{background:var(--ch-dim);border:1px solid rgba(64,216,142,.30)}.cb-ch::before{background:linear-gradient(90deg,var(--ch),var(--teal))}
+.cb-sk{background:var(--sk-dim);border:1px solid rgba(160,122,244,.30)}.cb-sk::before{background:linear-gradient(90deg,var(--sk),var(--pink))}
+.cb-au{background:var(--au-dim);border:1px solid rgba(255,208,96,.30)}.cb-au::before{background:linear-gradient(90deg,var(--au),var(--orange))}
+.cb-icon{font-size:38px;flex-shrink:0}
+.cb-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;display:inline-block;margin-bottom:5px}
+.cb-ki .cb-badge{background:var(--ki-dim);color:var(--ki)}
+.cb-ins .cb-badge{background:var(--ins-dim);color:var(--ins)}
+.cb-ch .cb-badge{background:var(--ch-dim);color:var(--ch)}
+.cb-sk .cb-badge{background:var(--sk-dim);color:var(--sk)}
+.cb-au .cb-badge{background:var(--au-dim);color:var(--au)}
+.cb-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.cb-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+/* CONTENT */
+.content{padding:56px 64px;max-width:1020px}
+.section{margin-bottom:72px}
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:30px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:3px 10px;border-radius:5px;margin-top:5px;flex-shrink:0;letter-spacing:.5px}
+.st-ki{color:var(--ki);background:var(--ki-dim);border:1px solid var(--ki-glow)}
+.st-ins{color:var(--ins);background:var(--ins-dim);border:1px solid var(--ins-glow)}
+.st-ch{color:var(--ch);background:var(--ch-dim);border:1px solid var(--ch-glow)}
+.st-sk{color:var(--sk);background:var(--sk-dim);border:1px solid var(--sk-glow)}
+.st-au{color:var(--au);background:var(--au-dim);border:1px solid var(--au-glow)}
+.st-y{color:var(--yellow);background:var(--yellow-dim);border:1px solid rgba(255,208,96,.24)}
+.sec-title{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:5px}
+.sec-sub{font-size:13px;color:var(--muted)}
+.sub{margin-bottom:38px}
+.sub-title{font-size:14.5px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sub-title::before{content:'';display:inline-block;width:14px;height:3px;background:var(--ki);border-radius:2px;flex-shrink:0}
+.sub p,.sub ul,.sub ol{color:var(--muted);font-size:13.5px;margin-bottom:11px;line-height:1.75}
+.sub ul,.sub ol{padding-left:22px}.sub li{margin-bottom:5px}.sub strong{color:var(--text)}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:16px;transition:all .2s;cursor:default}
+.card:hover{border-color:var(--ki);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+.card-icon{font-size:24px;margin-bottom:8px}.card-title{font-size:13px;font-weight:700;margin-bottom:4px}.card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* CODE BLOCKS */
+.cblock{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:13px 0}
+.cb-head{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border)}
+.cb-dots{display:flex;gap:5px}.cbd{width:10px;height:10px;border-radius:50%}
+.cbd.r{background:#ff5f56}.cbd.y{background:#ffbd2e}.cbd.g{background:#27c93f}
+.cb-name{font-size:11.5px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:2px 9px;border-radius:100px;flex-shrink:0}
+.ct-ki{background:var(--ki-dim);color:var(--ki)}.ct-ins{background:var(--ins-dim);color:var(--ins)}
+.ct-ch{background:var(--ch-dim);color:var(--ch)}.ct-sk{background:var(--sk-dim);color:var(--sk)}
+.ct-au{background:var(--au-dim);color:var(--au)}.ct-y{background:var(--yellow-dim);color:var(--yellow)}
+.ct-g{background:var(--green-dim);color:var(--green)}.ct-t{background:var(--teal-dim);color:var(--teal)}
+.cb-body{padding:18px 20px;overflow-x:auto}
+.cb-body pre{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.72;white-space:pre;color:#8899bb}
+.kw{color:#c792ea}.tp{color:#ffcb6b}.fn{color:#82aaff}.st-s{color:#c3e88d}
+.cm{color:#546e7a;font-style:italic}.nm{color:#f78c6c}.an{color:#ff6584}
+.pr{color:#89ddff}.vr{color:#eeffff}.cl{color:#ffcb6b}
+.c-r{color:#ff6584}.c-b{color:#5ba8ff}.c-g{color:#40d88e}
+.c-t{color:#30d8c0}.c-y{color:#ffd060}.c-o{color:#ff8c50}.c-p{color:#a07af4}.c-s{color:#38bdf8}
+.sh-prompt{color:var(--ch);font-weight:700;user-select:none}
+.sh-cmd{color:var(--text)}.sh-arg{color:var(--sky)}.sh-str{color:var(--green)}
+.sh-flag{color:var(--au)}.sh-cmt{color:#546e7a;font-style:italic}
+.yk{color:var(--blue)}.yv{color:var(--green)}.yc{color:#546e7a;font-style:italic}
+.chat{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.bubble{padding:11px 16px;border-radius:12px;font-size:13px;line-height:1.6;max-width:85%}
+.bubble-user{background:var(--ins-dim);border:1px solid rgba(91,168,255,.25);color:var(--text);align-self:flex-end;border-bottom-right-radius:4px}
+.bubble-bot{background:var(--s2);border:1px solid var(--border2);color:var(--muted);align-self:flex-start;border-bottom-left-radius:4px}
+.bubble-label{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.lbl-user{color:var(--ins)}.lbl-bot{color:var(--ki)}
+
+/* INFO BOXES */
+.info{display:flex;gap:12px;padding:14px 16px;border-radius:9px;margin:13px 0;font-size:13px;line-height:1.6}
+.info-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.i-ok{background:var(--green-dim);border:1px solid rgba(64,216,142,.2);color:#30a870}
+.i-warn{background:var(--yellow-dim);border:1px solid rgba(255,208,96,.2);color:#b09030}
+.i-tip{background:var(--blue-dim);border:1px solid rgba(91,168,255,.2);color:#3878d0}
+.i-note{background:var(--purple-dim);border:1px solid rgba(160,122,244,.2);color:#8060d0}
+.i-err{background:var(--pink-dim);border:1px solid rgba(255,101,132,.2);color:#cc3355}
+
+/* RW BOX */
+.rw-box{background:var(--s1);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;margin:14px 0;position:relative;overflow:hidden}
+.rw-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.rw-ki::before{background:var(--ki)}.rw-ins::before{background:var(--ins)}
+.rw-ch::before{background:var(--ch)}.rw-sk::before{background:var(--sk)}
+.rw-au::before{background:var(--au)}.rw-y::before{background:var(--yellow)}
+.rw-label{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.rw-ki .rw-label{color:var(--ki)}.rw-ins .rw-label{color:var(--ins)}
+.rw-ch .rw-label{color:var(--ch)}.rw-sk .rw-label{color:var(--sk)}
+.rw-au .rw-label{color:var(--au)}.rw-y .rw-label{color:var(--yellow)}
+.rw-title{font-size:14px;font-weight:700;margin-bottom:5px}
+.rw-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:13px 0;border-radius:11px;overflow:hidden}
+.tbl th{background:var(--s3);padding:10px 14px;text-align:left;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.025)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--teal)}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;margin:14px 0}
+.step{display:flex;gap:16px}
+.step-L{display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0}
+.step-num{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--ki);background:var(--ki-dim);border:2px solid var(--ki-glow)}
+.step-line{width:2px;flex:1;background:var(--border);margin:5px 0;min-height:14px}
+.step-B{padding:3px 0 26px}.step-B h4{font-size:14px;font-weight:700;margin-bottom:5px}
+.step-B p{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* CHEAT SHEET */
+.cheat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.cheat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:15px}
+.cheat-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+.h4-ki{color:var(--ki)}.h4-ins{color:var(--ins)}.h4-ch{color:var(--ch)}.h4-sk{color:var(--sk)}.h4-au{color:var(--au)}
+.cheat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.cheat-row:last-child{border-bottom:none}.ck{color:var(--muted)}.cv{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--teal)}
+
+/* PLATFORM PILLS */
+.platforms{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.plat{display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border2);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted)}
+.plat-icon{font-size:14px}
+
+/* ARCH DIAGRAM */
+.arch{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:0;margin:18px 0}
+.arch-box{background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;text-align:center}
+.arch-title{font-size:12px;font-weight:700;margin-bottom:3px}
+.arch-desc{font-size:11px;color:var(--muted)}
+.arch-arrow{text-align:center;color:var(--muted);font-size:20px;padding:0 8px}
+
+/* SPEC FILE TREE */
+.file-tree{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;padding:18px 20px;margin:13px 0;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9}
+.ft-folder{color:var(--au)}
+.ft-file{color:var(--text)}
+.ft-comment{color:#546e7a;font-style:italic}
+.ft-indent{padding-left:22px;display:block}
+.ft-ki{color:var(--ki)}
+.ft-green{color:var(--green)}
+.ft-blue{color:var(--blue)}
+
+p code,li code,td code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(124,108,248,.10);color:var(--ki);padding:2px 6px;border-radius:4px}
+hr.dv{border:none;border-top:1px solid var(--border);margin:58px 0}
+.footer{border-top:1px solid var(--border);padding:28px 64px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero,.content,.footer{padding-left:22px;padding-right:22px}.hero h1{font-size:32px}.grid-2,.grid-3,.grid-4,.cheat-grid{grid-template-columns:1fr}.arch{grid-template-columns:1fr;gap:8px}.arch-arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="logo-icon">👻</div>
+      <div class="logo-text">
+        <h2>Kiro</h2>
+        <p>Agentic IDE · AWS · 2026</p>
+      </div>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+  </div>
+
+  <div class="nav-section" aria-label="Page navigation">
+    <div class="nav-sect-label">🔄 Chuyển trang</div>
+    <a href="Claude-architecture-guide.html" class="nav-link"><span class="ico">📐</span> Arch Guide</a>
+    <a href="claude-guide.html" class="nav-link"><span class="ico">📖</span> Claude Guide</a>
+    <a href="claude-cowork-guide.html" class="nav-link"><span class="ico">🤖</span> Cowork Guide</a>
+    <a href="open-clawbot-guide.html" class="nav-link"><span class="ico">🦞</span> OpenClaw Guide</a>
+    <a href="codex-cli-guide.html" class="nav-link"><span class="ico">💻</span> Codex CLI Guide</a>
+    <a href="antigravity-guide.html" class="nav-link"><span class="ico">🚀</span> AntiGravity</a>
+    <a href="superpowers-antigravity-guide.html" class="nav-link"><span class="ico">⚡</span> Superpowers AG</a>
+    <a href="kiro-guide.html" class="nav-link active"><span class="ico">👻</span> Kiro Guide</a>
+    <a href="gemini-cli-guide.html" class="nav-link"><span class="ico">🌟</span> Gemini CLI</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-ki">👻 Tổng quan — 1 section</div>
+    <a href="#s0" class="nav-link"><span class="ico">🔍</span> Kiro là gì?</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-ins">⚙️ Cài đặt — 2 sections</div>
+    <a href="#s1" class="nav-link"><span class="ico">💻</span> Cài đặt & Khởi động</a>
+    <a href="#s2" class="nav-link"><span class="ico">📐</span> Giao diện & Panel</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-ch">📄 Specs — 2 sections</div>
+    <a href="#s3" class="nav-link"><span class="ico">📝</span> Spec-Driven Development</a>
+    <a href="#s4" class="nav-link"><span class="ico">🗂️</span> Steering Files</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-sk">⚡ Automation — 2 sections</div>
+    <a href="#s5" class="nav-link"><span class="ico">🪝</span> Agent Hooks</a>
+    <a href="#s6" class="nav-link"><span class="ico">🔌</span> MCP Integration</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-group-hdr ngh-au">🚀 Thực chiến — 2 sections</div>
+    <a href="#s7" class="nav-link"><span class="ico">💡</span> Ví dụ thực tế</a>
+    <a href="#s8" class="nav-link"><span class="ico">📋</span> Cheat Sheet</a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="hero-eyebrow"><span class="pulse"></span> Kiro 👻 · Agentic IDE từ AWS · Powered by Claude · 2026</div>
+  <h1><span class="h-grad">Kiro</span> 👻<br><span class="h-acc">Hướng dẫn</span><br><span class="h-ins">Toàn tập</span></h1>
+  <p class="hero-desc">Kiro là agentic IDE từ AWS — IDE lập trình đầu tiên bắt bạn <em>lên kế hoạch trước khi code</em>. Không còn "vibe coding" đoán mò, Kiro tạo ra tài liệu yêu cầu, thiết kế, và task list trước rồi mới viết code — giúp bạn ship production code có thể maintain được.</p>
+  <div class="hero-chips">
+    <span class="chip chip-ki">👻 Agentic IDE</span>
+    <span class="chip chip-ins">⚙️ Từ AWS</span>
+    <span class="chip chip-ch">📄 Spec-Driven</span>
+    <span class="chip chip-sk">🪝 Agent Hooks</span>
+    <span class="chip chip-au">🧭 Steering Files</span>
+    <span class="chip chip-t">🔌 MCP Support</span>
+    <span class="chip chip-p">🤖 Claude Sonnet</span>
+    <span class="chip chip-s">☁️ VS Code Base</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ════ S0 — OVERVIEW ════ -->
+<div class="section" id="s0">
+  <div class="sec-head">
+    <span class="sec-tag st-ki">OVERVIEW</span>
+    <div><h2 class="sec-title">Kiro là gì & Tại sao khác biệt?</h2>
+    <p class="sec-sub">Triết lý spec-driven, so sánh với Cursor / Copilot / Claude Code</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Kiro — IDE lên kế hoạch trước khi code</div>
+    <p>Kiro là <strong>agentic IDE</strong> do AWS xây dựng, ra mắt giữa 2025, chạy trên nền VS Code và được powered by <strong>Claude Sonnet 4.5</strong> qua Amazon Bedrock. Điểm khác biệt cốt lõi: thay vì nhận prompt → sinh code ngay, Kiro bắt bạn đi qua một quy trình có cấu trúc — tạo tài liệu spec, review, rồi mới code.</p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <div class="card-title" style="color:var(--ch)">Spec-Driven Development</div>
+        <div class="card-desc">Mỗi tính năng có 3 file markdown: requirements.md, design.md, tasks.md — trước khi Kiro viết 1 dòng code.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🪝</div>
+        <div class="card-title" style="color:var(--sk)">Agent Hooks</div>
+        <div class="card-desc">Automation chạy tự động khi có sự kiện IDE: lưu file → chạy test, tạo file → scan bảo mật.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧭</div>
+        <div class="card-title" style="color:var(--au)">Steering Files</div>
+        <div class="card-desc">Quy chuẩn project được lưu dưới dạng markdown — Kiro đọc mỗi lần, không cần giải thích lại.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔌</div>
+        <div class="card-title" style="color:var(--ins)">MCP Integration</div>
+        <div class="card-desc">Kết nối với database, API, AWS Docs, GitHub — mọi dịch vụ có API đều thành công cụ Kiro dùng được.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">☁️</div>
+        <div class="card-title" style="color:var(--teal)">AWS Powers</div>
+        <div class="card-desc">Tích hợp native với AWS: pricing, documentation, architecture diagrams — mạnh nhất cho cloud-native.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <div class="card-title" style="color:var(--ki)">Version-Controlled AI</div>
+        <div class="card-desc">Toàn bộ .kiro/ folder (specs, hooks, steering) được commit vào Git — team review như code thật.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Triết lý: Traceability over Speed</div>
+    <p>Mọi AI coding tool năm 2025 đều pitch giống nhau: <em>"Gõ prompt, nhận code."</em> Cursor, Copilot, Claude Code — tất cả tối ưu cho tốc độ. Kiro chọn con đường khác:</p>
+    <div class="info i-note">
+      <span class="info-ico">👻</span>
+      <div><strong style="color:var(--text)">Kiro's core belief:</strong> AI không thiếu khả năng sinh code — nó thiếu <em>hiểu context</em>. Thay vì giải thích lại mỗi lần chat, hãy viết một lần vào spec và steering, Kiro sẽ nhớ mãi mãi.</div>
+    </div>
+    <div class="grid-2">
+      <div class="rw-box rw-ki">
+        <div class="rw-label">👻 Kiro — Khi nào dùng?</div>
+        <div class="rw-title">Phù hợp cho dự án nghiêm túc</div>
+        <div class="rw-body">Tính năng phức tạp nhiều file · Cần documentation tự động · Team nhiều người · Production code cần maintain · Muốn AI theo đúng convention của team · Dự án AWS / cloud-native</div>
+      </div>
+      <div class="rw-box rw-ins">
+        <div class="rw-label">⚡ Khi nào dùng tool khác?</div>
+        <div class="rw-title">Kiro có thể nặng hơn cần thiết</div>
+        <div class="rw-body">Prototype nhanh cuối tuần · Sửa 1 file nhỏ · Side project cá nhân không cần docs · Cần autocomplete tức thì (Cursor nhanh hơn) · CI/CD pipeline headless (Claude Code tốt hơn)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">So sánh với các tool khác</div>
+    <table class="tbl">
+      <thead><tr><th></th><th>Kiro 👻</th><th>Cursor</th><th>GitHub Copilot</th><th>Claude Code</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Approach</strong></td><td style="color:var(--ki)">Spec-driven, plan first</td><td>Chat-first, fast output</td><td>Inline autocomplete</td><td>Terminal-native agent</td></tr>
+        <tr><td><strong>Điểm mạnh</strong></td><td>Traceability, docs tự động</td><td>Tốc độ, autocomplete tốt nhất</td><td>40+ IDEs, hệ sinh thái rộng</td><td>CI/CD, headless automation</td></tr>
+        <tr><td><strong>AI Model</strong></td><td>Claude Sonnet 4.5 (Bedrock)</td><td>Nhiều model, chọn được</td><td>GPT-4o, Copilot model</td><td>Claude Sonnet/Opus</td></tr>
+        <tr><td><strong>Documentation</strong></td><td>✅ Tự động tạo specs</td><td>❌ Không tự động</td><td>❌ Không tự động</td><td>⚠️ Qua prompt</td></tr>
+        <tr><td><strong>Hooks / Automation</strong></td><td>✅ Event-driven hooks</td><td>❌</td><td>⚠️ Hạn chế</td><td>✅ Qua script</td></tr>
+        <tr><td><strong>Giá (Free tier)</strong></td><td>50 interactions/tháng</td><td>2000 autocomplete/tháng</td><td>2000 completions/tháng</td><td>Trả theo token</td></tr>
+        <tr><td><strong>Base IDE</strong></td><td>VS Code (Code OSS)</td><td>VS Code fork</td><td>Plugin mọi IDE</td><td>Terminal / CLI</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Bảng giá Kiro 2026</div>
+    <div class="grid-3">
+      <div class="card" style="border-color:rgba(64,216,142,.3)">
+        <div class="card-icon">🆓</div>
+        <div class="card-title" style="color:var(--ch)">Free</div>
+        <div class="card-desc"><strong style="color:var(--text)">50 interactions/tháng</strong><br>Đủ để thử toàn bộ workflow: specs, hooks, steering, MCP. Không cần thẻ tín dụng.</div>
+      </div>
+      <div class="card" style="border-color:rgba(124,108,248,.3)">
+        <div class="card-icon">⚡</div>
+        <div class="card-title" style="color:var(--ki)">Pro — $19/tháng</div>
+        <div class="card-desc"><strong style="color:var(--text)">Không giới hạn interactions</strong><br>Phù hợp cho developer cá nhân dùng hàng ngày. Credit-based, overage $0.04/credit.</div>
+      </div>
+      <div class="card" style="border-color:rgba(255,208,96,.3)">
+        <div class="card-icon">🏢</div>
+        <div class="card-title" style="color:var(--au)">Power — $200/tháng</div>
+        <div class="card-desc"><strong style="color:var(--text)">Team & Enterprise</strong><br>Model cao cấp hơn, priority access, team collaboration features. Nhiều developer cho là đắt.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ INSTALL BANNER ════ -->
+<div class="cat-banner cb-ins">
+  <div class="cb-icon">⚙️</div>
+  <div>
+    <div class="cb-badge">CÀI ĐẶT</div>
+    <div class="cb-title">Phần 1 — Cài đặt & Khởi động</div>
+    <div class="cb-sub">Download · Đăng nhập · Mở project · Cấu hình lần đầu</div>
+  </div>
+</div>
+
+<!-- ════ S1 — CÀI ĐẶT ════ -->
+<div class="section" id="s1">
+  <div class="sec-head">
+    <span class="sec-tag st-ins">CÀI ĐẶT</span>
+    <div><h2 class="sec-title">Cài đặt & Khởi động</h2>
+    <p class="sec-sub">Download IDE, đăng nhập AWS Builder ID, mở project đầu tiên</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Yêu cầu hệ thống</div>
+    <div class="platforms">
+      <div class="plat"><span class="plat-icon">🍎</span> macOS 12+</div>
+      <div class="plat"><span class="plat-icon">🪟</span> Windows 10/11</div>
+      <div class="plat"><span class="plat-icon">🐧</span> Linux (Ubuntu 20+)</div>
+      <div class="plat"><span class="plat-icon">💾</span> RAM 8GB+</div>
+      <div class="plat"><span class="plat-icon">🖥️</span> VS Code Extensions tương thích</div>
+    </div>
+    <div class="info i-ok">
+      <span class="info-ico">✅</span>
+      <div>Kiro built on <strong style="color:var(--text)">VS Code (Code OSS)</strong> — toàn bộ extensions VS Code đều chạy được. Nếu bạn đang dùng VS Code, chuyển sang Kiro gần như không mất thiết lập.</div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Các bước cài đặt</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B">
+          <h4>Download Kiro IDE</h4>
+          <p>Truy cập <strong style="color:var(--ki)">kiro.dev</strong> → chọn platform (macOS/Windows/Linux) → download bộ cài. File cài khoảng 200-300MB.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B">
+          <h4>Đăng nhập AWS Builder ID</h4>
+          <p>Khi mở lần đầu, Kiro yêu cầu đăng nhập <strong>AWS Builder ID</strong> (miễn phí, khác với tài khoản AWS thông thường). Đăng ký tại <code>builder.aws.com</code> nếu chưa có.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B">
+          <h4>Mở Project</h4>
+          <p>File → Open Folder, hoặc chạy <code>kiro .</code> từ terminal trong thư mục project. Kiro sẽ tự detect stack và hỏi bạn có muốn generate steering docs không.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">4</div><div class="step-line"></div></div>
+        <div class="step-B">
+          <h4>Generate Steering Docs lần đầu</h4>
+          <p>Click panel Kiro (icon 👻 ở sidebar) → <strong>Generate Steering Docs</strong>. Agent sẽ scan repo và tự tạo 3 file trong <code>.kiro/steering/</code>: product.md, tech.md, structure.md.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">5</div></div>
+        <div class="step-B">
+          <h4>Thêm .kiro/ vào .gitignore đúng cách</h4>
+          <p>Chỉ ignore cache và sessions, <strong>không ignore</strong> specs và steering — đây là "source of truth" của team cần commit.</p>
+          <div class="cblock">
+            <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.gitignore</span><span class="cb-tag ct-ch">GIT</span></div>
+            <div class="cb-body"><pre><span class="sh-cmt"># Kiro — KHÔNG commit (cache, sessions)</span>
+<span class="c-r">.kiro/cache/</span>
+<span class="c-r">.kiro/sessions/</span>
+
+<span class="sh-cmt"># Kiro — NÊN commit (specs, steering, hooks)</span>
+<span class="sh-cmt"># .kiro/specs/        ← để lại, commit vào Git</span>
+<span class="sh-cmt"># .kiro/steering/     ← để lại, commit vào Git</span>
+<span class="sh-cmt"># .kiro/hooks/        ← để lại, commit vào Git</span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">CLI — Chạy Kiro từ terminal</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Terminal</span><span class="cb-tag ct-ins">SHELL</span></div>
+      <div class="cb-body"><pre><span class="sh-prompt">$</span> <span class="sh-cmd">kiro</span> <span class="sh-str">.</span>                    <span class="sh-cmt"># Mở IDE tại thư mục hiện tại</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">kiro</span> <span class="sh-str">/path/to/project</span>   <span class="sh-cmt"># Mở project theo path</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">kiro</span> <span class="sh-flag">--version</span>          <span class="sh-cmt"># Kiểm tra version</span>
+<span class="sh-prompt">$</span> <span class="sh-cmd">kiro</span> <span class="sh-flag">--help</span>             <span class="sh-cmt"># Xem tất cả options</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S2 — GIAO DIỆN ════ -->
+<div class="section" id="s2">
+  <div class="sec-head">
+    <span class="sec-tag st-ins">GIAO DIỆN</span>
+    <div><h2 class="sec-title">Giao diện & Kiro Panel</h2>
+    <p class="sec-sub">4 sections chính trong panel · Chat mode · Autonomy levels</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Kiro Panel — 4 sections cốt lõi</div>
+    <p>Click icon 👻 trong Activity Bar bên trái để mở Kiro Panel. Bạn sẽ thấy 4 sections luôn dùng:</p>
+    <div class="grid-2">
+      <div class="card" style="border-color:rgba(64,216,142,.3)">
+        <div class="card-icon">📋</div>
+        <div class="card-title" style="color:var(--ch)">Specs</div>
+        <div class="card-desc">Danh sách tất cả spec đã tạo trong project. Mỗi spec là 1 folder chứa requirements.md, design.md, tasks.md. Click để xem trạng thái (Todo / In Progress / Done).</div>
+      </div>
+      <div class="card" style="border-color:rgba(255,208,96,.3)">
+        <div class="card-icon">🧭</div>
+        <div class="card-title" style="color:var(--au)">Agent Steering</div>
+        <div class="card-desc">Xem và edit steering files. Có thể tạo steering mới, chọn include type (always/auto/manual). Kiro đọc những file này trong mọi prompt.</div>
+      </div>
+      <div class="card" style="border-color:rgba(124,108,248,.3)">
+        <div class="card-icon">🪝</div>
+        <div class="card-title" style="color:var(--ki)">Agent Hooks</div>
+        <div class="card-desc">Danh sách hooks đang active. Enable/disable từng hook, xem trigger event và action của mỗi hook. Hooks sống trong .kiro/hooks/.</div>
+      </div>
+      <div class="card" style="border-color:rgba(91,168,255,.3)">
+        <div class="card-icon">🔌</div>
+        <div class="card-title" style="color:var(--ins)">MCP Servers</div>
+        <div class="card-desc">Kết nối và quản lý MCP servers. Kiro có sẵn fetch MCP. Thêm servers bằng cách edit file JSON config. Enable/disable per session.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Chat & Autonomy Modes</div>
+    <p>Kiro Chat panel có 3 mức tự chủ — bạn điều chỉnh AI được làm gì mà không cần hỏi lại:</p>
+    <table class="tbl">
+      <thead><tr><th>Mode</th><th>AI tự làm gì?</th><th>Khi nào dùng?</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--ki)">Auto</strong></td><td>Tự chọn model phù hợp, tự quyết định các bước, hỏi khi cần confirm lớn</td><td>Mặc định, phù hợp đa số tình huống</td></tr>
+        <tr><td><strong style="color:var(--au)">Supervised</strong></td><td>Đề xuất từng bước, chờ bạn approve trước khi thực thi</td><td>Khi làm việc với code critical, production</td></tr>
+        <tr><td><strong style="color:var(--ch)">Yolo / Full Auto</strong></td><td>Tự làm mọi thứ, chỉ report kết quả cuối</td><td>Tác vụ routine, refactoring đã quen, không critical</td></tr>
+      </tbody>
+    </table>
+    <div class="info i-warn">
+      <span class="info-ico">⚠️</span>
+      <div><strong style="color:var(--text)">Lưu ý về Full Auto mode:</strong> Tháng 2/2026, có vụ code Kiro tạo ra bị cho là gây gián đoạn AWS service. AWS phủ nhận nhưng bài học quan trọng: AI-generated code tương tác với production infrastructure cần guardrails. Dùng Supervised mode cho những gì critical.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ SPEC BANNER ════ -->
+<div class="cat-banner cb-ch">
+  <div class="cb-icon">📄</div>
+  <div>
+    <div class="cb-badge">SPEC-DRIVEN</div>
+    <div class="cb-title">Phần 2 — Specs & Steering Files</div>
+    <div class="cb-sub">Cách tạo spec · 3 file markdown · Steering rules · Ví dụ thực tế</div>
+  </div>
+</div>
+
+<!-- ════ S3 — SPEC-DRIVEN ════ -->
+<div class="section" id="s3">
+  <div class="sec-head">
+    <span class="sec-tag st-ch">SPECS</span>
+    <div><h2 class="sec-title">Spec-Driven Development</h2>
+    <p class="sec-sub">Ba file markdown, quy trình plan-first, ví dụ tạo tính năng đăng nhập</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Spec là gì — Cấu trúc 3 file</div>
+    <p>Mỗi tính năng lớn trong Kiro là 1 <strong>spec</strong> — một folder chứa 3 file markdown. Kiro tạo ra chúng từ prompt của bạn, bạn review và approve, rồi AI mới code:</p>
+    <div class="file-tree">
+<span class="ft-folder">.kiro/</span>
+<span class="ft-indent"><span class="ft-folder">specs/</span></span>
+<span class="ft-indent"><span class="ft-indent"><span class="ft-folder">user-authentication/</span></span></span>
+<span class="ft-indent"><span class="ft-indent"><span class="ft-indent"><span class="ft-ki">requirements.md</span>   <span class="ft-comment">← Yêu cầu nghiệp vụ (viết bằng EARS notation)</span></span></span></span>
+<span class="ft-indent"><span class="ft-indent"><span class="ft-indent"><span class="ft-green">design.md</span>          <span class="ft-comment">← Kiến trúc kỹ thuật, component diagram</span></span></span></span>
+<span class="ft-indent"><span class="ft-indent"><span class="ft-indent"><span class="ft-blue">tasks.md</span>           <span class="ft-comment">← Danh sách task cụ thể, AI tick khi xong</span></span></span></span>
+<span class="ft-indent"><span class="ft-indent"><span class="ft-folder">product-review-system/</span></span></span>
+<span class="ft-indent"><span class="ft-indent"><span class="ft-folder">payment-integration/</span></span></span>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Quy trình tạo Spec — Ví dụ: Tính năng Review sản phẩm</div>
+    <div class="info i-tip">
+      <span class="info-ico">💡</span>
+      <div><strong style="color:var(--text)">Cách tạo spec:</strong> Trong Kiro Chat, gõ <code>Create Spec: [mô tả tính năng]</code>. Kiro sẽ đọc steering files, scan codebase, rồi tạo ra 3 file markdown để bạn review trước khi viết code.</div>
+    </div>
+
+    <div class="chat">
+      <div class="bubble bubble-user">
+        <div class="bubble-label lbl-user">BẠN</div>
+        Create Spec: Add a review system for products. Users can rate 1-5 stars, write text reviews, and see average ratings on product pages.
+      </div>
+      <div class="bubble bubble-bot">
+        <div class="bubble-label lbl-bot">KIRO 👻</div>
+        Đang đọc steering files của project... Scan workspace... Tạo spec <strong>product-review-system</strong>:<br><br>
+        ✅ requirements.md — 8 yêu cầu nghiệp vụ (EARS notation)<br>
+        ✅ design.md — Component diagram, DB schema, API endpoints<br>
+        ✅ tasks.md — 12 implementation tasks<br><br>
+        Hãy review 3 file này trong .kiro/specs/product-review-system/ trước khi tôi bắt đầu code nhé?
+      </div>
+    </div>
+
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.kiro/specs/product-review-system/requirements.md</span><span class="cb-tag ct-ch">REQUIREMENTS</span></div>
+      <div class="cb-body"><pre><span class="kw"># Product Review System — Requirements</span>
+
+<span class="fn">## Functional Requirements</span>
+
+<span class="sh-cmt"># EARS Notation: WHEN [trigger] THE SYSTEM SHALL [behavior]</span>
+
+<span class="c-g">REQ-001:</span> <span class="vr">WHEN an authenticated user views a product page</span>
+         <span class="vr">THE SYSTEM SHALL display a "Write a Review" button.</span>
+
+<span class="c-g">REQ-002:</span> <span class="vr">WHEN a user submits a review</span>
+         <span class="vr">THE SYSTEM SHALL validate that rating is between 1-5</span>
+         <span class="vr">AND text is between 10-1000 characters.</span>
+
+<span class="c-g">REQ-003:</span> <span class="vr">WHEN a product has reviews</span>
+         <span class="vr">THE SYSTEM SHALL display average rating rounded to 1 decimal</span>
+         <span class="vr">AND total review count on the product page.</span>
+
+<span class="c-g">REQ-004:</span> <span class="vr">WHEN a user has already reviewed a product</span>
+         <span class="vr">THE SYSTEM SHALL allow editing but NOT duplicate reviews.</span></pre></div>
+    </div>
+
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.kiro/specs/product-review-system/tasks.md</span><span class="cb-tag ct-ins">TASKS</span></div>
+      <div class="cb-body"><pre><span class="kw"># Implementation Tasks</span>
+
+<span class="c-r">- [ ]</span> <span class="vr">1. Create Review model (id, userId, productId, rating, text, createdAt)</span>
+<span class="c-r">- [ ]</span> <span class="vr">2. Add migration file for reviews table</span>
+<span class="c-r">- [ ]</span> <span class="vr">3. Create ReviewRepository with CRUD methods</span>
+<span class="c-r">- [ ]</span> <span class="vr">4. Build POST /api/products/:id/reviews endpoint</span>
+<span class="c-r">- [ ]</span> <span class="vr">5. Build GET /api/products/:id/reviews endpoint with pagination</span>
+<span class="c-r">- [ ]</span> <span class="vr">6. Add average rating computed field to Product model</span>
+<span class="c-y">- [~]</span> <span class="vr">7. Create ReviewForm React component  ← đang làm</span>
+<span class="c-g">- [x]</span> <span class="vr">8. Create StarRating display component  ← xong</span>
+<span class="c-r">- [ ]</span> <span class="vr">9. Update ProductPage to show reviews section</span>
+<span class="c-r">- [ ]</span> <span class="vr">10. Add unit tests for ReviewRepository</span>
+<span class="c-r">- [ ]</span> <span class="vr">11. Add E2E test for review submission flow</span>
+<span class="c-r">- [ ]</span> <span class="vr">12. Update API documentation</span></pre></div>
+    </div>
+
+    <p>Khi bạn đã approve spec, chỉ cần nói <code>Implement tasks from spec product-review-system</code> — Kiro sẽ thực thi từng task, tick checkbox khi xong, và đảm bảo code align với requirements đã viết.</p>
+  </div>
+</div>
+
+<!-- ════ S4 — STEERING ════ -->
+<div class="section" id="s4">
+  <div class="sec-head">
+    <span class="sec-tag st-ch">STEERING</span>
+    <div><h2 class="sec-title">Steering Files — Bộ nhớ dài hạn của AI</h2>
+    <p class="sec-sub">Lưu quy chuẩn project một lần, Kiro nhớ mãi mãi</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Steering là gì — Vấn đề nó giải quyết</div>
+    <p>Bạn đã bao giờ chat với AI và phải giải thích lại <em>"dự án này dùng TypeScript strict mode, tên biến camelCase, tất cả API error phải dùng Result type..."</em> mỗi lần không? Steering files giải quyết điều đó:</p>
+    <div class="info i-ok">
+      <span class="info-ico">🧭</span>
+      <div><strong style="color:var(--text)">Steering = Quy chuẩn team viết ra một lần.</strong> Kiro đọc những file này trong <em>mọi</em> prompt, không cần nhắc lại. Team mới join, dùng Kiro → tự động theo đúng convention của project.</div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">3 Steering Files được tạo tự động</div>
+    <div class="file-tree">
+<span class="ft-folder">.kiro/steering/</span>
+<span class="ft-indent"><span class="ft-ki">product.md</span>    <span class="ft-comment">← Sản phẩm là gì, user là ai, mục tiêu kinh doanh</span></span>
+<span class="ft-indent"><span class="ft-green">tech.md</span>       <span class="ft-comment">← Stack, framework, dependencies chính</span></span>
+<span class="ft-indent"><span class="ft-blue">structure.md</span>  <span class="ft-comment">← Cấu trúc folder, kiến trúc, architectural decisions</span></span>
+    </div>
+
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.kiro/steering/tech.md</span><span class="cb-tag ct-au">STEERING</span></div>
+      <div class="cb-body"><pre><span class="kw"># Tech Stack & Conventions</span>
+
+<span class="fn">## Language & Runtime</span>
+<span class="vr">- TypeScript 5.x với strict mode bật</span>
+<span class="vr">- Node.js 20 LTS, sử dụng ESM modules</span>
+<span class="vr">- Package manager: pnpm (KHÔNG dùng npm hay yarn)</span>
+
+<span class="fn">## Framework</span>
+<span class="vr">- Backend: Hono.js (KHÔNG dùng Express)</span>
+<span class="vr">- Frontend: React 19 + Vite</span>
+<span class="vr">- Database: PostgreSQL với Drizzle ORM</span>
+
+<span class="fn">## Coding Standards</span>
+<span class="vr">- Tên biến/function: camelCase</span>
+<span class="vr">- Tên type/interface: PascalCase</span>
+<span class="vr">- Error handling: LUÔN dùng Result&lt;T, E&gt; type, KHÔNG throw</span>
+<span class="vr">- API responses: { data, error, meta } format</span>
+
+<span class="fn">## Testing</span>
+<span class="vr">- Unit tests: Vitest</span>
+<span class="vr">- Mọi repository method đều phải có test</span>
+<span class="vr">- Coverage target: 80%</span></pre></div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Tạo Steering file tuỳ chỉnh</div>
+    <p>Ngoài 3 file auto-generated, bạn có thể tạo thêm steering cho từng mục đích và chọn <strong>include type</strong>:</p>
+    <table class="tbl">
+      <thead><tr><th>Include Type</th><th>Khi nào Kiro đọc?</th><th>Dùng cho</th></tr></thead>
+      <tbody>
+        <tr><td><code>always</code></td><td>Mọi prompt không ngoại lệ</td><td>Core conventions, bảo mật, quy tắc bắt buộc</td></tr>
+        <tr><td><code>auto</code></td><td>Khi file liên quan được mở/edit (Kiro tự quyết)</td><td>Framework-specific rules, component conventions</td></tr>
+        <tr><td><code>manual</code></td><td>Chỉ khi bạn @mention file đó</td><td>Onboarding docs, legacy notes, reference hiếm dùng</td></tr>
+      </tbody>
+    </table>
+
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.kiro/steering/security.md</span><span class="cb-tag ct-ki">CUSTOM STEERING</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt">---</span>
+<span class="yk">inclusion</span><span class="pr">:</span> <span class="yv">always</span>
+<span class="sh-cmt">---</span>
+
+<span class="kw"># Security Rules — LUÔN áp dụng</span>
+
+<span class="c-r">NEVER</span><span class="vr"> hardcode secrets, API keys, hoặc credentials vào code.</span>
+<span class="c-r">NEVER</span><span class="vr"> log sensitive user data (email, phone, password).</span>
+<span class="c-g">ALWAYS</span><span class="vr"> validate và sanitize input trước khi query DB.</span>
+<span class="c-g">ALWAYS</span><span class="vr"> dùng parameterized queries, KHÔNG string concatenation.</span>
+<span class="c-g">ALWAYS</span><span class="vr"> check authentication trước khi trả về data của user.</span>
+
+<span class="fn">## Environment Variables</span>
+<span class="vr">- Dùng zod để validate env vars lúc startup</span>
+<span class="vr">- File mẫu: .env.example (commit), .env (không commit)</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ HOOKS BANNER ════ -->
+<div class="cat-banner cb-sk">
+  <div class="cb-icon">⚡</div>
+  <div>
+    <div class="cb-badge">AUTOMATION</div>
+    <div class="cb-title">Phần 3 — Agent Hooks & MCP</div>
+    <div class="cb-sub">Event-driven automation · Kết nối dịch vụ ngoài · Ví dụ hooks thực tế</div>
+  </div>
+</div>
+
+<!-- ════ S5 — HOOKS ════ -->
+<div class="section" id="s5">
+  <div class="sec-head">
+    <span class="sec-tag st-sk">AGENT HOOKS</span>
+    <div><h2 class="sec-title">Agent Hooks — Automation trong IDE</h2>
+    <p class="sec-sub">"If this, then that" cho developer workflow — chạy tự động không cần prompt</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Hooks là gì — Tại sao cần?</div>
+    <p>Agent Hooks là các <strong>automated triggers</strong> — khi có sự kiện xảy ra trong IDE (lưu file, tạo file, xoá file...), Kiro tự động chạy một action AI đã được định nghĩa trước, không cần bạn prompt thủ công.</p>
+    <div class="grid-2">
+      <div class="rw-box rw-sk">
+        <div class="rw-label">🪝 Không có Hooks</div>
+        <div class="rw-title">Quy trình thủ công</div>
+        <div class="rw-body">Lưu file → nhớ mở Kiro Chat → gõ "write tests for this file" → chờ → copy kết quả → tạo test file. Mỗi lần làm mới đều lặp lại.</div>
+      </div>
+      <div class="rw-box rw-ch">
+        <div class="rw-label">⚡ Có Hooks</div>
+        <div class="rw-title">Tự động hoàn toàn</div>
+        <div class="rw-body">Lưu file → Hook tự trigger → Kiro tự tạo test file bên cạnh, tự chạy linter, tự update docs. Bạn chỉ việc code.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Cấu trúc Hook File</div>
+    <p>Hooks sống trong <code>.kiro/hooks/</code> dưới dạng JSON file — được commit vào Git để cả team dùng chung:</p>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.kiro/hooks/auto-test-generator.json</span><span class="cb-tag ct-sk">HOOK</span></div>
+      <div class="cb-body"><pre><span class="pr">{</span>
+  <span class="yk">"name"</span><span class="pr">:</span> <span class="st-s">"Auto Test Generator"</span><span class="pr">,</span>
+  <span class="yk">"description"</span><span class="pr">:</span> <span class="st-s">"Tự tạo test file khi lưu React component"</span><span class="pr">,</span>
+  <span class="yk">"enabled"</span><span class="pr">:</span> <span class="nm">true</span><span class="pr">,</span>
+  <span class="yk">"trigger"</span><span class="pr">:</span> <span class="pr">{</span>
+    <span class="yk">"event"</span><span class="pr">:</span> <span class="st-s">"fileSave"</span><span class="pr">,</span>            <span class="cm">// sự kiện: fileSave | fileCreate | fileDelete | manual</span>
+    <span class="yk">"filePattern"</span><span class="pr">:</span> <span class="st-s">"src/components/**/*.tsx"</span>  <span class="cm">// chỉ trigger cho file này</span>
+  <span class="pr">},</span>
+  <span class="yk">"action"</span><span class="pr">:</span> <span class="pr">{</span>
+    <span class="yk">"type"</span><span class="pr">:</span> <span class="st-s">"agent"</span><span class="pr">,</span>
+    <span class="yk">"prompt"</span><span class="pr">:</span> <span class="st-s">"Xem file React component vừa lưu. Nếu chưa có file test tương ứng ở __tests__/, hãy tạo file test với các test cases cover: render không crash, props cơ bản, và các state changes quan trọng. Dùng Vitest + React Testing Library."</span>
+  <span class="pr">}</span>
+<span class="pr">}</span></pre></div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">4 Hooks hay dùng nhất</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-icon">🧪</div>
+        <div class="card-title" style="color:var(--ch)">Auto Test Generator</div>
+        <div class="card-desc"><strong>Trigger:</strong> fileSave trên *.ts, *.tsx<br><strong>Action:</strong> Tạo test file tự động nếu chưa có<br><strong>Lợi ích:</strong> Coverage tăng mà không cần nhắc</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <div class="card-title" style="color:var(--pink)">Security Scanner</div>
+        <div class="card-desc"><strong>Trigger:</strong> fileCreate trên *.ts, *.js<br><strong>Action:</strong> Scan tìm hardcoded secrets, SQL injection, XSS<br><strong>Lợi ích:</strong> Bắt lỗi bảo mật tức thì</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📚</div>
+        <div class="card-title" style="color:var(--ins)">Doc Updater</div>
+        <div class="card-desc"><strong>Trigger:</strong> fileSave trên API routes<br><strong>Action:</strong> Update README và API docs tự động<br><strong>Lợi ích:</strong> Docs luôn sync với code</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎨</div>
+        <div class="card-title" style="color:var(--au)">Style Enforcer</div>
+        <div class="card-desc"><strong>Trigger:</strong> fileSave trên *.css, *.tsx<br><strong>Action:</strong> Kiểm tra có đúng design system không, đề xuất fix<br><strong>Lợi ích:</strong> UI consistent trên toàn app</div>
+      </div>
+    </div>
+
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.kiro/hooks/security-scan.json</span><span class="cb-tag ct-ki">SECURITY HOOK</span></div>
+      <div class="cb-body"><pre><span class="pr">{</span>
+  <span class="yk">"name"</span><span class="pr">:</span> <span class="st-s">"Security Scanner"</span><span class="pr">,</span>
+  <span class="yk">"trigger"</span><span class="pr">:</span> <span class="pr">{</span>
+    <span class="yk">"event"</span><span class="pr">:</span> <span class="st-s">"fileCreate"</span><span class="pr">,</span>
+    <span class="yk">"filePattern"</span><span class="pr">:</span> <span class="st-s">"**/*.{ts,js}"</span>
+  <span class="pr">},</span>
+  <span class="yk">"action"</span><span class="pr">:</span> <span class="pr">{</span>
+    <span class="yk">"type"</span><span class="pr">:</span> <span class="st-s">"agent"</span><span class="pr">,</span>
+    <span class="yk">"prompt"</span><span class="pr">:</span> <span class="st-s">"Scan file vừa tạo, kiểm tra: (1) hardcoded API keys hoặc secrets, (2) SQL queries dùng string concat, (3) user input không được sanitize, (4) missing auth checks. Nếu phát hiện issue, tạo comment inline với cách fix cụ thể."</span>
+  <span class="pr">}</span>
+<span class="pr">}</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S6 — MCP ════ -->
+<div class="section" id="s6">
+  <div class="sec-head">
+    <span class="sec-tag st-sk">MCP</span>
+    <div><h2 class="sec-title">MCP Integration — Kết nối thế giới bên ngoài</h2>
+    <p class="sec-sub">Kết nối database, API, AWS Docs, GitHub với 1 config</p></div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">MCP là gì trong Kiro</div>
+    <p><strong>Model Context Protocol (MCP)</strong> cho phép Kiro giao tiếp với external servers — biến mọi dịch vụ có API thành công cụ AI có thể dùng ngay trong chat. Thay vì copy-paste docs hay data vào prompt, Kiro tự fetch real-time.</p>
+    <div class="arch">
+      <div class="arch-box" style="border-color:rgba(124,108,248,.3)">
+        <div class="arch-title" style="color:var(--ki)">👻 Kiro Chat</div>
+        <div class="arch-desc">Hỏi về AWS pricing<br>Query database<br>Search GitHub</div>
+      </div>
+      <div class="arch-arrow">⟺</div>
+      <div class="arch-box" style="border-color:rgba(91,168,255,.3)">
+        <div class="arch-title" style="color:var(--ins)">🔌 MCP Client</div>
+        <div class="arch-desc">Kiro tự kết nối<br>Theo config JSON<br>Remote hoặc local</div>
+      </div>
+      <div class="arch-arrow">⟺</div>
+      <div class="arch-box" style="border-color:rgba(64,216,142,.3)">
+        <div class="arch-title" style="color:var(--ch)">🛢️ MCP Servers</div>
+        <div class="arch-desc">AWS Docs · GitHub<br>PostgreSQL · Supabase<br>Brave Search · Custom</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Cấu hình MCP Server</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">.kiro/settings/mcp.json</span><span class="cb-tag ct-ins">MCP CONFIG</span></div>
+      <div class="cb-body"><pre><span class="pr">{</span>
+  <span class="yk">"mcpServers"</span><span class="pr">:</span> <span class="pr">{</span>
+
+    <span class="cm">// Có sẵn: fetch để đọc URL</span>
+    <span class="yk">"fetch"</span><span class="pr">:</span> <span class="pr">{</span>
+      <span class="yk">"command"</span><span class="pr">:</span> <span class="st-s">"uvx"</span><span class="pr">,</span>
+      <span class="yk">"args"</span><span class="pr">:</span> <span class="pr">[</span><span class="st-s">"mcp-server-fetch"</span><span class="pr">]</span>
+    <span class="pr">},</span>
+
+    <span class="cm">// AWS Documentation — rất hữu ích cho cloud work</span>
+    <span class="yk">"aws-docs"</span><span class="pr">:</span> <span class="pr">{</span>
+      <span class="yk">"command"</span><span class="pr">:</span> <span class="st-s">"uvx"</span><span class="pr">,</span>
+      <span class="yk">"args"</span><span class="pr">:</span> <span class="pr">[</span><span class="st-s">"awslabs.aws-documentation-mcp-server@latest"</span><span class="pr">]</span>
+    <span class="pr">},</span>
+
+    <span class="cm">// GitHub — tạo issue, PR, đọc code</span>
+    <span class="yk">"github"</span><span class="pr">:</span> <span class="pr">{</span>
+      <span class="yk">"command"</span><span class="pr">:</span> <span class="st-s">"npx"</span><span class="pr">,</span>
+      <span class="yk">"args"</span><span class="pr">:</span> <span class="pr">[</span><span class="st-s">"-y"</span><span class="pr">,</span> <span class="st-s">"@modelcontextprotocol/server-github"</span><span class="pr">],</span>
+      <span class="yk">"env"</span><span class="pr">:</span> <span class="pr">{</span> <span class="yk">"GITHUB_PERSONAL_ACCESS_TOKEN"</span><span class="pr">:</span> <span class="st-s">"${GITHUB_TOKEN}"</span> <span class="pr">}</span>
+    <span class="pr">},</span>
+
+    <span class="cm">// PostgreSQL — query DB trực tiếp từ chat</span>
+    <span class="yk">"postgres"</span><span class="pr">:</span> <span class="pr">{</span>
+      <span class="yk">"command"</span><span class="pr">:</span> <span class="st-s">"npx"</span><span class="pr">,</span>
+      <span class="yk">"args"</span><span class="pr">:</span> <span class="pr">[</span><span class="st-s">"-y"</span><span class="pr">,</span> <span class="st-s">"@modelcontextprotocol/server-postgres"</span><span class="pr">,</span> <span class="st-s">"${DATABASE_URL}"</span><span class="pr">]</span>
+    <span class="pr">}</span>
+
+  <span class="pr">}</span>
+<span class="pr">}</span></pre></div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Ví dụ: Chat với MCP đang active</div>
+    <div class="chat">
+      <div class="bubble bubble-user">
+        <div class="bubble-label lbl-user">BẠN</div>
+        Xem schema của bảng users trong DB, rồi tạo cho tôi TypeScript types tương ứng với Zod validation schema.
+      </div>
+      <div class="bubble bubble-bot">
+        <div class="bubble-label lbl-bot">KIRO 👻 + PostgreSQL MCP</div>
+        [Đang query DB qua MCP...]<br><br>
+        Tôi thấy bảng users có: id (uuid), email (varchar 255, unique), name (varchar 100), created_at (timestamptz), role (enum: 'user','admin'), avatar_url (varchar nullable).<br><br>
+        Đây là TypeScript types + Zod schema:
+      </div>
+    </div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">src/types/user.ts — Generated from live DB schema</span><span class="cb-tag ct-g">AUTO-GENERATED</span></div>
+      <div class="cb-body"><pre><span class="kw">import</span> <span class="pr">{</span> <span class="vr">z</span> <span class="pr">}</span> <span class="kw">from</span> <span class="st-s">"zod"</span><span class="pr">;</span>
+
+<span class="kw">export const</span> <span class="fn">UserRole</span> <span class="pr">=</span> <span class="vr">z</span><span class="pr">.</span><span class="fn">enum</span><span class="pr">([</span><span class="st-s">"user"</span><span class="pr">,</span> <span class="st-s">"admin"</span><span class="pr">]);</span>
+
+<span class="kw">export const</span> <span class="fn">UserSchema</span> <span class="pr">=</span> <span class="vr">z</span><span class="pr">.</span><span class="fn">object</span><span class="pr">({</span>
+  <span class="vr">id</span><span class="pr">:</span> <span class="vr">z</span><span class="pr">.</span><span class="fn">string</span><span class="pr">().</span><span class="fn">uuid</span><span class="pr">(),</span>
+  <span class="vr">email</span><span class="pr">:</span> <span class="vr">z</span><span class="pr">.</span><span class="fn">string</span><span class="pr">().</span><span class="fn">email</span><span class="pr">().</span><span class="fn">max</span><span class="pr">(</span><span class="nm">255</span><span class="pr">),</span>
+  <span class="vr">name</span><span class="pr">:</span> <span class="vr">z</span><span class="pr">.</span><span class="fn">string</span><span class="pr">().</span><span class="fn">min</span><span class="pr">(</span><span class="nm">1</span><span class="pr">).</span><span class="fn">max</span><span class="pr">(</span><span class="nm">100</span><span class="pr">),</span>
+  <span class="vr">createdAt</span><span class="pr">:</span> <span class="vr">z</span><span class="pr">.</span><span class="fn">string</span><span class="pr">().</span><span class="fn">datetime</span><span class="pr">(),</span>
+  <span class="vr">role</span><span class="pr">:</span> <span class="fn">UserRole</span><span class="pr">.</span><span class="fn">default</span><span class="pr">(</span><span class="st-s">"user"</span><span class="pr">),</span>
+  <span class="vr">avatarUrl</span><span class="pr">:</span> <span class="vr">z</span><span class="pr">.</span><span class="fn">string</span><span class="pr">().</span><span class="fn">url</span><span class="pr">().</span><span class="fn">nullable</span><span class="pr">(),</span>
+<span class="pr">});</span>
+
+<span class="kw">export type</span> <span class="cl">User</span> <span class="pr">=</span> <span class="vr">z</span><span class="pr">.</span><span class="cl">infer</span><span class="pr">&lt;</span><span class="kw">typeof</span> <span class="fn">UserSchema</span><span class="pr">&gt;;</span>
+<span class="kw">export type</span> <span class="cl">UserRole</span> <span class="pr">=</span> <span class="vr">z</span><span class="pr">.</span><span class="cl">infer</span><span class="pr">&lt;</span><span class="kw">typeof</span> <span class="fn">UserRole</span><span class="pr">&gt;;</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<hr class="dv">
+
+<!-- ════ USE CASES BANNER ════ -->
+<div class="cat-banner cb-au">
+  <div class="cb-icon">🚀</div>
+  <div>
+    <div class="cb-badge">THỰC CHIẾN</div>
+    <div class="cb-title">Phần 4 — Ví dụ & Cheat Sheet</div>
+    <div class="cb-sub">5 use case thực tế · Cheat sheet đầy đủ · Tips nâng cao</div>
+  </div>
+</div>
+
+<!-- ════ S7 — USE CASES ════ -->
+<div class="section" id="s7">
+  <div class="sec-head">
+    <span class="sec-tag st-au">USE CASES</span>
+    <div><h2 class="sec-title">Ví dụ thực tế khi dùng Kiro</h2>
+    <p class="sec-sub">5 tình huống cụ thể từ đơn giản đến nâng cao</div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Use Case 1 — Xây dựng REST API từ đầu</div>
+    <div class="info i-tip">
+      <span class="info-ico">🎯</span>
+      <div><strong style="color:var(--text)">Kịch bản:</strong> Bạn cần tạo API cho ứng dụng to-do list với authentication, CRUD tasks, và realtime notifications.</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-L"><div class="step-num">1</div><div class="step-line"></div></div>
+        <div class="step-B">
+          <h4>Generate steering docs từ empty project</h4>
+          <p>Mở folder mới → Kiro Panel → Generate Steering. Kiro tạo product.md, tech.md, structure.md từ package.json và README bạn đã viết sẵn.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">2</div><div class="step-line"></div></div>
+        <div class="step-B">
+          <h4>Tạo spec cho authentication</h4>
+          <p>Chat: <code>Create Spec: JWT authentication system với refresh tokens, rate limiting, và brute force protection</code> → Review 3 file được tạo → Approve.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-L"><div class="step-num">3</div><div class="step-line"></div></div>
+        <div class="step-B">
+          <h4>Implement và tự động test</h4>
+          <p>Chat: <code>Implement all tasks in spec user-authentication</code> → Kiro viết code theo đúng tasks.md, tick từng checkbox, và nhờ security steering, tự động áp dụng best practices.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Use Case 2 — Refactor codebase cũ</div>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Kiro Chat — Refactoring workflow</span><span class="cb-tag ct-ki">EXAMPLE</span></div>
+      <div class="cb-body"><pre><span class="c-b">You:</span> <span class="vr">Scan toàn bộ src/ và tạo spec để migrate từ</span>
+      <span class="vr">class components sang functional components + hooks.</span>
+      <span class="vr">Ưu tiên các component có business logic phức tạp trước.</span>
+
+<span class="c-p">Kiro:</span> <span class="vr">Đang scan 47 file trong src/components/...</span>
+       <span class="vr">Tìm thấy 23 class components, 8 cái có complex state.</span>
+       <span class="vr">Tạo spec "react-modernization" với:</span>
+       <span class="vr">- requirements.md: tiêu chí migration, không break tests</span>
+       <span class="vr">- design.md: strategy per-component, hook extraction plan</span>
+       <span class="vr">- tasks.md: 23 tasks, sorted by complexity</span>
+       <span class="vr">Review spec trước khi bắt đầu?</span>
+
+<span class="c-b">You:</span> <span class="vr">Được, bắt đầu từ task 1-5 trước.</span>
+
+<span class="c-p">Kiro:</span> <span class="vr">[1/5] UserProfile.tsx — converting...</span>
+       <span class="vr">✅ Extracted useUserData hook</span>
+       <span class="vr">✅ Preserved all existing props interface</span>
+       <span class="vr">✅ Existing tests still passing</span>
+       <span class="vr">Moving to [2/5] ProductList.tsx...</span></pre></div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Use Case 3 — Team mới join project</div>
+    <div class="grid-2">
+      <div class="rw-box rw-ki">
+        <div class="rw-label">😤 Không có Kiro</div>
+        <div class="rw-title">Onboarding mất 1-2 tuần</div>
+        <div class="rw-body">Đọc README dài · Hỏi senior về conventions · Commit sai style bị reject · Không biết tại sao lại dùng library X mà không dùng Y</div>
+      </div>
+      <div class="rw-box rw-ch">
+        <div class="rw-label">✨ Có Kiro + Steering</div>
+        <div class="rw-title">Onboarding trong vài giờ</div>
+        <div class="rw-body">Mở Kiro → AI đọc steering → tự biết conventions · Code review chỉ còn về logic · Hỏi Kiro "tại sao dùng Hono?" → Kiro giải thích từ design.md</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Use Case 4 — Xây dựng với AWS Services</div>
+    <div class="chat">
+      <div class="bubble bubble-user">
+        <div class="bubble-label lbl-user">BẠN</div>
+        Tôi cần design architecture cho event-driven order processing system trên AWS. Budget khoảng $500/tháng, expect 10k orders/day.
+      </div>
+      <div class="bubble bubble-bot">
+        <div class="bubble-label lbl-bot">KIRO 👻 + AWS Docs MCP</div>
+        [Đang query AWS Documentation MCP server...]<br><br>
+        Với 10k orders/day (~0.12 req/sec average, peak ~1 req/sec), đây là architecture tôi đề xuất dưới $500/month:<br><br>
+        <strong>Order API:</strong> API Gateway + Lambda (serverless, pay-per-use, ~$15/month)<br>
+        <strong>Queue:</strong> SQS Standard Queue (~$0.40/1M messages, ~$5/month)<br>
+        <strong>Processing:</strong> Lambda consumers ($10/month)<br>
+        <strong>DB:</strong> RDS PostgreSQL t3.micro (~$30/month)<br>
+        <strong>Cache:</strong> ElastiCache t3.micro (~$15/month)<br><br>
+        Tổng ~$75/month, well under budget. Tôi đã kiểm tra pricing thực tế từ AWS Docs. Tạo spec để implement không?
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Use Case 5 — Quality Gate Pipeline tự động</div>
+    <p>Chain nhiều hooks lại để tạo CI/CD-like pipeline ngay trong IDE — mỗi khi lưu file:</p>
+    <div class="cblock">
+      <div class="cb-head"><div class="cb-dots"><div class="cbd r"></div><div class="cbd y"></div><div class="cbd g"></div></div><span class="cb-name">Quality Gate: save → lint → test → security → docs</span><span class="cb-tag ct-au">HOOK CHAIN</span></div>
+      <div class="cb-body"><pre><span class="sh-cmt">File saved trigger:</span>
+<span class="c-g">  ✅ Hook 1:</span> <span class="vr">ESLint check → auto-fix fixable issues</span>
+<span class="c-g">  ✅ Hook 2:</span> <span class="vr">Nếu có function mới → generate Vitest unit tests</span>
+<span class="c-g">  ✅ Hook 3:</span> <span class="vr">Security scan → flag nếu có hardcoded data</span>
+<span class="c-g">  ✅ Hook 4:</span> <span class="vr">Nếu là API route → update OpenAPI spec</span>
+<span class="sh-cmt">
+Kết quả: Mỗi lần Ctrl+S, file của bạn đã được:</span>
+<span class="c-g">  →</span> <span class="vr">Clean code (lint)</span>
+<span class="c-g">  →</span> <span class="vr">Có tests (auto-generated)</span>
+<span class="c-g">  →</span> <span class="vr">Secure (scan)</span>
+<span class="c-g">  →</span> <span class="vr">Documented (docs update)</span></pre></div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="sub-title">Tips nâng cao</div>
+    <div class="grid-2">
+      <div class="info i-tip" style="margin:0">
+        <span class="info-ico">💡</span>
+        <div><strong style="color:var(--text)">Đầu tư vào Steering trước</strong><br>Thời gian viết steering files tốt (30-60 phút đầu project) sẽ tiết kiệm hàng giờ giải thích sau này. Kiro output tốt đến đâu phụ thuộc vào steering tốt đến đó.</div>
+      </div>
+      <div class="info i-note" style="margin:0">
+        <span class="info-ico">📋</span>
+        <div><strong style="color:var(--text)">Review Spec trước khi code</strong><br>Đừng bỏ qua bước review requirements.md và design.md. Sửa spec mất 5 phút. Sửa code đã viết sai spec mất 5 giờ.</div>
+      </div>
+      <div class="info i-ok" style="margin:0">
+        <span class="info-ico">✅</span>
+        <div><strong style="color:var(--text)">Commit .kiro/ vào Git</strong><br>Specs + hooks + steering là "source of truth" của team. Version control chúng như code thật để cả team dùng chung và review được.</div>
+      </div>
+      <div class="info i-warn" style="margin:0">
+        <span class="info-ico">⚠️</span>
+        <div><strong style="color:var(--text)">Kiro không thay thế engineering judgment</strong><br>Kiro là accelerator cho developer có kỷ luật, không phải magic wand. Bạn vẫn cần hiểu code được tạo ra để maintain nó.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S8 — CHEAT SHEET ════ -->
+<div class="section" id="s8">
+  <div class="sec-head">
+    <span class="sec-tag st-au">CHEAT SHEET</span>
+    <div><h2 class="sec-title">Cheat Sheet — Tổng hợp nhanh</h2>
+    <p class="sec-sub">Prompts hay dùng · File structure · So sánh · Pricing</p></div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4 class="h4-ki">👻 Spec Commands</h4>
+      <div class="cheat-row"><span class="ck">Tạo spec mới</span><span class="cv">Create Spec: [mô tả]</span></div>
+      <div class="cheat-row"><span class="ck">Implement spec</span><span class="cv">Implement tasks from spec [name]</span></div>
+      <div class="cheat-row"><span class="ck">Update requirements</span><span class="cv">Update spec [name]: [thay đổi]</span></div>
+      <div class="cheat-row"><span class="ck">Xem tiến độ</span><span class="cv">Panel → Specs → click tên spec</span></div>
+      <div class="cheat-row"><span class="ck">Tạo task tiếp theo</span><span class="cv">Continue implementing spec [name]</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-au">🧭 Steering Commands</h4>
+      <div class="cheat-row"><span class="ck">Generate lần đầu</span><span class="cv">Panel → Generate Steering Docs</span></div>
+      <div class="cheat-row"><span class="ck">Tạo custom steering</span><span class="cv">Panel → Steering → New File</span></div>
+      <div class="cheat-row"><span class="ck">Always include</span><span class="cv">inclusion: always (trong frontmatter)</span></div>
+      <div class="cheat-row"><span class="ck">Manual include</span><span class="cv">@.kiro/steering/[file].md trong chat</span></div>
+      <div class="cheat-row"><span class="ck">Update steering</span><span class="cv">Edit file trực tiếp, auto-reload</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-sk">🪝 Hooks Triggers</h4>
+      <div class="cheat-row"><span class="ck">Khi lưu file</span><span class="cv">event: "fileSave"</span></div>
+      <div class="cheat-row"><span class="ck">Khi tạo file</span><span class="cv">event: "fileCreate"</span></div>
+      <div class="cheat-row"><span class="ck">Khi xoá file</span><span class="cv">event: "fileDelete"</span></div>
+      <div class="cheat-row"><span class="ck">Trigger thủ công</span><span class="cv">event: "manual"</span></div>
+      <div class="cheat-row"><span class="ck">Filter file pattern</span><span class="cv">filePattern: "src/**/*.tsx"</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-ins">🔌 MCP Servers có sẵn</h4>
+      <div class="cheat-row"><span class="ck">AWS Docs</span><span class="cv">awslabs.aws-documentation-mcp-server</span></div>
+      <div class="cheat-row"><span class="ck">GitHub</span><span class="cv">@modelcontextprotocol/server-github</span></div>
+      <div class="cheat-row"><span class="ck">PostgreSQL</span><span class="cv">@modelcontextprotocol/server-postgres</span></div>
+      <div class="cheat-row"><span class="ck">Brave Search</span><span class="cv">@modelcontextprotocol/server-brave-search</span></div>
+      <div class="cheat-row"><span class="ck">Fetch (built-in)</span><span class="cv">uvx mcp-server-fetch</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-ch">📁 Cấu trúc .kiro/</h4>
+      <div class="cheat-row"><span class="ck">Specs folder</span><span class="cv">.kiro/specs/[feature-name]/</span></div>
+      <div class="cheat-row"><span class="ck">Steering folder</span><span class="cv">.kiro/steering/</span></div>
+      <div class="cheat-row"><span class="ck">Hooks folder</span><span class="cv">.kiro/hooks/</span></div>
+      <div class="cheat-row"><span class="ck">MCP config</span><span class="cv">.kiro/settings/mcp.json</span></div>
+      <div class="cheat-row"><span class="ck">Ignore (cache)</span><span class="cv">.kiro/cache/, .kiro/sessions/</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-ki">💰 Pricing 2026</h4>
+      <div class="cheat-row"><span class="ck">Free tier</span><span class="cv">50 interactions/tháng</span></div>
+      <div class="cheat-row"><span class="ck">Pro plan</span><span class="cv">$19/tháng</span></div>
+      <div class="cheat-row"><span class="ck">Power plan</span><span class="cv">$200/tháng (team)</span></div>
+      <div class="cheat-row"><span class="ck">Overage</span><span class="cv">$0.04/credit</span></div>
+      <div class="cheat-row"><span class="ck">Auth required</span><span class="cv">AWS Builder ID (miễn phí)</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-ch">🆚 Kiro vs Cursor vs Copilot</h4>
+      <div class="cheat-row"><span class="ck">Spec-driven</span><span class="cv">Kiro ✅ · Cursor ❌ · Copilot ❌</span></div>
+      <div class="cheat-row"><span class="ck">Tốc độ autocomplete</span><span class="cv">Cursor 🥇 · Copilot 🥈 · Kiro 🥉</span></div>
+      <div class="cheat-row"><span class="ck">Agent Hooks</span><span class="cv">Kiro ✅ · Cursor ❌ · Copilot ⚠️</span></div>
+      <div class="cheat-row"><span class="ck">Docs tự động</span><span class="cv">Kiro ✅ · Cursor ❌ · Copilot ❌</span></div>
+      <div class="cheat-row"><span class="ck">AWS native</span><span class="cv">Kiro ✅ · Cursor ❌ · Copilot ❌</span></div>
+    </div>
+    <div class="cheat-card">
+      <h4 class="h4-au">💬 Prompts hay dùng</h4>
+      <div class="cheat-row"><span class="ck">Scan & suggest spec</span><span class="cv">Analyze codebase, suggest specs</span></div>
+      <div class="cheat-row"><span class="ck">Fix theo spec</span><span class="cv">Fix this to match spec requirements</span></div>
+      <div class="cheat-row"><span class="ck">Review code</span><span class="cv">Review against steering guidelines</span></div>
+      <div class="cheat-row"><span class="ck">Generate hook</span><span class="cv">Create hook for: [mô tả automation]</span></div>
+      <div class="cheat-row"><span class="ck">Explain steering</span><span class="cv">Why does steering say [rule]?</span></div>
+    </div>
+  </div>
+
+  <div class="info i-ok" style="margin-top:22px">
+    <span class="info-ico">🔗</span>
+    <div style="font-size:13.5px">
+      <strong style="color:var(--text)">Tài nguyên chính thức:</strong><br>
+      <span style="color:var(--muted)">
+        <a href="https://kiro.dev" style="color:var(--ki)">kiro.dev</a> — Trang chủ &amp; Download &nbsp;·&nbsp;
+        <a href="https://kiro.dev/docs" style="color:var(--ki)">kiro.dev/docs</a> — Documentation đầy đủ &nbsp;·&nbsp;
+        <a href="https://builder.aws.com" style="color:var(--ki)">builder.aws.com</a> — AWS Builder ID &amp; Community &nbsp;·&nbsp;
+        <a href="https://kiro.dev/docs/getting-started/first-project/" style="color:var(--ki)">First Project Guide</a> — Hướng dẫn dự án đầu tiên
+      </span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="footer">
+  <span>👻 Kiro · Agentic IDE từ AWS · Powered by Claude Sonnet 4.5 · 2026</span>
+  <span style="margin-left:auto;color:var(--faint)">Overview ×1 · Cài đặt ×2 · Specs ×2 · Automation ×2 · Thực chiến ×2</span>
+</div>
+</div><!-- /main -->
+
+<script>
+window.addEventListener('scroll',()=>{
+  const el=document.documentElement;
+  document.getElementById('pbar').style.width=(el.scrollTop/(el.scrollHeight-el.clientHeight)*100)+'%';
+});
+const sections=document.querySelectorAll('.section[id]');
+const links=document.querySelectorAll('.nav-link');
+sections.forEach(s=>new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove('active'));
+      const a=document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if(a)a.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -70% 0px'}).observe(s));
+</script>
+</body>
+</html>
